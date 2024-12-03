@@ -1,0 +1,76 @@
+{
+  "name": "@datalens-tech/auth",
+  "description": "DataLens Auth",
+  "version": "0.0.0",
+  "private": true,
+  "author": "DataLens Team <https://github.com/datalens-tech>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:datalens-tech/auth.git"
+  },
+  "main": "dist/index.js",
+  "dependencies": {
+    "@gravity-ui/expresskit": "^2.1.0",
+    "@gravity-ui/gateway": "^3.1.1",
+    "@gravity-ui/nodekit": "^1.7.0",
+    "@gravity-ui/postgreskit": "^2.0.0",
+    "db-errors": "^0.2.3",
+    "dotenv": "^16.4.6",
+    "knex": "^3.1.0",
+    "lodash": "^4.17.21",
+    "objection": "^3.1.5",
+    "pg-error-constants": "^1.0.0",
+    "power-radix": "^3.0.1",
+    "utility-types": "^3.11.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@gravity-ui/eslint-config": "^3.2.0",
+    "@gravity-ui/prettier-config": "^1.1.0",
+    "@gravity-ui/tsconfig": "^1.0.0",
+    "@trendyol/jest-testcontainers": "^2.1.1",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/lodash": "^4.17.4",
+    "@types/node": "^20.17.9",
+    "@types/pg": "^8.11.10",
+    "@types/supertest": "^6.0.2",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^8.57.1",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.4.1",
+    "source-map-support": "^0.5.21",
+    "supertest": "^6.3.4",
+    "testcontainers": "^10.15.0",
+    "ts-node": "^10.9.2",
+    "tsc-watch": "^6.2.1",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "npm run clear:dist && tsc",
+    "dev": "node ./scripts/setup-dev-env.js opensource && npm run clear:dist && APP_DEV_MODE=1 tsc-watch --onSuccess 'node dist/server'",
+    "db:migrate": "node dist/server/db/scripts/migrate.js",
+    "db:migrate-one": "node dist/server/db/scripts/migrate-one.js",
+    "db:rollback": "node dist/server/db/scripts/rollback.js",
+    "db:rollback-one": "node dist/server/db/scripts/rollback-one.js",
+    "db:prepare": "npm run build && CI_MODE=true SQL_DEBUG=false DEBUG=false node dist/server/db/scripts/clear-and-prepare",
+    "db:migration:create": "npx knex migrate:make --migrations-directory ./src/db/migrations -x ts",
+    "lint:prettier": "prettier --check '**/*.{js,ts}'",
+    "lint:js": "eslint \"**/*.{js,ts}\" --quiet",
+    "lint": "npm run lint:prettier && npm run lint:js",
+    "typecheck": "tsc --noEmit",
+    "decode": "node ./scripts/helpers.js -h=decode",
+    "encode": "node ./scripts/helpers.js -h=encode",
+    "clear:dist": "rm -rf ./dist/server",
+    "prepare": "husky || true"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix --quiet",
+      "prettier --write"
+    ]
+  }
+}
