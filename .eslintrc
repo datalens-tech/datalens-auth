@@ -4,5 +4,13 @@
         "node": true,
         "jest": true
     },
-    "root": true
+    "root": true,
+    "overrides": [
+        {
+            "files": ["src/db/scripts/**/*"],
+            "rules": {
+                "import/order": [0]
+            }
+        }
+    ]
 }
