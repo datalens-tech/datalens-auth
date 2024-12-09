@@ -1,7 +1,9 @@
 import {AppError} from '@gravity-ui/nodekit';
 import Ajv from 'ajv';
 
-export const ajv = new Ajv({
+import {AUTH_ERROR} from '../../constants/error-constants';
+
+const ajv = new Ajv({
     allErrors: true,
     verbose: true,
 });
@@ -19,15 +21,13 @@ const compileSchema = (schema: object) => {
     };
 };
 
-export const VALIDATION_ERROR_CODE = 'VALIDATION_ERROR';
-
 export const makeSchemaValidator = (schema: object) => {
     const preparedSchema = compileSchema(schema);
     return <T extends object>(data: T): T => {
         const {isValid, validationErrors} = preparedSchema(data);
         if (!isValid) {
             throw new AppError('Validation error', {
-                code: VALIDATION_ERROR_CODE,
+                code: AUTH_ERROR.VALIDATION_ERROR,
                 details: {validationErrors},
             });
         }
