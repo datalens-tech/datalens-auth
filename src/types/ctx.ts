@@ -1,11 +1,9 @@
-export interface UserCtxInfo {
+export interface CtxUser {
     userId: string;
-    login: string;
+    sessionId: string;
 }
 
 export interface CtxInfo {
-    requestId: string;
     isPrivateRoute: boolean;
     readOnlyMode: boolean;
-    user: UserCtxInfo;
 }

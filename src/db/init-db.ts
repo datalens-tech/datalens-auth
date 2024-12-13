@@ -94,8 +94,8 @@ export function initDB(nodekit: NodeKit) {
     });
 
     async function getId() {
-        const queryResult = await db.primary.raw('select get_id() as id');
-        return queryResult.rows[0].id;
+        const queryResult = await db.primary.raw('select auth_get_id() as id');
+        return queryResult.rows[0].id as string;
     }
 
     Model.db = db;

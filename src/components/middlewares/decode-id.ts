@@ -2,7 +2,8 @@ import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 import {AppError} from '@gravity-ui/nodekit';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
-import {ID_VARIABLES, macrotasksMap, decodeId as utilsDecodeId} from '../../utils/ids';
+import {ID_VARIABLES} from '../../db/constants/id';
+import {macrotasksMap, decodeId as utilsDecodeId} from '../../utils/ids';
 
 export const decodeId = async (req: Request, _res: Response, next: NextFunction) => {
     try {

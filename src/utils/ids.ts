@@ -1,9 +1,9 @@
 import chunk from 'lodash/chunk';
 import PowerRadix from 'power-radix';
 
-const CODING_BASE = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
+import {ID_VARIABLES} from '../db/constants/id';
 
-export const ID_VARIABLES = ['ids']; // TODO: add real id names
+const CODING_BASE = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
 
 function rotate(array: string[], start: number) {
     return array.slice(start, array.length).concat(array.slice(0, start));

@@ -66,6 +66,16 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
+        case AUTH_ERROR.USER_ALREADY_EXISTS: {
+            return {
+                code: 409,
+                response: {
+                    code,
+                    message,
+                },
+            };
+        }
+
         default:
             return {
                 code: 500,

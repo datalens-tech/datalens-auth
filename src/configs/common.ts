@@ -3,7 +3,7 @@ import type {AppConfig} from '@gravity-ui/nodekit';
 
 import {Feature, FeaturesConfig} from '../components/features/types';
 import {MASTER_TOKEN_HEADER} from '../constants/header';
-import {getEnvTokenVariable} from '../utils/env-utils';
+import {getEnvCert, getEnvTokenVariable} from '../utils/env-utils';
 
 export const features: FeaturesConfig = {
     [Feature.ReadOnlyMode]: false,
@@ -24,7 +24,16 @@ export default {
         extended: false,
     },
 
-    appAuthPolicy: AuthPolicy.disabled, // fix ?
+    appAuthPolicy: AuthPolicy.required,
+
+    uiAppEndpoint: process.env.UI_APP_ENDPOINT,
+
+    accessTokenTTL: 60 * 15, // 15 min
+    refreshTokenTTL: 60 * 60 * 24 * 10, // 10 days
+    sessionTTL: 60 * 60 * 24 * 30, // 30 days
+
+    tokenPrivateKey: getEnvCert(process.env.TOKEN_PRIVATE_KEY as string),
+    tokenPublicKey: getEnvCert(process.env.TOKEN_PUBLIC_KEY as string),
 
     appSensitiveKeys: [],
     appSensitiveHeaders: [MASTER_TOKEN_HEADER],
