@@ -64,6 +64,8 @@
   "scripts": {
     "build": "npm run clear:dist && tsc",
     "dev": "ts-node ./scripts/setup-dev-env.ts opensource && npm run clear:dist && APP_DEV_MODE=1 tsc-watch --onSuccess 'node dist/server'",
+    "test": "npm run build && npm run test:unit",
+    "test:unit": "jest -c './jest/unit/jest.config.js'",
     "db:migrate": "node dist/server/db/scripts/migrate.js",
     "db:migrate-one": "node dist/server/db/scripts/migrate-one.js",
     "db:rollback": "node dist/server/db/scripts/rollback.js",
