@@ -5,7 +5,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-name: Lint, Typecheck
+name: Lint, Typecheck, Tests
 
 jobs:
   build:
@@ -20,3 +20,4 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm run test
