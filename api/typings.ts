@@ -1,6 +1,3 @@
-export {
-    SharedAppConfig,
-    SharedAppContextParams,
-    SharedAppDynamicConfig,
-    SharedAppRouteParams,
-} from '../typings/nodekit';
+export {SharedAppConfig, SharedAppContextParams, SharedAppDynamicConfig} from '../typings/nodekit';
+
+export {SharedAppRouteParams} from '../typings/express';

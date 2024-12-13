@@ -1,38 +1,33 @@
 /* eslint-disable import/order */
 import {nodekit} from './nodekit';
 import {registerAppPlugins} from './registry/register-app-plugins';
-import {AppMiddleware, AppRoutes, AuthPolicy, ExpressKit} from '@gravity-ui/expresskit';
+import {AppMiddleware, AppRoutes, ExpressKit} from '@gravity-ui/expresskit';
 import {
+    appAuth,
     checkReadOnlyMode,
     ctx,
     decodeId,
     finalRequestHandler,
     resolveSpecialTokens,
-    setCiEnv,
     waitDatabase,
 } from './components/middlewares';
-import {AppEnv} from './constants/app';
 import {registry} from './registry';
 import {getRoutes} from './routes';
 import {setRegistryToContext} from './components/app-context';
 import {isEnabledFeature} from './components/features';
 import {objectKeys} from './utils/utility-types';
+import {initPassport} from './components/passport';
 
 setRegistryToContext(nodekit, registry);
 registerAppPlugins();
+
+nodekit.config.appAuthHandler = appAuth;
 
 const beforeAuth: AppMiddleware[] = [];
 const afterAuth: AppMiddleware[] = [];
 
 if (nodekit.config.appDevMode) {
     require('source-map-support').install();
-}
-
-if (
-    nodekit.config.appEnv === AppEnv.Development &&
-    nodekit.config.appAuthPolicy === AuthPolicy.disabled
-) {
-    beforeAuth.push(setCiEnv);
 }
 
 afterAuth.push(decodeId, waitDatabase, resolveSpecialTokens, ctx, checkReadOnlyMode);
@@ -54,6 +49,7 @@ objectKeys(extendedRoutes).forEach((key) => {
 
 const app = new ExpressKit(nodekit, routes);
 registry.setupApp(app);
+initPassport();
 
 if (require.main === module) {
     app.run();

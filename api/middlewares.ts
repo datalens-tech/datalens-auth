@@ -4,5 +4,5 @@ export {
     finalRequestHandler,
     logError,
     checkReadOnlyMode,
-    setCiEnv,
+    appAuth,
 } from '../src/components/middlewares';

@@ -1,8 +1,11 @@
 import {AppMiddleware, AppRouteDescription, AuthPolicy} from '@gravity-ui/expresskit';
 import type {HttpMethod} from '@gravity-ui/expresskit/dist/types';
 import type {NodeKit} from '@gravity-ui/nodekit';
+import passport from 'passport';
 
+import {afterSuccessAuth} from './components/cookies';
 import {Feature} from './components/features';
+import authController from './controllers/auth';
 import helpersController from './controllers/helpers';
 import homeController from './controllers/home';
 
@@ -51,7 +54,35 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             handler: helpersController.pool,
             authPolicy: AuthPolicy.disabled,
         },
-    } as const;
+
+        signin: {
+            route: 'POST /signin',
+            handler: afterSuccessAuth,
+            authHandler: passport.authenticate('local', {
+                failureRedirect: '/signin',
+                session: false,
+            }),
+        },
+
+        signup: makeRoute({
+            route: 'POST /signup',
+            handler: authController.signup,
+            authPolicy: AuthPolicy.disabled,
+            write: true,
+        }),
+        logout: makeRoute({
+            route: 'GET /logout',
+            handler: authController.logout,
+            authPolicy: AuthPolicy.disabled,
+            write: true,
+        }),
+        refresh: makeRoute({
+            route: 'POST /refresh',
+            handler: authController.refresh,
+            authPolicy: AuthPolicy.disabled,
+            write: true,
+        }),
+    } satisfies Record<string, ExtendedAppRouteDescription>;
 
     const typedRoutes: {[key in keyof typeof routes]: ExtendedAppRouteDescription} = routes;
     return typedRoutes;

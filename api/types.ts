@@ -1,1 +1,1 @@
-export {UserCtxInfo, CtxInfo} from '../src/types/ctx';
+export {CtxInfoUser, CtxInfo} from '../src/types/ctx';
