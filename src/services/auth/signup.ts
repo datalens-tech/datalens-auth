@@ -5,27 +5,33 @@ import {JwtAuth} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {makeSchemaValidator} from '../../components/validation/validation-schema-compiler';
 import {AUTH_ERROR} from '../../constants/error-constants';
-import {LOCAL_IDENTITY_ID} from '../../db/constants/id';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import {getPrimary, getReplica} from '../../db/utils/db';
-import {makeCombinedUserId} from '../../db/utils/id';
 import {ServiceArgs} from '../../types/service';
-import {encodeId} from '../../utils/ids';
 import {Nullable, Optional} from '../../utils/utility-types';
 
 const validateArgs = makeSchemaValidator({
     type: 'object',
-    required: ['login', 'displayName', 'password', 'userIp'],
+    required: ['login', 'password', 'userIp'],
     properties: {
         login: {
             type: 'string',
             minLength: 1,
             maxLength: 100,
         },
-        displayName: {
+        firstName: {
+            type: 'string',
+            verifyPassword: true,
+        },
+        lastName: {
             type: 'string',
             minLength: 1,
-            maxLength: 1000,
+            maxLength: 200,
+        },
+        email: {
+            type: 'string',
+            minLength: 1,
+            maxLength: 200,
         },
         password: {
             type: 'string',
@@ -33,6 +39,7 @@ const validateArgs = makeSchemaValidator({
         },
         userAgent: {
             type: 'string',
+            maxLength: 1000,
         },
         userIp: {
             type: ['string', 'null'],
@@ -42,14 +49,16 @@ const validateArgs = makeSchemaValidator({
 
 export interface SignupArgs {
     login: string;
-    displayName: string;
     password: string;
+    email: Optional<string>;
+    firstName: Optional<string>;
+    lastName: Optional<string>;
     userAgent: Optional<string>;
     userIp: Nullable<string>;
 }
 
 export const signup = async ({ctx, trx, skipValidation = false}: ServiceArgs, args: SignupArgs) => {
-    const {login, displayName, password, userAgent, userIp} = args;
+    const {login, firstName, lastName, email, password, userAgent, userIp} = args;
 
     const registry = ctx.get('registry');
     const {getId} = registry.getDbInstance();
@@ -61,7 +70,7 @@ export const signup = async ({ctx, trx, skipValidation = false}: ServiceArgs, ar
     }
     const user = await UserModel.query(getReplica(trx))
         .select(UserModelColumn.UserId)
-        .where(UserModelColumn.Login, login)
+        .where({[UserModelColumn.Login]: login, [UserModelColumn.ProviderId]: null})
         .first()
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
@@ -71,20 +80,17 @@ export const signup = async ({ctx, trx, skipValidation = false}: ServiceArgs, ar
 
     const hashedPassword = await hashPassword(password);
 
-    const localUserId = await getId();
-    const encodedLocalUserId = encodeId(localUserId);
-    const userId = makeCombinedUserId({
-        userId: encodedLocalUserId,
-        identityId: LOCAL_IDENTITY_ID,
-    });
+    const userId = await getId();
 
     const result = await transaction(getPrimary(trx), async (transactionTrx) => {
         await UserModel.query(transactionTrx)
             .insert({
                 [UserModelColumn.UserId]: userId,
-                [UserModelColumn.DisplayName]: displayName,
                 [UserModelColumn.Login]: login,
                 [UserModelColumn.Password]: hashedPassword,
+                [UserModelColumn.Email]: email,
+                [UserModelColumn.FirstName]: firstName,
+                [UserModelColumn.LastName]: lastName,
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 

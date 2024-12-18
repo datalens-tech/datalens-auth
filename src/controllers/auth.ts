@@ -3,18 +3,21 @@ import requestIp from 'request-ip';
 
 import {clearAuthCookies, getAuthCookies, setAuthCookie} from '../components/cookies';
 import {JwtAuth} from '../components/jwt-auth';
+import {AUTH_ERROR} from '../constants/error-constants';
 import {USER_AGENT_HEADER} from '../constants/header';
 import {signup} from '../services/auth/signup';
 
 export default {
     signup: async (req: Request, res: Response) => {
-        const {login, displayName, password} = req.body;
+        const {login, email, firstName, lastName, password} = req.body;
 
         const tokens = await signup(
             {ctx: req.ctx},
             {
                 login,
-                displayName,
+                email,
+                firstName,
+                lastName,
                 password,
                 userIp: requestIp.getClientIp(req),
                 userAgent: req.headers[USER_AGENT_HEADER],
@@ -22,7 +25,7 @@ export default {
         );
 
         setAuthCookie({req, res, tokens});
-        res.status(302).redirect('/');
+        res.status(200).send({done: true});
     },
 
     logout: async (req: Request, res: Response) => {
@@ -33,7 +36,7 @@ export default {
         }
 
         clearAuthCookies(res);
-        res.status(302).redirect('/');
+        res.status(200).send({done: true});
     },
 
     refresh: async (req: Request, res: Response) => {
@@ -51,10 +54,16 @@ export default {
                 setAuthCookie({req, res, tokens});
                 res.status(200).send({done: true});
             } catch (err) {
-                res.status(401).send("Can't refresh tokens");
+                res.status(401).send({
+                    code: AUTH_ERROR.NEED_RESET,
+                    message: "Can't refresh tokens",
+                });
             }
         } else {
-            res.status(401).send('No refreshToken');
+            res.status(401).send({
+                code: AUTH_ERROR.NEED_RESET,
+                message: 'No refreshToken',
+            });
         }
     },
 };

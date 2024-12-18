@@ -35,10 +35,11 @@ export class JwtAuth {
             : [ctx.config.defaultRole].filter(Boolean);
 
         const encodedSessionId = encodeId(sessionId);
+        const encodedUserId = encodeId(userId);
 
         const accessToken = jwt.sign(
             {
-                userId,
+                userId: encodedUserId,
                 sessionId: encodedSessionId,
                 roles,
             },
@@ -52,7 +53,7 @@ export class JwtAuth {
         const refreshToken = jwt.sign(
             {
                 refreshTokenId: encodedRefreshTokenId,
-                userId,
+                userId: encodedUserId,
                 sessionId: encodedSessionId,
             },
             ctx.config.tokenPrivateKey,
@@ -172,7 +173,7 @@ export class JwtAuth {
                 refreshToken,
             });
 
-            const userId = token.userId;
+            const decodedUserId = decodeId(token.userId);
             const decodedRefreshTokenId = decodeId(token.refreshTokenId);
             const decodedSessionId = decodeId(token.sessionId);
 
@@ -192,7 +193,7 @@ export class JwtAuth {
                 )
                 .where({
                     [`${SessionModel.tableName}.${SessionModelColumn.SessionId}`]: decodedSessionId,
-                    [`${SessionModel.tableName}.${SessionModelColumn.UserId}`]: userId,
+                    [`${SessionModel.tableName}.${SessionModelColumn.UserId}`]: decodedUserId,
                 })
                 .first()
                 .timeout(SessionModel.DEFAULT_QUERY_TIMEOUT)) as Optional<
@@ -233,7 +234,7 @@ export class JwtAuth {
 
                 const result = await this.generateTokens(
                     {trx: transactionTrx, ctx},
-                    {userId, sessionId: decodedSessionId},
+                    {userId: decodedUserId, sessionId: decodedSessionId},
                 );
 
                 await SessionModel.query(transactionTrx)
@@ -242,7 +243,7 @@ export class JwtAuth {
                     })
                     .where({
                         [SessionModelColumn.SessionId]: decodedSessionId,
-                        [SessionModelColumn.UserId]: userId,
+                        [SessionModelColumn.UserId]: decodedUserId,
                     })
                     .timeout(SessionModel.DEFAULT_QUERY_TIMEOUT);
 

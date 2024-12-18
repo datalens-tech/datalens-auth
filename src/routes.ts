@@ -54,12 +54,19 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             handler: helpersController.pool,
             authPolicy: AuthPolicy.disabled,
         },
+        signinFail: {
+            route: 'GET /signin-fail',
+            handler: (_req, res) => {
+                res.status(403).send('Forbidden');
+            },
+            authPolicy: AuthPolicy.disabled,
+        },
 
         signin: {
             route: 'POST /signin',
             handler: afterSuccessAuth,
             authHandler: passport.authenticate('local', {
-                failureRedirect: '/signin',
+                failureRedirect: '/signin-fail',
                 session: false,
             }),
         },
