@@ -1,24 +1,29 @@
 import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 
+import {AUTHORIZATION_HEADER, AUTHORIZATION_HEADER_VALUE_PREFIX} from '../../constants/header';
 import {JwtAuth} from '../jwt-auth';
 
 export const appAuth = async (req: Request, res: Response, next: NextFunction) => {
     req.ctx.log('AUTH');
 
-    const {authorization} = req.headers;
+    const authorization = req.headers[AUTHORIZATION_HEADER];
 
     if (authorization) {
-        const accessToken = authorization.slice(7);
+        const accessToken = authorization.slice(AUTHORIZATION_HEADER_VALUE_PREFIX.length + 1);
 
         if (accessToken) {
             try {
                 req.ctx.log('CHECK_ACCESS_TOKEN');
 
-                const {userId, sessionId} = JwtAuth.verifyAccessToken({ctx: req.ctx, accessToken});
+                const {userId, sessionId, roles} = JwtAuth.verifyAccessToken({
+                    ctx: req.ctx,
+                    accessToken,
+                });
 
                 req.originalContext.set('user', {
                     userId,
                     sessionId,
+                    roles,
                 });
 
                 req.ctx.log('CHECK_ACCESS_TOKEN_SUCCESS');

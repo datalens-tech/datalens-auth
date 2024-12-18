@@ -1,4 +1,5 @@
 import type {FeaturesConfig} from '../src/components/features/types';
+import {UserRole} from '../src/constants/role';
 import type {Registry} from '../src/registry';
 import type {CtxInfo, CtxUser} from '../src/types/ctx';
 
@@ -15,6 +16,8 @@ export interface SharedAppConfig {
 
     tokenPrivateKey: string;
     tokenPublicKey: string;
+
+    defaultRole: `${UserRole}`;
 }
 
 export interface SharedAppDynamicConfig {

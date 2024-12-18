@@ -3,6 +3,7 @@ import type {AppConfig} from '@gravity-ui/nodekit';
 
 import {Feature, FeaturesConfig} from '../components/features/types';
 import {MASTER_TOKEN_HEADER} from '../constants/header';
+import {UserRole} from '../constants/role';
 import {getEnvCert, getEnvTokenVariable} from '../utils/env-utils';
 
 export const features: FeaturesConfig = {
@@ -25,6 +26,8 @@ export default {
     },
 
     appAuthPolicy: AuthPolicy.required,
+
+    defaultRole: UserRole.Viewer,
 
     uiAppEndpoint: process.env.UI_APP_ENDPOINT,
 

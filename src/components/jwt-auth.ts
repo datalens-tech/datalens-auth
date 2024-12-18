@@ -2,13 +2,18 @@ import {AppContext} from '@gravity-ui/nodekit';
 import jwt from 'jsonwebtoken';
 import {raw, transaction} from 'objection';
 
-import {RefreshTokenModel, RefreshTokenModelColumn} from '../db/models/refresh-token';
+import {
+    RefreshTokenModel,
+    RefreshTokenModelColumn,
+    RefreshTokenModelFields,
+} from '../db/models/refresh-token';
+import {RoleModel, RoleModelColumn} from '../db/models/role';
 import {SessionModel, SessionModelColumn} from '../db/models/session';
 import {getPrimary} from '../db/utils/db';
 import {ServiceArgs} from '../types/service';
 import {AccessTokenPayload, RefreshTokenPayload} from '../types/token';
 import {decodeId, encodeId} from '../utils/ids';
-import {Nullable} from '../utils/utility-types';
+import {Nullable, Optional} from '../utils/utility-types';
 
 const algorithm = 'RS256';
 
@@ -20,12 +25,22 @@ export class JwtAuth {
         ctx.log('GENERATE_TOKENS', {userId, sessionId});
         const {getId} = ctx.get('registry').getDbInstance();
 
+        const roleModels = await RoleModel.query(getPrimary(trx))
+            .select(RoleModelColumn.Role)
+            .where(RoleModelColumn.UserId, userId)
+            .timeout(RefreshTokenModel.DEFAULT_QUERY_TIMEOUT);
+
+        const roles = roleModels.length
+            ? roleModels.map((model) => model[RoleModelColumn.Role])
+            : [ctx.config.defaultRole].filter(Boolean);
+
         const encodedSessionId = encodeId(sessionId);
 
         const accessToken = jwt.sign(
             {
                 userId,
                 sessionId: encodedSessionId,
+                roles,
             },
             ctx.config.tokenPrivateKey,
             {algorithm, expiresIn: `${ctx.config.accessTokenTTL}s`},
@@ -161,29 +176,37 @@ export class JwtAuth {
             const decodedRefreshTokenId = decodeId(token.refreshTokenId);
             const decodedSessionId = decodeId(token.sessionId);
 
-            // TODO: left join
-            const [refreshTokenModel, sessionModel] = await Promise.all([
-                RefreshTokenModel.query(getPrimary(trx))
-                    .select(RefreshTokenModelColumn.ExpiredAt)
-                    .where(RefreshTokenModelColumn.RefreshTokenId, decodedRefreshTokenId)
-                    .first()
-                    .timeout(RefreshTokenModel.DEFAULT_QUERY_TIMEOUT),
-                SessionModel.query(getPrimary(trx))
-                    .select([SessionModelColumn.UserIp, SessionModelColumn.ExpiredAt])
-                    .where({
-                        [SessionModelColumn.SessionId]: decodedSessionId,
-                        [SessionModelColumn.UserId]: userId,
-                    })
-                    .first()
-                    .timeout(SessionModel.DEFAULT_QUERY_TIMEOUT),
-            ]);
+            const tokenExpiredAtColumn = 'tokenExpiredAt';
 
-            if (!sessionModel) {
+            const joinedModel = (await SessionModel.query(getPrimary(trx))
+                .select([
+                    `${SessionModel.tableName}.${SessionModelColumn.UserIp}`,
+                    `${SessionModel.tableName}.${SessionModelColumn.ExpiredAt}`,
+                    `${RefreshTokenModel.tableName}.${RefreshTokenModelColumn.RefreshTokenId}`,
+                    `${RefreshTokenModel.tableName}.${RefreshTokenModelColumn.ExpiredAt} as token_expired_at`,
+                ])
+                .leftJoin(
+                    RefreshTokenModel.tableName,
+                    `${SessionModel.tableName}.${SessionModelColumn.SessionId}`,
+                    `${RefreshTokenModel.tableName}.${RefreshTokenModelColumn.SessionId}`,
+                )
+                .where({
+                    [`${SessionModel.tableName}.${SessionModelColumn.SessionId}`]: decodedSessionId,
+                    [`${SessionModel.tableName}.${SessionModelColumn.UserId}`]: userId,
+                })
+                .first()
+                .timeout(SessionModel.DEFAULT_QUERY_TIMEOUT)) as Optional<
+                SessionModel & {
+                    [tokenExpiredAtColumn]: RefreshTokenModelFields['expiredAt'];
+                } & Pick<RefreshTokenModelFields, 'refreshTokenId'>
+            >;
+
+            if (!joinedModel) {
                 throw new Error('Unknown session');
             }
 
-            if (!refreshTokenModel) {
-                if (sessionModel.userIp && sessionModel.userIp !== userIp) {
+            if (joinedModel[RefreshTokenModelColumn.RefreshTokenId] !== decodedRefreshTokenId) {
+                if (joinedModel.userIp && joinedModel.userIp !== userIp) {
                     // Delete compromised session
                     await SessionModel.query(getPrimary(trx))
                         .delete()
@@ -194,11 +217,11 @@ export class JwtAuth {
                 throw new Error('Unknown refreshToken');
             }
 
-            if (new Date(refreshTokenModel.expiredAt).getTime() < new Date().getTime()) {
+            if (new Date(joinedModel[tokenExpiredAtColumn]).getTime() < new Date().getTime()) {
                 throw new Error('Expired refreshToken');
             }
 
-            if (new Date(sessionModel.expiredAt).getTime() < new Date().getTime()) {
+            if (new Date(joinedModel.expiredAt).getTime() < new Date().getTime()) {
                 throw new Error('Expired session');
             }
 
