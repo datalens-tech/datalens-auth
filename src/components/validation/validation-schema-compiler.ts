@@ -3,9 +3,23 @@ import Ajv from 'ajv';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
 
+import {PASSWORD_REGEX} from './regexp';
+
 const ajv = new Ajv({
     allErrors: true,
     verbose: true,
+});
+
+ajv.addKeyword({
+    keyword: 'verifyPassword',
+    validate: (_schema: unknown, data: string) => {
+        return PASSWORD_REGEX.test(data);
+    },
+    error: {
+        message:
+            'must be: more than 8 chars with uppercase character, numbers and special character',
+    },
+    errors: true,
 });
 
 const compileSchema = (schema: object) => {

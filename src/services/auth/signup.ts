@@ -27,11 +27,9 @@ const validateArgs = makeSchemaValidator({
             minLength: 1,
             maxLength: 1000,
         },
-        // TODO: strict validate password
         password: {
             type: 'string',
-            minLength: 1,
-            maxLength: 200,
+            verifyPassword: true,
         },
         userAgent: {
             type: 'string',
