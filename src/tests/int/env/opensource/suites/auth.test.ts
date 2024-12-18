@@ -13,7 +13,7 @@ let accessToken: string;
 const EXTRA_TIME = 2000; // 2 sec
 
 function checkSettedCookies(responseHeader: Record<string, string | string[]>, save = false) {
-    const setCookieHeader = responseHeader[SET_COOKIE_HEADER];
+    const setCookieHeader = responseHeader[SET_COOKIE_HEADER] as string[];
 
     expect(Array.isArray(setCookieHeader)).toBe(true);
 
@@ -68,9 +68,11 @@ function checkSettedCookies(responseHeader: Record<string, string | string[]>, s
     });
 
     if (save) {
-        savedCookies = setCookieHeader as string[];
+        savedCookies = setCookieHeader;
         accessToken = cookieAccessToken;
     }
+
+    return {savedCookies: setCookieHeader, accessToken: cookieAccessToken};
 }
 
 describe('Auth', () => {
@@ -188,7 +190,7 @@ describe('Auth', () => {
         expect(response.status).toBe(401);
     });
 
-    test('Access token is valid after logout when time expired', async () => {
+    test('Access token is valid after logout until it expires', async () => {
         await auth(request(app).get(makeRoute('home')), {accessToken}).expect(200);
 
         const {accessTokenTTL} = appConfig;
@@ -199,5 +201,46 @@ describe('Auth', () => {
         await auth(request(app).get(makeRoute('home')), {accessToken}).expect(401);
 
         jest.useRealTimers();
+    });
+
+    test('Compromised session', async () => {
+        const singinResponse = await request(app).post(makeRoute('signin')).send({
+            login: testUserLogin,
+            password: testUserPassword,
+        });
+        expect(singinResponse.status).toBe(302);
+        const signinData = checkSettedCookies(singinResponse.header, false);
+
+        let refreshResponse = await request(app)
+            .post(makeRoute('refresh'))
+            .set('Cookie', signinData.savedCookies);
+        expect(refreshResponse.status).toBe(200);
+        let refreshedData = checkSettedCookies(refreshResponse.header, false);
+
+        // call with singin refresh token
+        await request(app)
+            .post(makeRoute('refresh'))
+            .set('Cookie', signinData.savedCookies)
+            .expect(401);
+
+        // call with actual refresh token
+        refreshResponse = await request(app)
+            .post(makeRoute('refresh'))
+            .set('Cookie', refreshedData.savedCookies);
+        expect(refreshResponse.status).toBe(200);
+        refreshedData = checkSettedCookies(refreshResponse.header, false);
+
+        // call with singin refresh token and changed ip
+        await request(app)
+            .post(makeRoute('refresh'))
+            .set('Cookie', signinData.savedCookies)
+            .set('X-Forwarded-For', '92.168.190.25')
+            .expect(401);
+
+        // failed to refresh because session was deleted
+        refreshResponse = await request(app)
+            .post(makeRoute('refresh'))
+            .set('Cookie', refreshedData.savedCookies)
+            .expect(401);
     });
 });
