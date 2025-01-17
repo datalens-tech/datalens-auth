@@ -5,11 +5,14 @@ import type {Nullable} from '../../utils/utility-types';
 
 export const UserModelColumn = {
     UserId: 'userId',
-    DisplayName: 'displayName',
     CreatedAt: 'createdAt',
     UpdatedAt: 'updatedAt',
     Login: 'login',
     Password: 'password',
+    Email: 'email',
+    FirstName: 'firstName',
+    LastName: 'lastName',
+    ProviderId: 'providerId',
 } as const;
 
 type UserModelColumnValues = ValuesType<typeof UserModelColumn>;
@@ -26,9 +29,12 @@ export class UserModel extends Model implements Record<UserModelColumnValues, un
     }
 
     userId!: string;
-    displayName!: string;
     createdAt!: string;
     updatedAt!: string;
     login!: Nullable<string>;
     password!: Nullable<string>;
+    firstName!: Nullable<string>;
+    lastName!: Nullable<string>;
+    email!: Nullable<string>;
+    providerId!: Nullable<string>;
 }

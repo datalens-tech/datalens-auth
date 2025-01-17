@@ -4,7 +4,7 @@ import request from 'supertest';
 import {JwtAuth} from '../../../../../components/jwt-auth';
 import {AUTH_COOKIE_NAME, AUTH_EXP_COOKIE_NAME} from '../../../../../constants/cookie';
 import {SET_COOKIE_HEADER} from '../../../../../constants/header';
-import {app, appConfig, appCtx, auth} from '../../../auth';
+import {AUTH_ERROR, app, appConfig, appCtx, auth} from '../../../auth';
 import {testUserLogin, testUserPassword} from '../../../constants';
 import {makeRoute} from '../../../routes';
 
@@ -86,7 +86,7 @@ describe('Auth', () => {
             password: testUserPassword,
         });
 
-        const failureRedirect = '/signin';
+        const failureRedirect = '/signin-fail';
         const setCookieHeader = response.header[SET_COOKIE_HEADER];
 
         expect(response.header['location']).toBe(failureRedirect);
@@ -97,12 +97,11 @@ describe('Auth', () => {
     test('Sign up', async () => {
         const response = await request(app).post(makeRoute('signup')).send({
             login: testUserLogin,
-            displayName: testUserLogin,
             password: testUserPassword,
         });
 
-        expect(response.header['location']).toBe('/');
-        expect(response.status).toBe(302);
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({done: true});
 
         checkSettedCookies(response.header, true);
     });
@@ -117,8 +116,8 @@ describe('Auth', () => {
             password: testUserPassword,
         });
 
-        expect(response.header['location']).toBe('/');
-        expect(response.status).toBe(302);
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({done: true});
 
         checkSettedCookies(response.header, true);
     });
@@ -148,6 +147,7 @@ describe('Auth', () => {
 
         const response = await request(app).post(makeRoute('refresh')).set('Cookie', savedCookies);
         expect(response.status).toBe(401);
+        expect(response.body?.code).toBe(AUTH_ERROR.NEED_RESET);
 
         jest.useRealTimers();
     });
@@ -167,8 +167,8 @@ describe('Auth', () => {
 
         const response = await request(app).get(makeRoute('logout')).set('Cookie', savedCookies);
 
-        expect(response.header['location']).toBe('/');
-        expect(response.status).toBe(302);
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({done: true});
         const setCookieHeader = response.header[SET_COOKIE_HEADER] as unknown as string[];
         expect(Array.isArray(setCookieHeader)).toBe(true);
 
@@ -188,6 +188,7 @@ describe('Auth', () => {
     test('Failed to refresh token after logout', async () => {
         const response = await request(app).post(makeRoute('refresh')).set('Cookie', savedCookies);
         expect(response.status).toBe(401);
+        expect(response.body?.code).toBe(AUTH_ERROR.NEED_RESET);
     });
 
     test('Access token is valid after logout until it expires', async () => {
@@ -208,7 +209,8 @@ describe('Auth', () => {
             login: testUserLogin,
             password: testUserPassword,
         });
-        expect(singinResponse.status).toBe(302);
+        expect(singinResponse.status).toBe(200);
+        expect(singinResponse.body).toStrictEqual({done: true});
         const signinData = checkSettedCookies(singinResponse.header, false);
 
         let refreshResponse = await request(app)

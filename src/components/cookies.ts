@@ -7,8 +7,18 @@ import type {Optional} from '../utils/utility-types';
 
 type Tokens = {accessToken: string; refreshToken: string};
 
-export const setAuthCookie = ({res, tokens}: {req: Request; res: Response; tokens: Tokens}) => {
+export const setAuthCookie = ({
+    req,
+    res,
+    tokens,
+}: {
+    req: Request;
+    res: Response;
+    tokens: Tokens;
+}) => {
     const {accessToken, refreshToken} = tokens;
+
+    const secure = Boolean(req.ctx.config.uiAppEndpoint?.startsWith('https'));
 
     res.cookie(
         AUTH_COOKIE_NAME,
@@ -17,20 +27,22 @@ export const setAuthCookie = ({res, tokens}: {req: Request; res: Response; token
             refreshToken,
         }),
         {
-            // secure: true,
+            secure,
             httpOnly: true,
             path: '/',
-            // domain: req.ctx.config.uiAppEndpoint,
+            sameSite: true,
+            // signed: true,
         },
     );
 
     const {exp} = jwt.decode(accessToken) as AccessTokenPayload;
 
     res.cookie(AUTH_EXP_COOKIE_NAME, exp, {
-        // secure: true,
+        secure,
         httpOnly: false,
         path: '/',
-        // domain: req.ctx.config.uiAppEndpoint,
+        sameSite: true,
+        // signed: true,
     });
 };
 
@@ -77,5 +89,5 @@ export const afterSuccessAuth = (req: Request, res: Response) => {
         },
     });
 
-    res.status(302).redirect('/');
+    res.status(200).send({done: true});
 };

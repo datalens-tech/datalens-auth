@@ -4,11 +4,10 @@ import requestIp from 'request-ip';
 
 import {JwtAuth} from '../components/jwt-auth';
 import {USER_AGENT_HEADER} from '../constants/header';
-import {LOCAL_IDENTITY_ID} from '../db/constants/id';
 import {UserModel, UserModelColumn} from '../db/models/user';
 import {getReplica} from '../db/utils/db';
-import {escapeStringForLike} from '../db/utils/query';
 import type {AuthorizedUser} from '../types/user';
+import {encodeId} from '../utils/ids';
 
 import {comparePasswords} from './passwords';
 
@@ -38,11 +37,10 @@ export const initPassport = () => {
                 try {
                     const user = await UserModel.query(getReplica())
                         .select([UserModelColumn.UserId, UserModelColumn.Password])
-                        .where(UserModelColumn.Login, username)
-                        .andWhereLike(
-                            UserModelColumn.UserId,
-                            `${escapeStringForLike(LOCAL_IDENTITY_ID)}:%`,
-                        )
+                        .where({
+                            [UserModelColumn.Login]: username,
+                            [UserModelColumn.ProviderId]: null,
+                        })
                         .first()
                         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
@@ -69,7 +67,7 @@ export const initPassport = () => {
                             },
                         );
                         done(null, {
-                            userId: user.userId,
+                            userId: encodeId(user.userId),
                             accessToken,
                             refreshToken,
                         });
