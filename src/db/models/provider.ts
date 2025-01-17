@@ -1,6 +1,7 @@
 import type {ValuesType} from 'utility-types';
 
 import {Model} from '..';
+import type {BigIntId} from '../types/id';
 
 export const ProviderModelColumn = {
     ProviderId: 'providerId',
@@ -23,7 +24,7 @@ export class ProviderModel extends Model implements Record<ProviderModelColumnVa
         return ProviderModelColumn.ProviderId;
     }
 
-    providerId!: string;
+    providerId!: BigIntId;
     name!: string;
     data!: Record<string, unknown>;
     createdAt!: string;

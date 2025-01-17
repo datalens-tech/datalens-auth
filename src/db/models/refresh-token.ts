@@ -1,6 +1,7 @@
 import type {ValuesType} from 'utility-types';
 
 import {Model} from '../';
+import type {BigIntId} from '../types/id';
 
 export const RefreshTokenModelColumn = {
     RefreshTokenId: 'refreshTokenId',
@@ -25,8 +26,8 @@ export class RefreshTokenModel
         return RefreshTokenModelColumn.RefreshTokenId;
     }
 
-    refreshTokenId!: string;
-    sessionId!: string;
+    refreshTokenId!: BigIntId;
+    sessionId!: BigIntId;
     createdAt!: string;
     expiredAt!: string;
 }

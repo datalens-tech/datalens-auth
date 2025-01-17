@@ -2,6 +2,7 @@ import chunk from 'lodash/chunk';
 import PowerRadix from 'power-radix';
 
 import {ID_VARIABLES} from '../db/constants/id';
+import {BigIntId, StringId} from '../db/types/id';
 
 const CODING_BASE = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
 
@@ -9,7 +10,7 @@ function rotate(array: string[], start: number) {
     return array.slice(start, array.length).concat(array.slice(0, start));
 }
 
-export function encodeId(bigIntId: string) {
+export function encodeId(bigIntId: BigIntId): StringId {
     let encodedId = '';
 
     if (bigIntId) {
@@ -24,15 +25,15 @@ export function encodeId(bigIntId: string) {
         encodedId = encodedLongPart + encodedRotationNumber;
     }
 
-    return encodedId;
+    return encodedId as StringId;
 }
 
-export function decodeId(id: string) {
+export function decodeId(stringId: StringId): BigIntId {
     let decodedId = '';
 
-    if (id) {
-        const encodedRotationNumber = id.slice(-1);
-        const encodedLongPart = id.slice(0, -1);
+    if (stringId) {
+        const encodedRotationNumber = stringId.slice(-1);
+        const encodedLongPart = stringId.slice(0, -1);
 
         const decodedRotationNumber = Number(
             new PowerRadix(
@@ -50,17 +51,17 @@ export function decodeId(id: string) {
         decodedId = decodedLongPart;
     }
 
-    return decodedId;
+    return decodedId as BigIntId;
 }
 
-function encodeIds(object: {[key: string]: string}) {
+function encodeIds(object: Record<string, string | BigIntId>) {
     for (const idVariable of ID_VARIABLES) {
         if (object && object[idVariable]) {
             const id = object[idVariable];
-            object[idVariable] = id && encodeId(id);
+            object[idVariable] = id && encodeId(id as BigIntId);
         }
     }
-    return object;
+    return object as Record<string, string | StringId>;
 }
 
 export async function macrotasksMap<T, R extends (item: T) => unknown>(
@@ -96,7 +97,7 @@ export async function encodeData<T, R = T>(data: T) {
     if (Array.isArray(data)) {
         dataFormed = (await macrotasksMap(data, encodeIds)) as R;
     } else if (data !== null && typeof data === 'object') {
-        dataFormed = encodeIds(data as Record<string, string>) as R;
+        dataFormed = encodeIds(data as Record<string, string | BigIntId>) as R;
     } else {
         dataFormed = data as unknown as R;
     }

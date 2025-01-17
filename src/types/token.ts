@@ -1,4 +1,5 @@
 import {UserRole} from '../constants/role';
+import type {StringId} from '../db/types/id';
 
 export interface ExpirableTokenPayload {
     iat: number;
@@ -6,13 +7,13 @@ export interface ExpirableTokenPayload {
 }
 
 export interface AccessTokenPayload extends ExpirableTokenPayload {
-    userId: string;
-    sessionId: string;
+    userId: StringId;
+    sessionId: StringId;
     roles: `${UserRole}`[];
 }
 
 export interface RefreshTokenPayload {
-    refreshTokenId: string;
-    userId: string;
-    sessionId: string;
+    refreshTokenId: StringId;
+    userId: StringId;
+    sessionId: StringId;
 }

@@ -17,11 +17,12 @@ const validateArgs = makeSchemaValidator({
         login: {
             type: 'string',
             minLength: 1,
-            maxLength: 100,
+            maxLength: 200,
         },
         firstName: {
             type: 'string',
-            verifyPassword: true,
+            minLength: 1,
+            maxLength: 200,
         },
         lastName: {
             type: 'string',

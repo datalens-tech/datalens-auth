@@ -8,6 +8,7 @@ import {AppEnv} from '../constants/app';
 import {DEFAULT_DB_QUERY_TIMEOUT} from '../constants/timeout';
 import {isTrueArg} from '../utils/env-utils';
 
+import type {BigIntId} from './types/id';
 import {getDsnList, getTestDsnList} from './utils/dsn';
 import {camelCase} from './utils/utils';
 
@@ -95,7 +96,7 @@ export function initDB(nodekit: NodeKit) {
 
     async function getId() {
         const queryResult = await db.primary.raw('select auth_get_id() as id');
-        return queryResult.rows[0].id as string;
+        return queryResult.rows[0].id as BigIntId;
     }
 
     Model.db = db;

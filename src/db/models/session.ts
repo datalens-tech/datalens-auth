@@ -2,6 +2,7 @@ import type {ValuesType} from 'utility-types';
 
 import {Model} from '../';
 import type {Nullable} from '../../utils/utility-types';
+import type {BigIntId} from '../types/id';
 
 export const SessionModelColumn = {
     SessionId: 'sessionId',
@@ -26,8 +27,8 @@ export class SessionModel extends Model implements Record<SessionModelColumnValu
         return SessionModelColumn.SessionId;
     }
 
-    sessionId!: string;
-    userId!: string;
+    sessionId!: BigIntId;
+    userId!: BigIntId;
     userAgent!: string;
     userIp!: Nullable<string>;
     createdAt!: string;

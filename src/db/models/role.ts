@@ -2,6 +2,7 @@ import type {ValuesType} from 'utility-types';
 
 import {Model} from '../';
 import {UserRole} from '../../constants/role';
+import type {BigIntId} from '../types/id';
 
 export const RoleModelColumn = {
     UserId: 'userId',
@@ -23,7 +24,7 @@ export class RoleModel extends Model implements Record<RoleModelColumnValues, un
         return [RoleModelColumn.UserId, RoleModelColumn.Role];
     }
 
-    userId!: string;
+    userId!: BigIntId;
     role!: `${UserRole}`;
     createdAt!: string;
     updatedAt!: string;
