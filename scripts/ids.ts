@@ -7,6 +7,7 @@ import util from 'node:util';
 
 import minimist from 'minimist';
 
+import type {BigIntId, StringId} from '../api/db';
 import {decodeId, encodeId} from '../api/utils';
 
 util.inspect.defaultOptions.maxArrayLength = null;
@@ -22,14 +23,14 @@ const {helper} = args;
 
 switch (helper) {
     case 'decode': {
-        const encodedIds = args._;
+        const encodedIds = args._ as StringId[];
         const decodedIds = encodedIds.map(decodeId);
 
         console.log(decodedIds);
         break;
     }
     case 'encode': {
-        const encodedIds = args._;
+        const encodedIds = args._ as BigIntId[];
         const decodedIds = encodedIds.map(encodeId);
 
         console.log(decodedIds);

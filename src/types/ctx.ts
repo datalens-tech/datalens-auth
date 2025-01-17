@@ -1,8 +1,9 @@
 import type {UserRole} from '../constants/role';
+import type {StringId} from '../db/types/id';
 
 export interface CtxUser {
-    userId: string;
-    sessionId: string;
+    userId: StringId;
+    sessionId: StringId;
     roles: `${UserRole}`[];
 }
 

@@ -9,6 +9,7 @@ import {
 } from '../db/models/refresh-token';
 import {RoleModel, RoleModelColumn} from '../db/models/role';
 import {SessionModel, SessionModelColumn} from '../db/models/session';
+import type {BigIntId} from '../db/types/id';
 import {getPrimary} from '../db/utils/db';
 import {ServiceArgs} from '../types/service';
 import {AccessTokenPayload, RefreshTokenPayload} from '../types/token';
@@ -20,7 +21,7 @@ const algorithm = 'RS256';
 export class JwtAuth {
     static generateTokens = async (
         {trx, ctx}: ServiceArgs,
-        {userId, sessionId}: {userId: string; sessionId: string},
+        {userId, sessionId}: {userId: BigIntId; sessionId: BigIntId},
     ) => {
         ctx.log('GENERATE_TOKENS', {userId, sessionId});
         const {getId} = ctx.get('registry').getDbInstance();
@@ -81,7 +82,7 @@ export class JwtAuth {
             userAgent,
             userIp,
         }: {
-            userId: string;
+            userId: BigIntId;
             userAgent?: string;
             userIp: Nullable<string>;
         },

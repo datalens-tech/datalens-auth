@@ -2,6 +2,7 @@ import type {ValuesType} from 'utility-types';
 
 import {Model} from '../';
 import type {Nullable} from '../../utils/utility-types';
+import type {BigIntId} from '../types/id';
 
 export const UserModelColumn = {
     UserId: 'userId',
@@ -28,7 +29,7 @@ export class UserModel extends Model implements Record<UserModelColumnValues, un
         return UserModelColumn.UserId;
     }
 
-    userId!: string;
+    userId!: BigIntId;
     createdAt!: string;
     updatedAt!: string;
     login!: Nullable<string>;
@@ -36,5 +37,5 @@ export class UserModel extends Model implements Record<UserModelColumnValues, un
     firstName!: Nullable<string>;
     lastName!: Nullable<string>;
     email!: Nullable<string>;
-    providerId!: Nullable<string>;
+    providerId!: Nullable<BigIntId>;
 }

@@ -1,5 +1,7 @@
+import type {StringId} from '../db/types/id';
+
 export interface AuthorizedUser {
-    userId: string;
+    userId: StringId;
     accessToken: string;
     refreshToken: string;
 }
