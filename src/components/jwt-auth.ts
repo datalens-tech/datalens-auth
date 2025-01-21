@@ -16,7 +16,7 @@ import {AccessTokenPayload, RefreshTokenPayload} from '../types/token';
 import {decodeId, encodeId} from '../utils/ids';
 import {Nullable, Optional} from '../utils/utility-types';
 
-const algorithm = 'RS256';
+const algorithm = 'PS256';
 
 export class JwtAuth {
     static generateTokens = async (

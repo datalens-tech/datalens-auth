@@ -7,6 +7,9 @@ import type {Optional} from '../utils/utility-types';
 
 type Tokens = {accessToken: string; refreshToken: string};
 
+const LOCALHOST = ['localhost', '127.0.0.1', '[::1]'];
+const ONE_HOUR = 60 * 60 * 1000;
+
 export const setAuthCookie = ({
     req,
     res,
@@ -17,8 +20,13 @@ export const setAuthCookie = ({
     tokens: Tokens;
 }) => {
     const {accessToken, refreshToken} = tokens;
+    const uiAppEndpoint = req.ctx.config.uiAppEndpoint || '';
+    const refreshTokenTTLSec = req.ctx.config.refreshTokenTTL;
+    const maxAge = refreshTokenTTLSec * 1000 + ONE_HOUR;
+    const uiAppHostname = new URL(uiAppEndpoint, 'http://localhost').hostname;
 
-    const secure = Boolean(req.ctx.config.uiAppEndpoint?.startsWith('https'));
+    const secure = Boolean(uiAppEndpoint.startsWith('https'));
+    const domain = LOCALHOST.includes(uiAppHostname) ? undefined : uiAppHostname;
 
     res.cookie(
         AUTH_COOKIE_NAME,
@@ -31,6 +39,8 @@ export const setAuthCookie = ({
             httpOnly: true,
             path: '/',
             sameSite: true,
+            domain,
+            maxAge,
             // signed: true,
         },
     );
@@ -42,6 +52,8 @@ export const setAuthCookie = ({
         httpOnly: false,
         path: '/',
         sameSite: true,
+        domain,
+        maxAge,
         // signed: true,
     });
 };
