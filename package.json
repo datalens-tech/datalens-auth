@@ -11,11 +11,11 @@
   },
   "main": "dist/index.js",
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^7.3.0",
     "@gravity-ui/expresskit": "^2.2.0",
     "@gravity-ui/gateway": "^3.1.1",
     "@gravity-ui/nodekit": "^2.1.0",
     "@gravity-ui/postgreskit": "^2.0.0",
-    "ajv": "^8.17.1",
     "db-errors": "^0.2.3",
     "dotenv": "^16.4.6",
     "jsonwebtoken": "^9.0.2",
@@ -29,8 +29,10 @@
     "power-radix": "^3.0.1",
     "request-ip": "^3.3.0",
     "set-cookie-parser": "^2.7.1",
+    "swagger-ui-express": "^5.0.1",
     "utility-types": "^3.11.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@gravity-ui/eslint-config": "^3.2.0",
@@ -51,6 +53,7 @@
     "@types/request-ip": "^0.0.41",
     "@types/set-cookie-parser": "^2.4.10",
     "@types/supertest": "^6.0.2",
+    "@types/swagger-ui-express": "^4.1.7",
     "@types/uuid": "^9.0.8",
     "eslint": "^8.57.1",
     "husky": "^9.1.7",

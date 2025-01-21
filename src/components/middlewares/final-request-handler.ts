@@ -8,7 +8,7 @@ export function logError(error: AppError, req: Request) {
         const {message} = error;
         req.ctx.log(message, {error});
     } else {
-        req.ctx.logError('Unhandled US error', error);
+        req.ctx.logError('Unhandled Auth service error', error);
     }
 }
 

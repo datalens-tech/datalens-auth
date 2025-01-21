@@ -10,6 +10,14 @@ import type {AuthorizedUser} from '../types/user';
 import {encodeId} from '../utils/ids';
 
 import {comparePasswords} from './passwords';
+import {makeParser, z, zc} from './zod';
+
+const parseRequest = makeParser(
+    z.strictObject({
+        login: zc.login(),
+        password: zc.password(),
+    }),
+);
 
 export const initPassport = () => {
     passport.serializeUser((user, cb) => {
@@ -35,10 +43,12 @@ export const initPassport = () => {
             {usernameField, passReqToCallback: true},
             async (req, username, password, done) => {
                 try {
+                    const parsedRequest = await parseRequest({login: username, password});
+
                     const user = await UserModel.query(getReplica())
                         .select([UserModelColumn.UserId, UserModelColumn.Password])
                         .where({
-                            [UserModelColumn.Login]: username,
+                            [UserModelColumn.Login]: parsedRequest.login,
                             [UserModelColumn.ProviderId]: null,
                         })
                         .first()
@@ -53,7 +63,7 @@ export const initPassport = () => {
                     }
 
                     const authResult = await comparePasswords({
-                        inputPassword: password,
+                        inputPassword: parsedRequest.password,
                         storedPasswordHash: user.password,
                     });
 

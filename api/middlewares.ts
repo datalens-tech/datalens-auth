@@ -1,5 +1,4 @@
 export {
-    decodeId,
     waitDatabase,
     finalRequestHandler,
     logError,

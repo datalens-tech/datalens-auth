@@ -1,4 +1,3 @@
-export {decodeId} from './decode-id';
 export {resolveSpecialTokens} from './resolve-special-tokens';
 export {waitDatabase} from './wait-database';
 export {ctx} from './ctx';
