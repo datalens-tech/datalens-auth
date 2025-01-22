@@ -29,13 +29,12 @@ export const login = () =>
                 });
                 return z.NEVER;
             }
-        }
-
-        if (!LOGIN_REGEX.test(val)) {
+        } else if (!LOGIN_REGEX.test(val)) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: LOGIN_REGEX_ERROR_MESSAGE,
+                fatal: true,
             });
+            return z.NEVER;
         }
-        return z.NEVER;
     });
