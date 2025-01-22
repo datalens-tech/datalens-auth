@@ -3,7 +3,6 @@ import type {HttpMethod} from '@gravity-ui/expresskit/dist/types';
 import type {NodeKit} from '@gravity-ui/nodekit';
 import passport from 'passport';
 
-import {afterSuccessAuth} from './components/cookies';
 import {Feature} from './components/features';
 import authController from './controllers/auth';
 import helpersController from './controllers/helpers';
@@ -64,7 +63,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
 
         signin: {
             route: 'POST /signin',
-            handler: afterSuccessAuth,
+            handler: authController.signin,
             authHandler: passport.authenticate('local', {
                 failureRedirect: '/signin-fail',
                 session: false,

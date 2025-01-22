@@ -6,7 +6,6 @@ import {
     appAuth,
     checkReadOnlyMode,
     ctx,
-    decodeId,
     finalRequestHandler,
     resolveSpecialTokens,
     waitDatabase,
@@ -17,6 +16,7 @@ import {setRegistryToContext} from './components/app-context';
 import {isEnabledFeature} from './components/features';
 import {objectKeys} from './utils/utility-types';
 import {initPassport} from './components/passport';
+import {initSwagger, registerApiRoute} from './components/api-docs';
 
 setRegistryToContext(nodekit, registry);
 registerAppPlugins();
@@ -30,7 +30,7 @@ if (nodekit.config.appDevMode) {
     require('source-map-support').install();
 }
 
-afterAuth.push(decodeId, waitDatabase, resolveSpecialTokens, ctx, checkReadOnlyMode);
+afterAuth.push(waitDatabase, resolveSpecialTokens, ctx, checkReadOnlyMode);
 
 nodekit.config.appFinalErrorHandler = finalRequestHandler;
 
@@ -43,6 +43,9 @@ objectKeys(extendedRoutes).forEach((key) => {
         !Array.isArray(features) ||
         features.every((feature) => isEnabledFeature(nodekit.ctx, feature))
     ) {
+        if (nodekit.config.swaggerEnabled) {
+            registerApiRoute(extendedRoutes[key]);
+        }
         routes[route] = params;
     }
 });
@@ -50,6 +53,10 @@ objectKeys(extendedRoutes).forEach((key) => {
 const app = new ExpressKit(nodekit, routes);
 registry.setupApp(app);
 initPassport();
+
+if (nodekit.config.swaggerEnabled) {
+    initSwagger(app);
+}
 
 if (require.main === module) {
     app.run();

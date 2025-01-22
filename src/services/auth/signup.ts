@@ -3,50 +3,11 @@ import {transaction} from 'objection';
 
 import {JwtAuth} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
-import {makeSchemaValidator} from '../../components/validation/validation-schema-compiler';
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import {getPrimary, getReplica} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
 import {Nullable, Optional} from '../../utils/utility-types';
-
-const validateArgs = makeSchemaValidator({
-    type: 'object',
-    required: ['login', 'password', 'userIp'],
-    properties: {
-        login: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 200,
-        },
-        firstName: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 200,
-        },
-        lastName: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 200,
-        },
-        email: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 200,
-        },
-        password: {
-            type: 'string',
-            verifyPassword: true,
-        },
-        userAgent: {
-            type: 'string',
-            maxLength: 1000,
-        },
-        userIp: {
-            type: ['string', 'null'],
-        },
-    },
-});
 
 export interface SignupArgs {
     login: string;
@@ -58,7 +19,7 @@ export interface SignupArgs {
     userIp: Nullable<string>;
 }
 
-export const signup = async ({ctx, trx, skipValidation = false}: ServiceArgs, args: SignupArgs) => {
+export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
     const {login, firstName, lastName, email, password, userAgent, userIp} = args;
 
     const registry = ctx.get('registry');
@@ -66,9 +27,6 @@ export const signup = async ({ctx, trx, skipValidation = false}: ServiceArgs, ar
 
     ctx.log('SIGNUP');
 
-    if (!skipValidation) {
-        validateArgs(args);
-    }
     const user = await UserModel.query(getReplica(trx))
         .select(UserModelColumn.UserId)
         .where({[UserModelColumn.Login]: login, [UserModelColumn.ProviderId]: null})

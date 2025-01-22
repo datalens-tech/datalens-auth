@@ -18,6 +18,8 @@ export interface SharedAppConfig {
     tokenPublicKey: string;
 
     defaultRole: `${UserRole}`;
+
+    swaggerEnabled: boolean;
 }
 
 export interface SharedAppDynamicConfig {

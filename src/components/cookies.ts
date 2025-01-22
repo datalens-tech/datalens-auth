@@ -85,21 +85,3 @@ export const getAuthCookies = (req: Request) => {
 export const clearAuthCookies = (res: Response) => {
     res.clearCookie(AUTH_COOKIE_NAME).clearCookie(AUTH_EXP_COOKIE_NAME);
 };
-
-export const afterSuccessAuth = (req: Request, res: Response) => {
-    if (!req.user) {
-        res.status(500).send('No user');
-        return;
-    }
-
-    setAuthCookie({
-        req,
-        res,
-        tokens: {
-            accessToken: req.user.accessToken,
-            refreshToken: req.user.refreshToken,
-        },
-    });
-
-    res.status(200).send({done: true});
-};

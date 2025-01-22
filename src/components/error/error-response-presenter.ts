@@ -54,7 +54,6 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
-        case AUTH_ERROR.DECODE_ID_FAILED:
         case AUTH_ERROR.VALIDATION_ERROR: {
             return {
                 code: 400,
