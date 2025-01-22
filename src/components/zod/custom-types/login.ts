@@ -2,20 +2,27 @@ import {z} from 'zod';
 
 import {LOGIN_REGEX, LOGIN_REGEX_ERROR_MESSAGE} from '../../validation/regexp';
 
+const min = 3;
+const max = 200;
+
 export const login = () =>
     z.string().superRefine((val, ctx) => {
-        if (val.length < 3) {
+        if (val.length < min) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: 'should be >= 3',
+                message: `Login should contain at least ${min} characters`,
+                fatal: true,
             });
+            return z.NEVER;
         }
 
-        if (val.length > 200) {
+        if (val.length > max) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: 'should be <= 200',
+                message: `Login should contain at most ${max} characters`,
+                fatal: true,
             });
+            return z.NEVER;
         }
 
         if (val.includes('@')) {
@@ -24,7 +31,7 @@ export const login = () =>
             } catch (err) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
-                    message: 'Invalid email',
+                    message: "Login with '@' character should be valid email",
                     fatal: true,
                 });
                 return z.NEVER;
