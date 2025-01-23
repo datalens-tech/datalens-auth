@@ -1,5 +1,5 @@
 {
-  "name": "@datalens-tech/auth",
+  "name": "@datalens-tech/datalens-auth",
   "description": "DataLens Auth",
   "version": "0.0.0",
   "private": true,
@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git@github.com:datalens-tech/auth.git"
+    "url": "git@github.com:datalens-tech/datalens-auth.git"
   },
   "main": "dist/index.js",
   "dependencies": {

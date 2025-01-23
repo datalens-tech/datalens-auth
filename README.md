@@ -1,2 +1,2 @@
-# auth
+# DataLens Auth Service
 🐶
