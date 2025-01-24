@@ -80,6 +80,8 @@
     "db:rollback": "node dist/server/db/scripts/rollback.js",
     "db:rollback-one": "node dist/server/db/scripts/rollback-one.js",
     "db:migration:create": "npx knex migrate:make --migrations-directory ./src/db/migrations -x ts",
+    "docker:build": "docker build --build-arg app_version=${BUILD_VERSION} . -t ${TARGET_IMAGE}:${BUILD_VERSION} -t ${TARGET_IMAGE}:latest",
+    "docker:push": "docker image push ${TARGET_IMAGE}:${BUILD_VERSION} && docker image push ${TARGET_IMAGE}:latest",
     "lint:prettier": "prettier --check '**/*.{js,ts}'",
     "lint:js": "eslint \"**/*.{js,ts}\" --quiet",
     "lint": "npm run lint:prettier && npm run lint:js",
