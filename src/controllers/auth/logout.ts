@@ -14,6 +14,7 @@ const controller: AppRouteHandler = async (req, res: Response<SuccessResponseMod
     }
 
     clearAuthCookies(res);
+
     res.status(200).send(successModel.format());
 };
 

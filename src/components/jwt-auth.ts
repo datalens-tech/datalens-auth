@@ -130,7 +130,7 @@ export class JwtAuth {
 
             const decodedRefreshTokenId = decodeId(token.refreshTokenId);
 
-            return await transaction(getPrimary(trx), async (transactionTrx) => {
+            await transaction(getPrimary(trx), async (transactionTrx) => {
                 const refreshTokenModel = await RefreshTokenModel.query(transactionTrx)
                     .select(RefreshTokenModelColumn.SessionId)
                     .where(RefreshTokenModelColumn.RefreshTokenId, decodedRefreshTokenId)
@@ -152,7 +152,6 @@ export class JwtAuth {
             });
         } catch (err) {
             ctx.logError('CLOSE_SESSION_ERROR', err);
-            throw err;
         }
     };
 
