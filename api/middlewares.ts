@@ -4,4 +4,5 @@ export {
     logError,
     checkReadOnlyMode,
     appAuth,
+    checkPermissions,
 } from '../src/components/middlewares';

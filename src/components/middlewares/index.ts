@@ -4,3 +4,4 @@ export {ctx} from './ctx';
 export {finalRequestHandler, logError} from './final-request-handler';
 export {checkReadOnlyMode} from './check-read-only-mode';
 export {appAuth} from './app-auth';
+export {checkPermissions} from './check-permissions';

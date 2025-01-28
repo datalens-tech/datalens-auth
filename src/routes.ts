@@ -4,9 +4,12 @@ import type {NodeKit} from '@gravity-ui/nodekit';
 import passport from 'passport';
 
 import {Feature} from './components/features';
+import {AUTHORIZATION_HEADER} from './constants/header';
+import {Permission} from './constants/permission';
 import authController from './controllers/auth';
 import helpersController from './controllers/helpers';
 import homeController from './controllers/home';
+import managementController from './controllers/management';
 
 export type GetRoutesOptions = {
     beforeAuth: AppMiddleware[];
@@ -53,6 +56,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             handler: helpersController.pool,
             authPolicy: AuthPolicy.disabled,
         },
+
         signinFail: {
             route: 'GET /signin-fail',
             handler: (_req, res) => {
@@ -60,7 +64,6 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             },
             authPolicy: AuthPolicy.disabled,
         },
-
         signin: {
             route: 'POST /signin',
             handler: authController.signin,
@@ -69,7 +72,6 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
                 session: false,
             }),
         },
-
         signup: makeRoute({
             route: 'POST /signup',
             handler: authController.signup,
@@ -87,6 +89,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             handler: authController.refresh,
             authPolicy: AuthPolicy.disabled,
             write: true,
+        }),
+
+        createUser: makeRoute({
+            route: 'POST /v1/management/users/create',
+            handler: managementController.createUser,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
         }),
     } satisfies Record<string, ExtendedAppRouteDescription>;
 
