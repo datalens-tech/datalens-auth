@@ -51,6 +51,16 @@ export const registerApiRoute = (
             );
         }
 
+        if (Array.isArray(routeDescription.apiHeaders)) {
+            routeDescription.apiHeaders.forEach((apiHeader) => {
+                headers.push(
+                    z.strictObject({
+                        [apiHeader]: z.string(),
+                    }),
+                );
+            });
+        }
+
         if (additionalHeaders) {
             headers.push(...additionalHeaders);
         }

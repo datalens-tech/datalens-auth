@@ -1,5 +1,7 @@
 import type {RouteConfig as ZodOpenApiRouteConfig} from '@asteasolutions/zod-to-openapi';
 
+import type {ApiHeader} from '../src/components/api-docs/types';
+import type {Permission} from '../src/constants/permission';
 import type {AuthorizedUser} from '../src/types/user';
 
 declare global {
@@ -11,6 +13,8 @@ declare global {
 export interface SharedAppRouteParams {
     private?: boolean;
     write?: boolean;
+    apiHeaders?: ApiHeader[];
+    permission?: Permission;
 }
 
 export interface SharedAppRouteHandler {

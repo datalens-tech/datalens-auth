@@ -6,8 +6,9 @@ import {
     AUTHORIZATION_HEADER_VALUE_PREFIX,
     MASTER_TOKEN_HEADER,
 } from '../../constants/header';
+
 export {AUTH_ERROR} from '../../constants/error-constants';
-export {JwtAuth} from '../../components/jwt-auth';
+export {UserRole} from '../../constants/role';
 
 export type AuthArgs = {
     accessToken: string;

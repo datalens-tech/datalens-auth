@@ -4,6 +4,7 @@ import {registerAppPlugins} from './registry/register-app-plugins';
 import {AppMiddleware, AppRoutes, ExpressKit} from '@gravity-ui/expresskit';
 import {
     appAuth,
+    checkPermissions,
     checkReadOnlyMode,
     ctx,
     finalRequestHandler,
@@ -30,7 +31,7 @@ if (nodekit.config.appDevMode) {
     require('source-map-support').install();
 }
 
-afterAuth.push(waitDatabase, resolveSpecialTokens, ctx, checkReadOnlyMode);
+afterAuth.push(waitDatabase, resolveSpecialTokens, ctx, checkReadOnlyMode, checkPermissions);
 
 nodekit.config.appFinalErrorHandler = finalRequestHandler;
 
