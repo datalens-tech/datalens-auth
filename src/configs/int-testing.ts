@@ -5,5 +5,5 @@ export default {
     features: {
         ...features,
     },
-    swaggerEnabled: false,
+    swaggerEnabled: true,
 } satisfies Partial<AppConfig>;
