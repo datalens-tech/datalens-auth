@@ -5,7 +5,7 @@ import {testUserPassword} from '../../../../constants';
 import {createTestUsers, generateTokens, isBigIntId} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
-describe('create user', () => {
+describe('Create user', () => {
     let admin = {} as Awaited<ReturnType<typeof createTestUsers>>,
         user = {} as Awaited<ReturnType<typeof createTestUsers>>,
         adminTokens = {} as Awaited<ReturnType<typeof generateTokens>>,

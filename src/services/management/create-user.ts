@@ -1,12 +1,13 @@
 import {AppError} from '@gravity-ui/nodekit';
 import {transaction} from 'objection';
 
-import {UserRole} from '../..//constants/role';
 import {hashPassword} from '../../components/passwords';
 import {AUTH_ERROR} from '../../constants/error-constants';
+import {UserRole} from '../../constants/role';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import {getPrimary, getReplica} from '../../db/utils/db';
+import {lowerEqual} from '../../db/utils/query';
 import {ServiceArgs} from '../../types/service';
 import {Optional} from '../../utils/utility-types';
 
@@ -29,7 +30,8 @@ export const createUser = async ({ctx, trx}: ServiceArgs, args: CreateUserArgs) 
 
     const user = await UserModel.query(getReplica(trx))
         .select(UserModelColumn.UserId)
-        .where({[UserModelColumn.Login]: login, [UserModelColumn.ProviderId]: null})
+        .where(UserModelColumn.ProviderId, null)
+        .where(lowerEqual({column: UserModelColumn.Login, value: login}))
         .first()
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
@@ -53,8 +55,12 @@ export const createUser = async ({ctx, trx}: ServiceArgs, args: CreateUserArgs) 
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
-        if (Array.isArray(roles)) {
-            const normalizedRoles = Array.from(new Set(roles));
+        const resultRoles = (Array.isArray(roles) ? roles : [ctx.config.defaultRole]).filter(
+            Boolean,
+        );
+
+        if (resultRoles.length) {
+            const normalizedRoles = Array.from(new Set(resultRoles));
             await RoleModel.query(transactionTrx)
                 .insert(
                     normalizedRoles.map((role) => ({

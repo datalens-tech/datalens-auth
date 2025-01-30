@@ -7,9 +7,10 @@ import {Feature} from './components/features';
 import {AUTHORIZATION_HEADER} from './constants/header';
 import {Permission} from './constants/permission';
 import authController from './controllers/auth';
-import helpersController from './controllers/helpers';
+import healthcheckController from './controllers/healthcheck';
 import homeController from './controllers/home';
 import managementController from './controllers/management';
+import usersController from './controllers/users';
 
 export type GetRoutesOptions = {
     beforeAuth: AppMiddleware[];
@@ -38,29 +39,29 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
 
         ping: {
             route: 'GET /ping',
-            handler: helpersController.ping,
+            handler: healthcheckController.ping,
             authPolicy: AuthPolicy.disabled,
         },
         pingDb: {
             route: 'GET /ping-db',
-            handler: helpersController.pingDb,
+            handler: healthcheckController.pingDb,
             authPolicy: AuthPolicy.disabled,
         },
         pingDbPrimary: {
             route: 'GET /ping-db-primary',
-            handler: helpersController.pingDbPrimary,
+            handler: healthcheckController.pingDbPrimary,
             authPolicy: AuthPolicy.disabled,
         },
         pool: {
             route: 'GET /pool',
-            handler: helpersController.pool,
+            handler: healthcheckController.pool,
             authPolicy: AuthPolicy.disabled,
         },
 
         signinFail: {
             route: 'GET /signin-fail',
             handler: (_req, res) => {
-                res.status(403).send('Forbidden');
+                res.status(403).send({message: 'Forbidden'});
             },
             authPolicy: AuthPolicy.disabled,
         },
@@ -97,6 +98,13 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
+        }),
+
+        getUsersList: makeRoute({
+            route: 'GET /v1/users/list',
+            handler: usersController.getUsersList,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.InstanceUse,
         }),
     } satisfies Record<string, ExtendedAppRouteDescription>;
 

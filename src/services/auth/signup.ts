@@ -4,8 +4,10 @@ import {transaction} from 'objection';
 import {JwtAuth} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {AUTH_ERROR} from '../../constants/error-constants';
+import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import {getPrimary, getReplica} from '../../db/utils/db';
+import {lowerEqual} from '../../db/utils/query';
 import {ServiceArgs} from '../../types/service';
 import {Nullable, Optional} from '../../utils/utility-types';
 
@@ -29,7 +31,8 @@ export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
 
     const user = await UserModel.query(getReplica(trx))
         .select(UserModelColumn.UserId)
-        .where({[UserModelColumn.Login]: login, [UserModelColumn.ProviderId]: null})
+        .where(UserModelColumn.ProviderId, null)
+        .where(lowerEqual({column: UserModelColumn.Login, value: login}))
         .first()
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
@@ -52,6 +55,18 @@ export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
                 [UserModelColumn.LastName]: lastName,
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
+
+        const roles = [ctx.config.defaultRole].filter(Boolean);
+        if (roles.length) {
+            await RoleModel.query(transactionTrx)
+                .insert(
+                    roles.map((role) => ({
+                        [RoleModelColumn.UserId]: userId,
+                        [RoleModelColumn.Role]: role,
+                    })),
+                )
+                .timeout(RoleModel.DEFAULT_QUERY_TIMEOUT);
+        }
 
         const tokens = await JwtAuth.startSession(
             {ctx, trx: transactionTrx},

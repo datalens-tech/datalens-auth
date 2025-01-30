@@ -16,6 +16,10 @@ const prepareTestDb = async () => {
         CREATE SCHEMA public;
     `);
 
+    await knexInstance.raw(`
+        CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    `);
+
     await knexInstance.migrate.latest();
     await knexInstance.destroy();
 };

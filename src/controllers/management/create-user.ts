@@ -35,6 +35,7 @@ const controller: AppRouteHandler = async (req, res: Response<CreateUserResponse
             roles: body.roles,
         },
     );
+
     res.status(200).send(createUserModel.format(result));
 };
 

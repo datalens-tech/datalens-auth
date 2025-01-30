@@ -42,7 +42,7 @@ export async function up(knex: Knex): Promise<void> {
 
         CREATE INDEX auth_users_login_idx ON auth_users USING BTREE (login);
         CREATE INDEX auth_users_provider_id_idx ON auth_users USING BTREE (provider_id);
-        CREATE UNIQUE INDEX auth_users_uniq_login_idx ON auth_users USING BTREE (login) WHERE provider_id IS NULL;
+        CREATE UNIQUE INDEX auth_users_uniq_login_idx ON auth_users USING BTREE (LOWER(login)) WHERE provider_id IS NULL;
 
         CREATE TABLE auth_sessions (
             session_id BIGINT NOT NULL DEFAULT auth_get_id() PRIMARY KEY,
@@ -74,11 +74,13 @@ export async function up(knex: Knex): Promise<void> {
         );
 
         CREATE INDEX auth_roles_user_id_idx ON auth_roles USING BTREE (user_id);
+        CREATE INDEX auth_roles_role_idx ON auth_roles USING BTREE (role);
     `);
 }
 
 export async function down(knex: Knex): Promise<void> {
     return knex.raw(`
+        DROP INDEX auth_roles_role_idx;
         DROP INDEX auth_roles_user_id_idx;
         DROP TABLE auth_roles;
 

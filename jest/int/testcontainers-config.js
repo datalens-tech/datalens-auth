@@ -4,12 +4,13 @@ module.exports = {
     postgre: {
         name: 'postgres-test',
         image: 'postgres',
-        tag: '11',
+        tag: '16',
         ports: [5432],
         env: {
             POSTGRES_USER: testDbConfig.user,
             POSTGRES_PASSWORD: testDbConfig.password,
             POSTGRES_DB: testDbConfig.dbName,
+            POSTGRES_INITDB_ARGS: '--encoding=UTF-8 --lc-collate=en_US.utf8 --lc-ctype=en_US.utf8',
         },
         wait: {
             type: 'ports',

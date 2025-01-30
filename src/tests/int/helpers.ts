@@ -7,19 +7,25 @@ import type {BigIntId, StringId} from '../../db/types/id';
 import {registry} from '../../registry/';
 import {decodeId} from '../../utils/ids';
 
-import {appCtx} from './auth';
+import {appConfig, appCtx} from './auth';
 import {testUserLogin, testUserPassword} from './constants';
 
 type CreateTestUserArgs = {
     login?: string;
     password?: string;
     roles?: `${UserRole}`[];
+    email?: string;
+    firstName?: string;
+    lastName?: string;
 };
 
 export const createTestUsers = async ({
     login = testUserLogin,
     password = testUserPassword,
     roles,
+    email,
+    firstName,
+    lastName,
 }: CreateTestUserArgs) => {
     const {db, getId} = registry.getDbInstance();
 
@@ -30,13 +36,19 @@ export const createTestUsers = async ({
             [UserModelColumn.UserId]: await getId(),
             [UserModelColumn.Login]: login,
             [UserModelColumn.Password]: hashedPassword,
+            [UserModelColumn.Email]: email,
+            [UserModelColumn.FirstName]: firstName,
+            [UserModelColumn.LastName]: lastName,
         })
+        .returning('*')
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
-    if (roles) {
+    const resultRoles = Array.isArray(roles) ? roles : [appConfig.defaultRole].filter(Boolean);
+
+    if (resultRoles.length) {
         await RoleModel.query(db.primary)
             .insert(
-                roles.map((role) => ({
+                resultRoles.map((role) => ({
                     [RoleModelColumn.UserId]: user[UserModelColumn.UserId],
                     [RoleModelColumn.Role]: role,
                 })),
