@@ -3,6 +3,13 @@ import {UserRole} from '../constants/role';
 
 const permissionToRoles = {
     [Permission.Manage]: [UserRole.Admin],
+    [Permission.InstanceUse]: [
+        UserRole.Admin,
+        UserRole.Editor,
+        UserRole.Viewer,
+        UserRole.Visitor,
+        UserRole.Creator,
+    ],
 };
 
 export function checkPermission(args: {role: `${UserRole}`; permission: `${Permission}`}) {

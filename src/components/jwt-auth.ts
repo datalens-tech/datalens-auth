@@ -31,9 +31,7 @@ export class JwtAuth {
             .where(RoleModelColumn.UserId, userId)
             .timeout(RefreshTokenModel.DEFAULT_QUERY_TIMEOUT);
 
-        const roles = roleModels.length
-            ? roleModels.map((model) => model[RoleModelColumn.Role])
-            : [ctx.config.defaultRole].filter(Boolean);
+        const roles = roleModels.map((model) => model[RoleModelColumn.Role]);
 
         const encodedSessionId = encodeId(sessionId);
         const encodedUserId = encodeId(userId);

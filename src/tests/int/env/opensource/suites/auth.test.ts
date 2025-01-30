@@ -245,4 +245,11 @@ describe('Auth', () => {
             .set('Cookie', refreshedData.savedCookies)
             .expect(401);
     });
+
+    test('signin-fail route', async () => {
+        const response = await request(app).get('/signin-fail');
+
+        expect(response.status).toBe(403);
+        expect(response.body).toStrictEqual({message: 'Forbidden'});
+    });
 });
