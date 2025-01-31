@@ -70,7 +70,17 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
                 code: 409,
                 response: {
                     code,
-                    message,
+                    message: 'The user already exists',
+                },
+            };
+        }
+
+        case AUTH_ERROR.USER_NOT_EXISTS: {
+            return {
+                code: 404,
+                response: {
+                    code,
+                    message: "The user doesn't exist",
                 },
             };
         }

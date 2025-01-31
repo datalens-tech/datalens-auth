@@ -24,7 +24,7 @@ const format = (data: ResultUser): z.infer<typeof schema> => {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        providerId: data.providerId,
+        providerId: data.providerId ? encodeId(data.providerId) : data.providerId,
         roles: data.roles as UserRole[],
     };
 };
