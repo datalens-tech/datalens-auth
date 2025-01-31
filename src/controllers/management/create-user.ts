@@ -40,7 +40,7 @@ const controller: AppRouteHandler = async (req, res: Response<CreateUserResponse
 };
 
 controller.api = {
-    summary: 'Create user',
+    summary: 'Create a user',
     tags: [ApiTag.Management],
     request: {
         body: {

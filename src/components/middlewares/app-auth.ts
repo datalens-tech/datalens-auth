@@ -1,6 +1,7 @@
 import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 
 import {AUTHORIZATION_HEADER, AUTHORIZATION_HEADER_VALUE_PREFIX} from '../../constants/header';
+import {decodeId} from '../../utils/ids';
 import {JwtAuth} from '../jwt-auth';
 
 export const appAuth = async (req: Request, res: Response, next: NextFunction) => {
@@ -21,8 +22,8 @@ export const appAuth = async (req: Request, res: Response, next: NextFunction) =
                 });
 
                 req.originalContext.set('user', {
-                    userId,
-                    sessionId,
+                    userId: decodeId(userId),
+                    sessionId: decodeId(sessionId),
                     roles,
                 });
 

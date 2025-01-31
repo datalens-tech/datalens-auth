@@ -99,12 +99,23 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
+        getUserProfile: makeRoute({
+            route: 'GET /v1/management/users/:userId/profile',
+            handler: managementController.getUserProfile,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
 
         getUsersList: makeRoute({
             route: 'GET /v1/users/list',
             handler: usersController.getUsersList,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.InstanceUse,
+        }),
+        getMyUserProfile: makeRoute({
+            route: 'GET /v1/users/me/profile',
+            handler: usersController.getUserProfile,
+            apiHeaders: [AUTHORIZATION_HEADER],
         }),
     } satisfies Record<string, ExtendedAppRouteDescription>;
 

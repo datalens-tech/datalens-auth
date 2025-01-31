@@ -36,7 +36,7 @@ export const createUser = async ({ctx, trx}: ServiceArgs, args: CreateUserArgs) 
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
     if (user) {
-        throw new AppError('User already exists', {code: AUTH_ERROR.USER_ALREADY_EXISTS});
+        throw new AppError(AUTH_ERROR.USER_ALREADY_EXISTS, {code: AUTH_ERROR.USER_ALREADY_EXISTS});
     }
 
     const hashedPassword = await hashPassword(password);
