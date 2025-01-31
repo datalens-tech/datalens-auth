@@ -4,7 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
-import {createUser} from '../../services/management/create-user';
+import {createUser} from '../../services/users/create-user';
 
 import {CreateUserResponseModel, createUserModel} from './response-models/create-user-model';
 
