@@ -111,6 +111,12 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
+        updateUserPassword: makeRoute({
+            route: 'POST /v1/management/users/:userId/password',
+            handler: managementController.updateUserPassword,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
 
         getUsersList: makeRoute({
             route: 'GET /v1/users/list',
@@ -126,6 +132,11 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         updateMyUserProfile: makeRoute({
             route: 'POST /v1/users/me/profile',
             handler: usersController.updateUserProfile,
+            apiHeaders: [AUTHORIZATION_HEADER],
+        }),
+        updateMyUserPassword: makeRoute({
+            route: 'POST /v1/users/me/password',
+            handler: usersController.updateUserPassword,
             apiHeaders: [AUTHORIZATION_HEADER],
         }),
     } satisfies Record<string, ExtendedAppRouteDescription>;

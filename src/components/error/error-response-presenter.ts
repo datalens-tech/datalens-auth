@@ -85,6 +85,16 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
+        case AUTH_ERROR.OLD_PASSWORD_INCORRECT: {
+            return {
+                code: 400,
+                response: {
+                    code,
+                    message: 'The old password is incorrect',
+                },
+            };
+        }
+
         default:
             return {
                 code: 500,
