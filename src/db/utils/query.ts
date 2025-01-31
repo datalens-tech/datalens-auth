@@ -31,3 +31,5 @@ export function lowerEqual({column, value}: {column: string; value: string}) {
     const lowerValue = value.toLowerCase();
     return raw('LOWER(??) = ?', [column, lowerValue]);
 }
+
+export const setCurrentTime = () => raw('CURRENT_TIMESTAMP');

@@ -28,7 +28,7 @@ const pickCreatedUserFields = (
     roles: expect.arrayContaining(roles),
 });
 
-describe('Get user profile', () => {
+describe('Get a user profile', () => {
     let admin = {} as Awaited<ReturnType<typeof createTestUsers>>,
         user = {} as Awaited<ReturnType<typeof createTestUsers>>,
         userWithoutRoles = {} as Awaited<ReturnType<typeof createTestUsers>>,
@@ -67,7 +67,7 @@ describe('Get user profile', () => {
         simpleUserTokens = await generateTokens({userId: userWithoutRoles.userId});
     });
 
-    describe('Get a user profile', () => {
+    describe('[Manage] Get a user profile', () => {
         test('Access denied without the token', async () => {
             const response = await request(app).get(
                 makeRoute('getUserProfile', {userId: createdUsers['user'].userId}),
