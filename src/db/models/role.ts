@@ -5,6 +5,7 @@ import {UserRole} from '../../constants/role';
 import type {BigIntId} from '../types/id';
 
 export const RoleModelColumn = {
+    RoleId: 'roleId',
     UserId: 'userId',
     Role: 'role',
     CreatedAt: 'createdAt',
@@ -21,9 +22,10 @@ export class RoleModel extends Model implements Record<RoleModelColumnValues, un
     }
 
     static get idColumn() {
-        return [RoleModelColumn.UserId, RoleModelColumn.Role];
+        return RoleModelColumn.RoleId;
     }
 
+    roleId!: BigIntId;
     userId!: BigIntId;
     role!: `${UserRole}`;
     createdAt!: string;
