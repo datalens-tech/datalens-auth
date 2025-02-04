@@ -95,24 +95,34 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         addUsersRoles: makeRoute({
             route: 'POST /v1/management/users/roles/add',
             handler: managementController.addUsersRoles,
+            write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         updateUsersRoles: makeRoute({
             route: 'POST /v1/management/users/roles/update',
             handler: managementController.updateUsersRoles,
+            write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         removeUsersRoles: makeRoute({
             route: 'POST /v1/management/users/roles/remove',
             handler: managementController.removeUsersRoles,
+            write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         createUser: makeRoute({
             route: 'POST /v1/management/users/create',
             handler: managementController.createUser,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        deleteUser: makeRoute({
+            route: 'DELETE /v1/management/users/:userId',
+            handler: managementController.deleteUser,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
@@ -126,12 +136,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         updateUserProfile: makeRoute({
             route: 'POST /v1/management/users/:userId/profile',
             handler: managementController.updateUserProfile,
+            write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         updateUserPassword: makeRoute({
             route: 'POST /v1/management/users/:userId/password',
             handler: managementController.updateUserPassword,
+            write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
@@ -150,11 +162,13 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         updateMyUserProfile: makeRoute({
             route: 'POST /v1/users/me/profile',
             handler: usersController.updateUserProfile,
+            write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
         }),
         updateMyUserPassword: makeRoute({
             route: 'POST /v1/users/me/password',
             handler: usersController.updateUserPassword,
+            write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
         }),
     } satisfies Record<string, ExtendedAppRouteDescription>;
