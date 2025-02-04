@@ -24,7 +24,7 @@ const pickCreatedUserFields = (
         UserModelColumn.LastName,
     ]),
     userId: encodeId(user.userId),
-    roles: expect.arrayContaining(roles),
+    roles: expect.toIncludeSameMembers(roles),
 });
 
 describe('Update a user profile', () => {

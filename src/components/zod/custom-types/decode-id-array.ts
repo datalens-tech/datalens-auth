@@ -4,7 +4,7 @@ import {macrotasksMap} from '../../../utils/ids';
 
 import {makeIdDecoder} from './utils';
 
-export const decodeIdArray = ({min = 0, max = Infinity}: {min?: number; max?: number}) => {
+export const decodeIdArray = ({min = 1, max = Infinity}: {min?: number; max?: number}) => {
     return z
         .string()
         .array()

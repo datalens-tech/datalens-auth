@@ -92,6 +92,24 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
         }),
 
+        addUsersRoles: makeRoute({
+            route: 'POST /v1/management/users/roles/add',
+            handler: managementController.addUsersRoles,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        updateUsersRoles: makeRoute({
+            route: 'POST /v1/management/users/roles/update',
+            handler: managementController.updateUsersRoles,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        removeUsersRoles: makeRoute({
+            route: 'POST /v1/management/users/roles/remove',
+            handler: managementController.removeUsersRoles,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
         createUser: makeRoute({
             route: 'POST /v1/management/users/create',
             handler: managementController.createUser,

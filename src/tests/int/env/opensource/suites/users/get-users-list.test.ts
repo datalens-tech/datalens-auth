@@ -24,7 +24,7 @@ const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRole
         UserModelColumn.ProviderId,
     ]),
     userId: encodeId(user.userId),
-    roles: expect.arrayContaining(roles),
+    roles: expect.toIncludeSameMembers(roles),
 });
 
 describe('Get users list', () => {
@@ -63,7 +63,7 @@ describe('Get users list', () => {
             email: 'third@edu.ru',
             roles: user2Roles,
         });
-        createdUsers['user2'] = pickCreatedUserFields(user2, userRoles);
+        createdUsers['user2'] = pickCreatedUserFields(user2, user2Roles);
 
         userWithoutRoles = await createTestUsers({
             login: 'test-user-without-roles',

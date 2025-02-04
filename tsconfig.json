@@ -7,5 +7,6 @@
   },
   "include": ["typings", "src"],
   "exclude": ["node_modules"],
-  "types": ["node"]
+  "types": ["node"],
+  "files": ["node_modules/jest-extended/types/index.d.ts"]
 }

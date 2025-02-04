@@ -8,7 +8,7 @@ import type {ModelInstance} from '../../db/types/model';
 import {getReplica} from '../../db/utils/db';
 import {getNextPageToken, searchSubstring} from '../../db/utils/query';
 import {ServiceArgs} from '../../types/service';
-import type {ArrayElement} from '../../utils/utility-types';
+import type {ArrayElement, NullableValues} from '../../utils/utility-types';
 
 const selectedUserColumns = [
     UserModelColumn.UserId,
@@ -29,7 +29,7 @@ const selectedJoinedColumns = [
 type SelectedUserColumns = Pick<UserModel, ArrayElement<typeof selectedUserColumns>>;
 
 type JoinedColumns = SelectedUserColumns &
-    Pick<RoleModel, ArrayElement<typeof selectedRoleColumns>>;
+    NullableValues<Pick<RoleModel, ArrayElement<typeof selectedRoleColumns>>>;
 
 type JoinedUserRoleModel = ModelInstance<JoinedColumns>;
 
