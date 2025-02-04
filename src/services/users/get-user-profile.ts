@@ -9,7 +9,7 @@ import type {BigIntId} from '../../db/types/id';
 import type {ModelInstance} from '../../db/types/model';
 import {getReplica} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
-import type {ArrayElement} from '../../utils/utility-types';
+import type {ArrayElement, NullableValues} from '../../utils/utility-types';
 
 const selectedUserColumns = [
     UserModelColumn.UserId,
@@ -29,7 +29,7 @@ const selectedJoinedColumns = [
 type SelectedUserColumns = Pick<UserModel, ArrayElement<typeof selectedUserColumns>>;
 
 type JoinedColumns = SelectedUserColumns &
-    Pick<RoleModel, ArrayElement<typeof selectedRoleColumns>>;
+    NullableValues<Pick<RoleModel, ArrayElement<typeof selectedRoleColumns>>>;
 
 type JoinedUserRoleModel = ModelInstance<JoinedColumns>;
 
@@ -58,7 +58,7 @@ export const getUserProfile = async ({ctx, trx}: ServiceArgs, args: GetUserProfi
         throw new AppError(AUTH_ERROR.USER_NOT_EXISTS, {code: AUTH_ERROR.USER_NOT_EXISTS});
     }
 
-    const roles = result.map((item) => item.role);
+    const roles = result.map((item) => item.role).filter((role) => role !== null);
     const userProfile = {
         ...pick(result[0], selectedUserColumns),
         roles,

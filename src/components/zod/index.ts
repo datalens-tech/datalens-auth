@@ -124,3 +124,4 @@ export const makeReqParserSync =
 
 export {z};
 export {zc};
+export {makeIdDecoder} from './custom-types/utils';

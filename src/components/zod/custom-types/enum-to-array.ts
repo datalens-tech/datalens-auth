@@ -10,7 +10,7 @@ export const enumToArray = <T extends EnumLike>({
     max?: number;
 }) =>
     z
-        .nativeEnum(value)
-        .or(z.nativeEnum(value).array())
+        .string(value)
+        .or(z.string(value).array())
         .transform((val) => (Array.isArray(val) ? val : [val]))
         .pipe(z.nativeEnum(value).array().min(min).max(max));

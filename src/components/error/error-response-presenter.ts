@@ -95,6 +95,26 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
+        case AUTH_ERROR.ROLE_NOT_EXISTS: {
+            return {
+                code: 404,
+                response: {
+                    code,
+                    message,
+                },
+            };
+        }
+
+        case AUTH_ERROR.NOT_CONSISTENT: {
+            return {
+                code: 400,
+                response: {
+                    code,
+                    message,
+                },
+            };
+        }
+
         default:
             return {
                 code: 500,
