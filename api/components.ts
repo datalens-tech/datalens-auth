@@ -10,3 +10,5 @@ export {isGatewayError} from '../src/components/gateway';
 export {setRegistryToContext} from '../src/components/app-context';
 
 export {registerApiRoute, initSwagger, ApiTag} from '../src/components/api-docs';
+
+export {initPassport} from '../src/components/passport';

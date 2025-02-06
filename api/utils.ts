@@ -1,4 +1,4 @@
-export {getEnvVariable, getEnvTokenVariable, isTrueArg} from '../src/utils/env-utils';
+export {getEnvVariable, getEnvTokenVariable, isTrueArg, getEnvCert} from '../src/utils/env-utils';
 
 export {
     objectKeys,

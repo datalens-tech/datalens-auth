@@ -1,41 +1,13 @@
-import type {FeaturesConfig} from '../src/components/features/types';
-import {UserRole} from '../src/constants/role';
-import type {Registry} from '../src/registry';
-import type {CtxInfo, CtxUser} from '../src/types/ctx';
-
-export interface SharedAppConfig {
-    features: FeaturesConfig;
-    dynamicFeaturesEndpoint?: string;
-    masterToken: string[];
-
-    uiAppEndpoint: string;
-
-    accessTokenTTL: number;
-    refreshTokenTTL: number;
-    sessionTTL: number;
-
-    tokenPrivateKey: string;
-    tokenPublicKey: string;
-
-    defaultRole: `${UserRole}`;
-
-    swaggerEnabled: boolean;
-}
-
-export interface SharedAppDynamicConfig {
-    features?: FeaturesConfig;
-}
-
-export interface SharedAppContextParams {
-    info: CtxInfo;
-    registry: Registry;
-    user: CtxUser;
-}
+import type {
+    PlatformAppConfig,
+    PlatformAppContextParams,
+    PlatformAppDynamicConfig,
+} from '../src/types/nodekit';
 
 declare module '@gravity-ui/nodekit' {
-    export interface AppConfig extends SharedAppConfig {}
+    interface AppConfig extends PlatformAppConfig {}
 
-    export interface AppDynamicConfig extends SharedAppDynamicConfig {}
+    interface AppDynamicConfig extends PlatformAppDynamicConfig {}
 
-    export interface AppContextParams extends SharedAppContextParams {}
+    interface AppContextParams extends PlatformAppContextParams {}
 }

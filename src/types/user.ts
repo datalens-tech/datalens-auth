@@ -1,6 +1,6 @@
 import type {StringId} from '../db/types/id';
 
-export interface AuthorizedUser {
+export interface PlatformAuthorizedUser {
     userId: StringId;
     accessToken: string;
     refreshToken: string;
