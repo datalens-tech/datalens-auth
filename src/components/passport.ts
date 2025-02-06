@@ -6,7 +6,7 @@ import {JwtAuth} from '../components/jwt-auth';
 import {USER_AGENT_HEADER} from '../constants/header';
 import {UserModel, UserModelColumn} from '../db/models/user';
 import {getReplica} from '../db/utils/db';
-import type {AuthorizedUser} from '../types/user';
+import type {PlatformAuthorizedUser} from '../types/user';
 import {encodeId} from '../utils/ids';
 
 import {comparePasswords} from './passwords';
@@ -30,7 +30,7 @@ export const initPassport = () => {
         });
     });
 
-    passport.deserializeUser((user: AuthorizedUser, cb) => {
+    passport.deserializeUser((user: PlatformAuthorizedUser, cb) => {
         process.nextTick(() => {
             cb(null, user);
         });

@@ -53,6 +53,7 @@ objectKeys(extendedRoutes).forEach((key) => {
 
 const app = new ExpressKit(nodekit, routes);
 registry.setupApp(app);
+
 initPassport();
 
 if (nodekit.config.swaggerEnabled) {

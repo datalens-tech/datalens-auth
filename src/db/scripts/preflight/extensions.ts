@@ -3,6 +3,7 @@ dotenv.config();
 
 import '../../../index';
 import {registry} from '../../../registry';
+import {createExtensions} from '../../utils/create-extensions';
 
 if (require.main === module) {
     const {db} = registry.getDbInstance();
@@ -11,9 +12,7 @@ if (require.main === module) {
         try {
             await db.ready();
 
-            await db.primary.raw(`
-                CREATE EXTENSION IF NOT EXISTS pg_trgm;
-            `);
+            await createExtensions(db.primary);
 
             process.exit(0);
         } catch (err) {

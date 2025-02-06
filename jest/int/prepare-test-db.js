@@ -2,6 +2,7 @@ const knexBuilder = require('knex');
 const _ = require('lodash');
 
 const {getKnexOptions} = require('../../dist/server/db/init-db');
+const {createExtensions} = require('../../dist/server/db/utils/create-extensions');
 const {getTestDsnList} = require('../../dist/server/db/utils/dsn');
 const {tableExists, truncateTables} = require('../../dist/server/tests/int/utils');
 
@@ -19,9 +20,7 @@ const prepareTestDb = async () => {
             exclude: ['auth_migrations', 'auth_migrations_lock'],
         });
     } else {
-        await knexInstance.raw(`
-            CREATE EXTENSION IF NOT EXISTS pg_trgm;
-        `);
+        await createExtensions(knexInstance);
     }
 
     await knexInstance.migrate.latest();
