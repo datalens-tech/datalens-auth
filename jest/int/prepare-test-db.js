@@ -21,9 +21,9 @@ const prepareTestDb = async () => {
         });
     } else {
         await createExtensions(knexInstance);
+        await knexInstance.migrate.latest();
     }
 
-    await knexInstance.migrate.latest();
     await knexInstance.destroy();
 };
 
