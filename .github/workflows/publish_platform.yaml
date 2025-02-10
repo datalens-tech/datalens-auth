@@ -4,10 +4,10 @@ on:
       - main
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
-name: Publish Platform
+name: Publish
 
 permissions:
   contents: write
@@ -15,7 +15,10 @@ permissions:
 jobs:
   build:
     name: datalens-auth
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - linux
+      - k8s-runner-front-us
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,13 +26,13 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
       - name: 'Get last release'
         run: |
           COMMIT_NAME=$(git log -n 1 --pretty=format:%s) 
 
-          LAST_RELEASE_VERSION=$(curl -L https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq -r '.|=sort_by(.name|ltrimstr("v")|split(".")|map(tonumber)|[.[0],.[1],-.[2]])|.[-1].name' | sed 's|v||')
+          LAST_RELEASE_VERSION=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -L https://api.github.com/repos/$GITHUB_REPOSITORY/releases | jq -r '.|=sort_by(.name|ltrimstr("v")|split(".")|map(tonumber)|[.[0],.[1],-.[2]])|.[-1].name' | sed 's|v||')
           echo "Last release version: ${LAST_RELEASE_VERSION}"
 
           MAIN_COMMIT=$(git rev-parse origin/main)
