@@ -16,14 +16,19 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: read
+  packages: write
+  actions: read
+
 jobs:
   build:
     name: datalens-auth
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - linux
+      - k8s-runner-front-us
     if: ${{ github.event.workflow_run.conclusion == '' || github.event.workflow_run.conclusion == 'success' }}
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Download Artifacts
         uses: dawidd6/action-download-artifact@v6
