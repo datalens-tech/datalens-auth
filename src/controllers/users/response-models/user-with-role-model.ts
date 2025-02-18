@@ -10,7 +10,8 @@ const schema = z
         email: z.string().nullable(),
         firstName: z.string().nullable(),
         lastName: z.string().nullable(),
-        providerId: z.string().nullable(),
+        idpType: z.string().nullable(),
+        idpSlug: z.string().nullable(),
         roles: z.nativeEnum(UserRole).array(),
     })
     .describe('User with roles model');
@@ -24,7 +25,8 @@ const format = (data: ResultUser): z.infer<typeof schema> => {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        providerId: data.providerId ? encodeId(data.providerId) : data.providerId,
+        idpType: data.idpType,
+        idpSlug: data.idpSlug,
         roles: data.roles as UserRole[],
     };
 };

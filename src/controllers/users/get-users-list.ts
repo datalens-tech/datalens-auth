@@ -13,6 +13,7 @@ const requestSchema = {
         page: zc.stringNumber({min: 0}).optional().describe('Example: 0'),
         pageSize: zc.stringNumber({min: 1, max: 100}).optional().describe('Example: 20'),
         filterString: z.string().min(1).max(100).optional().describe('Example: Smith'),
+        idpType: z.string().min(1).max(100).optional().describe('Example: ldap'),
         roles: zc
             .enumToArray({value: UserRole, min: 1, max: 10})
             .optional()
@@ -31,6 +32,7 @@ const controller: AppRouteHandler = async (req, res: Response<UserListResponseMo
             page: query.page,
             pageSize: query.pageSize,
             filterString: query.filterString,
+            idpType: query.idpType,
             roles: query.roles,
         },
     );

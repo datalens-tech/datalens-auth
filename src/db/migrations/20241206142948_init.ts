@@ -20,14 +20,6 @@ export async function up(knex: Knex): Promise<void> {
         END;
         $$ LANGUAGE PLPGSQL;
 
-        CREATE TABLE auth_providers (
-            provider_id BIGINT NOT NULL DEFAULT auth_get_id() PRIMARY KEY,
-            name TEXT NOT NULL,
-            data JSONB NOT NULL DEFAULT '{}'::jsonb,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-
         CREATE TABLE auth_users (
             user_id BIGINT NOT NULL DEFAULT auth_get_id() PRIMARY KEY,
             login TEXT,
@@ -35,14 +27,27 @@ export async function up(knex: Knex): Promise<void> {
             first_name TEXT,
             last_name TEXT,
             email TEXT,
+            idp_user_id TEXT,
+            idp_slug TEXT,
+            idp_type TEXT,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            provider_id BIGINT DEFAULT NULL REFERENCES auth_providers (provider_id) ON UPDATE CASCADE ON DELETE CASCADE
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
         CREATE INDEX auth_users_login_idx ON auth_users USING BTREE (login);
-        CREATE INDEX auth_users_provider_id_idx ON auth_users USING BTREE (provider_id);
-        CREATE UNIQUE INDEX auth_users_uniq_login_idx ON auth_users USING BTREE (LOWER(login)) WHERE provider_id IS NULL;
+        CREATE INDEX auth_users_idp_type_idx ON auth_users USING BTREE (idp_type);
+        CREATE UNIQUE INDEX auth_users_uniq_idp_user_slug_idx on auth_users USING BTREE (idp_user_id, idp_slug);
+        CREATE UNIQUE INDEX auth_users_uniq_local_login_idx ON auth_users USING BTREE (LOWER(login)) WHERE idp_slug IS NULL;
+
+        CREATE INDEX auth_users_login_lower_idx ON auth_users (LOWER(login));
+        CREATE INDEX auth_users_first_name_lower_idx ON auth_users (LOWER(first_name));
+        CREATE INDEX auth_users_last_name_lower_idx ON auth_users (LOWER(last_name));
+        CREATE INDEX auth_users_email_lower_idx ON auth_users (LOWER(email));
+
+        CREATE INDEX auth_users_login_trgm_idx ON auth_users USING gin (LOWER(login) gin_trgm_ops);
+        CREATE INDEX auth_users_first_name_trgm_idx ON auth_users USING gin (LOWER(first_name) gin_trgm_ops);
+        CREATE INDEX auth_users_last_name_trgm_idx ON auth_users USING gin (LOWER(last_name) gin_trgm_ops);
+        CREATE INDEX auth_users_email_trgm_idx ON auth_users USING gin (LOWER(email) gin_trgm_ops);
 
         CREATE TABLE auth_sessions (
             session_id BIGINT NOT NULL DEFAULT auth_get_id() PRIMARY KEY,
@@ -92,12 +97,19 @@ export async function down(knex: Knex): Promise<void> {
         DROP INDEX auth_sessions_user_id_idx;
         DROP TABLE auth_sessions;
 
-        DROP INDEX auth_users_uniq_login_idx;
-        DROP INDEX auth_users_provider_id_idx;
+        DROP INDEX auth_users_email_trgm_idx;
+        DROP INDEX auth_users_last_name_trgm_idx;
+        DROP INDEX auth_users_first_name_trgm_idx;
+        DROP INDEX auth_users_login_trgm_idx;
+        DROP INDEX auth_users_email_lower_idx;
+        DROP INDEX auth_users_last_name_lower_idx;
+        DROP INDEX auth_users_first_name_lower_idx;
+        DROP INDEX auth_users_login_lower_idx;
+        DROP INDEX auth_users_uniq_local_login_idx;
+        DROP INDEX auth_users_uniq_idp_user_slug_idx;
+        DROP INDEX auth_users_idp_type_idx;
         DROP INDEX auth_users_login_idx;
         DROP TABLE auth_users;
-
-        DROP TABLE auth_providers;
 
         DROP FUNCTION auth_get_id();
         DROP SEQUENCE auth_counter_seq;

@@ -23,13 +23,19 @@ export const updateUserPassword = async ({ctx, trx}: ServiceArgs, args: UpdateUs
     ctx.log('UPDATE_USER_PASSWORD', {userId});
 
     const user = await UserModel.query(getReplica(trx))
-        .select([UserModelColumn.UserId, UserModelColumn.Password])
+        .select([UserModelColumn.UserId, UserModelColumn.Password, UserModelColumn.IdpSlug])
         .where(UserModelColumn.UserId, userId)
         .first()
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
     if (!user) {
         throw new AppError(AUTH_ERROR.USER_NOT_EXISTS, {code: AUTH_ERROR.USER_NOT_EXISTS});
+    }
+
+    if (user[UserModelColumn.IdpSlug] !== null) {
+        throw new AppError(AUTH_ERROR.IDP_USER_UPDATE_NOT_ALLOWED, {
+            code: AUTH_ERROR.IDP_USER_UPDATE_NOT_ALLOWED,
+        });
     }
 
     if (checkOldPassword) {
