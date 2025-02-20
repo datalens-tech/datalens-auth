@@ -10,7 +10,7 @@ import {decodeId} from '../../utils/ids';
 import {appConfig, appCtx} from './auth';
 import {testUserLogin, testUserPassword} from './constants';
 
-type CreateTestUserArgs = {
+export type CreateTestUserArgs = {
     login?: string;
     password?: string;
     roles?: `${UserRole}`[];

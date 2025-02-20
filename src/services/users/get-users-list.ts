@@ -16,7 +16,8 @@ const selectedUserColumns = [
     UserModelColumn.Email,
     UserModelColumn.FirstName,
     UserModelColumn.LastName,
-    UserModelColumn.ProviderId,
+    UserModelColumn.IdpSlug,
+    UserModelColumn.IdpType,
 ] as const;
 
 const selectedRoleColumns = [RoleModelColumn.Role] as const;
@@ -39,11 +40,12 @@ export interface GetUserListArgs {
     page?: number;
     pageSize?: number;
     filterString?: string;
+    idpType?: string;
     roles?: `${UserRole}`[];
 }
 
 export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArgs) => {
-    const {page = 0, pageSize = 20, filterString, roles} = args;
+    const {page = 0, pageSize = 20, filterString, roles, idpType} = args;
 
     ctx.log('GET_USERS_LIST');
 
@@ -95,6 +97,13 @@ export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArg
 
                     if (roles) {
                         qb1.whereIn(`${RoleModel.tableName}.${RoleModelColumn.Role}`, roles);
+                    }
+
+                    if (idpType) {
+                        qb1.where(
+                            `${UserModel.tableName}.${UserModelColumn.IdpType}`,
+                            idpType === 'null' ? null : idpType,
+                        );
                     }
                 })
                 .limit(pageSize)

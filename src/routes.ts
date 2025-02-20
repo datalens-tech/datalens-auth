@@ -72,6 +72,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
                 failureRedirect: '/signin-fail',
                 session: false,
             }),
+            write: true,
         },
         signup: makeRoute({
             route: 'POST /signup',

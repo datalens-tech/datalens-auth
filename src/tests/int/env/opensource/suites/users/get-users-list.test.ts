@@ -21,7 +21,8 @@ const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRole
         UserModelColumn.Email,
         UserModelColumn.FirstName,
         UserModelColumn.LastName,
-        UserModelColumn.ProviderId,
+        UserModelColumn.IdpSlug,
+        UserModelColumn.IdpType,
     ]),
     userId: encodeId(user.userId),
     roles: expect.toIncludeSameMembers(roles),
@@ -94,6 +95,24 @@ describe('Get users list', () => {
     test('User can list all users', async () => {
         const response = await auth(request(app).get(makeRoute('getUsersList')), {
             accessToken: userTokens.accessToken,
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({
+            users: [
+                createdUsers['admin'],
+                createdUsers['user'],
+                createdUsers['user2'],
+                createdUsers['userWithoutRoles'],
+            ],
+        });
+    });
+
+    test('Filter by idpType', async () => {
+        const response = await auth(request(app).get(makeRoute('getUsersList')), {
+            accessToken: userTokens.accessToken,
+        }).query({
+            idpType: 'null',
         });
 
         expect(response.status).toBe(200);

@@ -31,7 +31,7 @@ export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
 
     const user = await UserModel.query(getReplica(trx))
         .select(UserModelColumn.UserId)
-        .where(UserModelColumn.ProviderId, null)
+        .where(UserModelColumn.IdpType, null)
         .where(lowerEqual({column: UserModelColumn.Login, value: login}))
         .first()
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);

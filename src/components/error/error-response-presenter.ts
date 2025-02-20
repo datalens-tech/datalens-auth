@@ -115,6 +115,16 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
+        case AUTH_ERROR.IDP_USER_UPDATE_NOT_ALLOWED: {
+            return {
+                code: 403,
+                response: {
+                    code,
+                    message: 'Not allowed to change IdP user settings',
+                },
+            };
+        }
+
         default:
             return {
                 code: 500,

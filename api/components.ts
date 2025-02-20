@@ -12,3 +12,19 @@ export {setRegistryToContext} from '../src/components/app-context';
 export {registerApiRoute, initSwagger, ApiTag} from '../src/components/api-docs';
 
 export {initPassport} from '../src/components/passport';
+
+export {hashPassword, comparePasswords} from '../src/components/passwords';
+
+export {encrypt, decrypt} from '../src/components/cipher';
+
+export {
+    makeParser,
+    makeParserSync,
+    makeReqParser,
+    makeReqParserSync,
+    makeIdDecoder,
+    z,
+    zc,
+} from '../src/components/zod';
+
+export {JwtAuth} from '../src/components/jwt-auth';

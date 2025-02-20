@@ -49,7 +49,7 @@ export const initPassport = () => {
                         .select([UserModelColumn.UserId, UserModelColumn.Password])
                         .where({
                             [UserModelColumn.Login]: parsedRequest.login,
-                            [UserModelColumn.ProviderId]: null,
+                            [UserModelColumn.IdpType]: null,
                         })
                         .first()
                         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
