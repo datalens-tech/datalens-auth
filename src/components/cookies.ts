@@ -1,4 +1,5 @@
 import {Request, Response} from '@gravity-ui/expresskit';
+import {AppContext} from '@gravity-ui/nodekit';
 import jwt from 'jsonwebtoken';
 
 import {AUTH_COOKIE_NAME, AUTH_EXP_COOKIE_NAME} from '../constants/cookie';
@@ -20,13 +21,10 @@ export const setAuthCookie = ({
     tokens: Tokens;
 }) => {
     const {accessToken, refreshToken} = tokens;
-    const uiAppEndpoint = req.ctx.config.uiAppEndpoint || '';
     const refreshTokenTTLSec = req.ctx.config.refreshTokenTTL;
     const maxAge = refreshTokenTTLSec * 1000 + ONE_HOUR;
-    const uiAppHostname = new URL(uiAppEndpoint, 'http://localhost').hostname;
 
-    const secure = Boolean(uiAppEndpoint.startsWith('https'));
-    const domain = LOCALHOST.includes(uiAppHostname) ? undefined : uiAppHostname;
+    const baseCoookieOptions = getBaseCookieOptions(req.ctx);
 
     res.cookie(
         AUTH_COOKIE_NAME,
@@ -35,26 +33,18 @@ export const setAuthCookie = ({
             refreshToken,
         }),
         {
-            secure,
+            ...baseCoookieOptions,
             httpOnly: true,
-            path: '/',
-            sameSite: true,
-            domain,
             maxAge,
-            // signed: true,
         },
     );
 
     const {exp} = jwt.decode(accessToken) as AccessTokenPayload;
 
     res.cookie(AUTH_EXP_COOKIE_NAME, exp, {
-        secure,
+        ...baseCoookieOptions,
         httpOnly: false,
-        path: '/',
-        sameSite: true,
-        domain,
         maxAge,
-        // signed: true,
     });
 };
 
@@ -82,6 +72,26 @@ export const getAuthCookies = (req: Request) => {
     };
 };
 
-export const clearAuthCookies = (res: Response) => {
-    res.clearCookie(AUTH_COOKIE_NAME).clearCookie(AUTH_EXP_COOKIE_NAME);
+export const clearAuthCookies = (req: Request, res: Response) => {
+    const baseCoookieOptions = getBaseCookieOptions(req.ctx);
+
+    res.clearCookie(AUTH_COOKIE_NAME, {
+        ...baseCoookieOptions,
+        httpOnly: true,
+    }).clearCookie(AUTH_EXP_COOKIE_NAME, {...baseCoookieOptions, httpOnly: false});
 };
+
+function getBaseCookieOptions(ctx: AppContext) {
+    const uiAppEndpoint = ctx.config.uiAppEndpoint || '';
+    const uiAppHostname = new URL(uiAppEndpoint, 'http://localhost').hostname;
+
+    const secure = Boolean(uiAppEndpoint.startsWith('https'));
+    const domain = LOCALHOST.includes(uiAppHostname) ? undefined : uiAppHostname;
+
+    return {
+        secure,
+        path: '/',
+        sameSite: true,
+        domain,
+    };
+}

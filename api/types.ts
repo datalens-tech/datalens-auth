@@ -9,3 +9,5 @@ export type {
     PlatformAppContextParams,
     PlatformAppDynamicConfig,
 } from '../src/types/nodekit';
+
+export {ServiceArgs} from '../src/types/service';

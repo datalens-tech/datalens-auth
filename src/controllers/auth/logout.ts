@@ -13,7 +13,7 @@ const controller: AppRouteHandler = async (req, res: Response<SuccessResponseMod
         await JwtAuth.closeSession({ctx: req.ctx}, {refreshToken: authCookie.refreshToken});
     }
 
-    clearAuthCookies(res);
+    clearAuthCookies(req, res);
 
     res.status(200).send(successModel.format());
 };
