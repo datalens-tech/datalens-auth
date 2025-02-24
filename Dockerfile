@@ -98,6 +98,6 @@ RUN chown -R ${USER} /opt/app/dist/run
 USER app
 
 ENV NODE_ENV=production
-ENV APP_PORT=8088
+ENV APP_PORT=8080
 
 ENTRYPOINT ["./scripts/preflight.sh"]
