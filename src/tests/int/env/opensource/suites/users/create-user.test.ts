@@ -1,6 +1,6 @@
 import request from 'supertest';
 
-import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
+import {AUTH_ERROR, UserRole, app, auth, authMasterToken} from '../../../../auth';
 import {testUserPassword} from '../../../../constants';
 import {createTestUsers, generateTokens, isBigIntId} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
@@ -101,5 +101,17 @@ describe('Create user', () => {
             message: expect.any(String),
             code: AUTH_ERROR.ACCESS_DENIED,
         });
+    });
+
+    test('Create user via private call', async () => {
+        const response = await authMasterToken(
+            request(app).post(makeRoute('privateCreateUser')),
+        ).send({
+            login: 'new-private-login',
+            password: testUserPassword,
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({userId: expect.any(String)});
     });
 });

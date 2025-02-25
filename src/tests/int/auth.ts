@@ -20,7 +20,7 @@ export const appConfig = usApp.config;
 export const appCtx = usApp.nodekit.ctx;
 
 export const authMasterToken = (req: request.Test) => {
-    const token = process.env.MASTER_TOKEN_HEADER ?? '';
+    const token = process.env.MASTER_TOKEN ?? '';
     req.set(MASTER_TOKEN_HEADER, token);
     return req;
 };

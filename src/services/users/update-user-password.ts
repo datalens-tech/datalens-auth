@@ -19,6 +19,7 @@ export interface UpdateUserPasswordArgs {
 
 export const updateUserPassword = async ({ctx, trx}: ServiceArgs, args: UpdateUserPasswordArgs) => {
     const {userId, newPassword, oldPassword, checkOldPassword} = args;
+    const {isPrivateRoute} = ctx.get('info');
 
     ctx.log('UPDATE_USER_PASSWORD', {userId});
 
@@ -32,9 +33,9 @@ export const updateUserPassword = async ({ctx, trx}: ServiceArgs, args: UpdateUs
         throw new AppError(AUTH_ERROR.USER_NOT_EXISTS, {code: AUTH_ERROR.USER_NOT_EXISTS});
     }
 
-    if (user[UserModelColumn.IdpSlug] !== null) {
-        throw new AppError(AUTH_ERROR.IDP_USER_UPDATE_NOT_ALLOWED, {
-            code: AUTH_ERROR.IDP_USER_UPDATE_NOT_ALLOWED,
+    if (!isPrivateRoute && user[UserModelColumn.IdpSlug] !== null) {
+        throw new AppError(AUTH_ERROR.IDP_USER_CHANGE_NOT_ALLOWED, {
+            code: AUTH_ERROR.IDP_USER_CHANGE_NOT_ALLOWED,
         });
     }
 

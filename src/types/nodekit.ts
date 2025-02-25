@@ -21,6 +21,8 @@ export interface PlatformAppConfig {
     defaultRole: `${UserRole}`;
 
     swaggerEnabled: boolean;
+
+    manageLocalUsersDisabled: boolean;
 }
 
 export interface PlatformAppDynamicConfig {

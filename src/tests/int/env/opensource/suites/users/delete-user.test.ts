@@ -1,19 +1,21 @@
 import request from 'supertest';
 
 import {encodeId} from '../../../../../../utils/ids';
-import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
+import {AUTH_ERROR, UserRole, app, auth, authMasterToken} from '../../../../auth';
 import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 describe('Delete user', () => {
     let admin = {} as Awaited<ReturnType<typeof createTestUsers>>,
         user = {} as Awaited<ReturnType<typeof createTestUsers>>,
+        user2 = {} as Awaited<ReturnType<typeof createTestUsers>>,
         adminTokens = {} as Awaited<ReturnType<typeof generateTokens>>,
         userTokens = {} as Awaited<ReturnType<typeof generateTokens>>;
 
     beforeAll(async () => {
         admin = await createTestUsers({roles: [UserRole.Admin]});
         user = await createTestUsers({login: 'test-user'});
+        user2 = await createTestUsers({login: 'test-user-2'});
 
         adminTokens = await generateTokens({userId: admin.userId});
         userTokens = await generateTokens({userId: user.userId});
@@ -76,6 +78,26 @@ describe('Delete user', () => {
 
         const responseProfile = await auth(
             request(app).get(makeRoute('getUserProfile', {userId: encodeId(admin.userId)})),
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        );
+        expect(responseProfile.status).toBe(404);
+        expect(responseProfile.body).toStrictEqual({
+            message: expect.any(String),
+            code: AUTH_ERROR.USER_NOT_EXISTS,
+        });
+    });
+
+    test('Delete user via private call', async () => {
+        const response = await authMasterToken(
+            request(app).delete(makeRoute('privateDeleteUser', {userId: encodeId(user2.userId)})),
+        );
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({done: true});
+
+        const responseProfile = await auth(
+            request(app).get(makeRoute('getUserProfile', {userId: encodeId(user2.userId)})),
             {
                 accessToken: adminTokens.accessToken,
             },

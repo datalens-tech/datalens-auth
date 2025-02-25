@@ -1,12 +1,13 @@
 import request from 'supertest';
 
 import {encodeId} from '../../../../../../utils/ids';
-import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
+import {AUTH_ERROR, UserRole, app, auth, authMasterToken} from '../../../../auth';
 import {testUserPassword} from '../../../../constants';
 import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 const NEW_MANAGE_PASSWORD = 'NewManagePa$$word1';
+const NEW_PRIVATE_PASSWORD = 'NewPrivatePa$$word1';
 const NEW_PASSWORD = 'New_Pa$sword1';
 
 describe('Update a user password', () => {
@@ -59,7 +60,7 @@ describe('Update a user password', () => {
             });
         });
 
-        test('Admin can update a user profile', async () => {
+        test('Admin can update a user password', async () => {
             const response = await auth(
                 request(app).post(
                     makeRoute('updateUserPassword', {
@@ -85,18 +86,42 @@ describe('Update a user password', () => {
         });
     });
 
+    describe('[Private] update a user password', () => {
+        test('Update a user password', async () => {
+            const response = await authMasterToken(
+                request(app).post(
+                    makeRoute('privateUpdateUserPassword', {
+                        userId: encodeId(user.userId),
+                    }),
+                ),
+            ).send({newPassword: NEW_PRIVATE_PASSWORD});
+
+            expect(response.status).toBe(200);
+            expect(response.body).toStrictEqual({done: true});
+        });
+
+        test('User can sign in with new password', async () => {
+            const response = await request(app).post(makeRoute('signin')).send({
+                login: user.login,
+                password: NEW_PRIVATE_PASSWORD,
+            });
+            expect(response.status).toBe(200);
+            expect(response.body).toStrictEqual({done: true});
+        });
+    });
+
     describe('Update current user password', () => {
         test('Access denied without the token', async () => {
             const response = await request(app)
                 .post(makeRoute('updateMyUserPassword'))
-                .send({oldPassword: NEW_MANAGE_PASSWORD, newPassword: NEW_PASSWORD});
+                .send({oldPassword: NEW_PRIVATE_PASSWORD, newPassword: NEW_PASSWORD});
             expect(response.status).toBe(401);
         });
 
         test('User can update current password', async () => {
             const response = await auth(request(app).post(makeRoute('updateMyUserPassword')), {
                 accessToken: userTokens.accessToken,
-            }).send({oldPassword: NEW_MANAGE_PASSWORD, newPassword: NEW_PASSWORD});
+            }).send({oldPassword: NEW_PRIVATE_PASSWORD, newPassword: NEW_PASSWORD});
 
             expect(response.status).toBe(200);
             expect(response.body).toStrictEqual({done: true});

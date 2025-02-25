@@ -2,7 +2,7 @@ import request from 'supertest';
 
 import {BigIntId} from '../../../../../../db/types/id';
 import {encodeId} from '../../../../../../utils/ids';
-import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
+import {AUTH_ERROR, UserRole, app, auth, authMasterToken} from '../../../../auth';
 import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
@@ -314,6 +314,60 @@ describe('Change users roles', () => {
                 UserRole.Admin,
                 UserRole.Creator,
             ],
+        });
+    });
+
+    test('Add user role via private call', async () => {
+        const response = await authMasterToken(
+            request(app).post(makeRoute('privateAddUsersRoles')),
+        ).send({
+            deltas: [{role: UserRole.Viewer, subjectId: encodeId(user.userId)}],
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({done: true});
+        await expectUserRoles({
+            userId: user.userId,
+            accessToken: userWithManyRolesTokens.accessToken,
+            roles: [UserRole.Visitor, UserRole.Creator, UserRole.Viewer],
+        });
+    });
+
+    test('Update user role via private call', async () => {
+        const response = await authMasterToken(
+            request(app).post(makeRoute('privateUpdateUsersRoles')),
+        ).send({
+            deltas: [
+                {
+                    oldRole: UserRole.Viewer,
+                    newRole: UserRole.Editor,
+                    subjectId: encodeId(user.userId),
+                },
+            ],
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({done: true});
+        await expectUserRoles({
+            userId: user.userId,
+            accessToken: userWithManyRolesTokens.accessToken,
+            roles: [UserRole.Visitor, UserRole.Creator, UserRole.Editor],
+        });
+    });
+
+    test('Remove user role via private call', async () => {
+        const response = await authMasterToken(
+            request(app).post(makeRoute('privateRemoveUsersRoles')),
+        ).send({
+            deltas: [{role: UserRole.Editor, subjectId: encodeId(user.userId)}],
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({done: true});
+        await expectUserRoles({
+            userId: user.userId,
+            accessToken: userWithManyRolesTokens.accessToken,
+            roles: [UserRole.Visitor, UserRole.Creator],
         });
     });
 });
