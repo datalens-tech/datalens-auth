@@ -115,12 +115,22 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
-        case AUTH_ERROR.IDP_USER_UPDATE_NOT_ALLOWED: {
+        case AUTH_ERROR.IDP_USER_CHANGE_NOT_ALLOWED: {
             return {
                 code: 403,
                 response: {
                     code,
                     message: 'Not allowed to change IdP user settings',
+                },
+            };
+        }
+
+        case AUTH_ERROR.MANAGE_LOCAL_USERS_DISABLED: {
+            return {
+                code: 403,
+                response: {
+                    code,
+                    message: 'Local user management is disabled',
                 },
             };
         }

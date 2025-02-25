@@ -17,6 +17,7 @@ export interface UpdateUserProfileArgs {
 
 export const updateUserProfile = async ({ctx, trx}: ServiceArgs, args: UpdateUserProfileArgs) => {
     const {userId, email, firstName, lastName} = args;
+    const {isPrivateRoute} = ctx.get('info');
 
     ctx.log('UPDATE_USER_PROFILE', {userId});
 
@@ -30,9 +31,9 @@ export const updateUserProfile = async ({ctx, trx}: ServiceArgs, args: UpdateUse
         throw new AppError(AUTH_ERROR.USER_NOT_EXISTS, {code: AUTH_ERROR.USER_NOT_EXISTS});
     }
 
-    if (user[UserModelColumn.IdpSlug] !== null) {
-        throw new AppError(AUTH_ERROR.IDP_USER_UPDATE_NOT_ALLOWED, {
-            code: AUTH_ERROR.IDP_USER_UPDATE_NOT_ALLOWED,
+    if (!isPrivateRoute && user[UserModelColumn.IdpSlug] !== null) {
+        throw new AppError(AUTH_ERROR.IDP_USER_CHANGE_NOT_ALLOWED, {
+            code: AUTH_ERROR.IDP_USER_CHANGE_NOT_ALLOWED,
         });
     }
 

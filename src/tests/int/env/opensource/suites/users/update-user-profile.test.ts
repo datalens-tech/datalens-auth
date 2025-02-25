@@ -4,7 +4,7 @@ import request from 'supertest';
 import type {UserProfileResponseModel} from '../../../../../../controllers/reponse-models/users/user-profile-model';
 import {UserModel, UserModelColumn} from '../../../../../../db/models/user';
 import {encodeId} from '../../../../../../utils/ids';
-import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
+import {AUTH_ERROR, UserRole, app, auth, authMasterToken} from '../../../../auth';
 import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
@@ -22,6 +22,8 @@ const pickCreatedUserFields = (
         UserModelColumn.Email,
         UserModelColumn.FirstName,
         UserModelColumn.LastName,
+        UserModelColumn.IdpType,
+        UserModelColumn.IdpSlug,
     ]),
     userId: encodeId(user.userId),
     roles: expect.toIncludeSameMembers(roles),
@@ -110,6 +112,36 @@ describe('Update a user profile', () => {
             expect(response.body).toStrictEqual({
                 message: expect.any(String),
                 code: AUTH_ERROR.ACCESS_DENIED,
+            });
+        });
+    });
+
+    describe('[Private] update a user profile', () => {
+        test('Update a user profile', async () => {
+            const firstName = 'PrivateName';
+            const response = await authMasterToken(
+                request(app).post(
+                    makeRoute('privateUpdateUserProfile', {
+                        userId: createdUsers['user'].userId,
+                    }),
+                ),
+            ).send({firstName});
+
+            expect(response.status).toBe(200);
+            expect(response.body).toStrictEqual({done: true});
+
+            const response2 = await auth(
+                request(app).get(
+                    makeRoute('getUserProfile', {userId: createdUsers['user'].userId}),
+                ),
+                {
+                    accessToken: adminTokens.accessToken,
+                },
+            );
+
+            expect(response2.status).toBe(200);
+            expect(response2.body).toStrictEqual({
+                profile: {...createdUsers['user'], firstName},
             });
         });
     });

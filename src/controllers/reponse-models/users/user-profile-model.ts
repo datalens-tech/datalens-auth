@@ -11,6 +11,8 @@ const schema = z
             email: z.string().nullable(),
             firstName: z.string().nullable(),
             lastName: z.string().nullable(),
+            idpType: z.string().nullable(),
+            idpSlug: z.string().nullable(),
             roles: z.nativeEnum(UserRole).array(),
         }),
     })
@@ -26,6 +28,8 @@ const format = (data: UserProfile): z.infer<typeof schema> => {
             email: data.email,
             firstName: data.firstName,
             lastName: data.lastName,
+            idpType: data.idpType,
+            idpSlug: data.idpSlug,
             roles: data.roles as UserRole[],
         },
     };

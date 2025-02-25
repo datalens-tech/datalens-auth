@@ -4,6 +4,10 @@ import {comparePasswords, hashPassword} from './passwords';
 
 const password = 'qwerty@123!';
 const longPassword = randomBytes(256).toString('hex');
+const dummyPassword = 'Password1!';
+// hash from dummyPassword
+const dummyHash =
+    'arnHVFl5whQaxDvvdwQcBw:m9tBazMcHIsi3hiRX-qM9STQZYau3rCNTXxRQ9692EEYX-cJhidHjsYuBQnaErHdED0v2t7apJRALkGVtNTMFg';
 
 describe('passwords', () => {
     test('comparePasswords: equal', async () => {
@@ -49,5 +53,14 @@ describe('passwords', () => {
         const hash4 = await hashPassword(longPassword);
 
         expect(hash3 === hash4).toBe(false);
+    });
+
+    test('dummy hash compare', async () => {
+        const compareResult = await comparePasswords({
+            storedPasswordHash: dummyHash,
+            inputPassword: dummyPassword,
+        });
+
+        expect(compareResult).toBe(true);
     });
 });

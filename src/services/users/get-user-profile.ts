@@ -17,6 +17,8 @@ const selectedUserColumns = [
     UserModelColumn.Email,
     UserModelColumn.FirstName,
     UserModelColumn.LastName,
+    UserModelColumn.IdpSlug,
+    UserModelColumn.IdpType,
 ] as const;
 
 const selectedRoleColumns = [RoleModelColumn.Role] as const;

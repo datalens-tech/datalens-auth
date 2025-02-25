@@ -6,6 +6,7 @@ import passport from 'passport';
 import {Feature} from './components/features';
 import {AUTHORIZATION_HEADER} from './constants/header';
 import {Permission} from './constants/permission';
+import {RouteCheck} from './constants/route';
 import authController from './controllers/auth';
 import healthcheckController from './controllers/healthcheck';
 import homeController from './controllers/home';
@@ -79,6 +80,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             handler: authController.signup,
             authPolicy: AuthPolicy.disabled,
             write: true,
+            check: [RouteCheck.ManageLocalUsers],
         }),
         logout: makeRoute({
             route: 'GET /logout',
@@ -99,6 +101,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
+            check: [RouteCheck.ManageLocalUsers],
+        }),
+        privateAddUsersRoles: makeRoute({
+            route: 'POST /private/v1/management/users/roles/add',
+            handler: managementController.addUsersRoles,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
         }),
         updateUsersRoles: makeRoute({
             route: 'POST /v1/management/users/roles/update',
@@ -106,6 +116,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
+            check: [RouteCheck.ManageLocalUsers],
+        }),
+        privateUpdateUsersRoles: makeRoute({
+            route: 'POST /private/v1/management/users/roles/update',
+            handler: managementController.updateUsersRoles,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
         }),
         removeUsersRoles: makeRoute({
             route: 'POST /v1/management/users/roles/remove',
@@ -113,6 +131,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
+            check: [RouteCheck.ManageLocalUsers],
+        }),
+        privateRemoveUsersRoles: makeRoute({
+            route: 'POST /private/v1/management/users/roles/remove',
+            handler: managementController.removeUsersRoles,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
         }),
         createUser: makeRoute({
             route: 'POST /v1/management/users/create',
@@ -120,6 +146,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
+            check: [RouteCheck.ManageLocalUsers],
+        }),
+        privateCreateUser: makeRoute({
+            route: 'POST /private/v1/management/users/create',
+            handler: managementController.createUser,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
         }),
         deleteUser: makeRoute({
             route: 'DELETE /v1/management/users/:userId',
@@ -127,6 +161,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
+            check: [RouteCheck.ManageLocalUsers],
+        }),
+        privateDeleteUser: makeRoute({
+            route: 'DELETE /private/v1/management/users/:userId',
+            handler: managementController.deleteUser,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
         }),
         getUserProfile: makeRoute({
             route: 'GET /v1/management/users/:userId/profile',
@@ -140,6 +182,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
+            check: [RouteCheck.ManageLocalUsers],
+        }),
+        privateUpdateUserProfile: makeRoute({
+            route: 'POST /private/v1/management/users/:userId/profile',
+            handler: managementController.updateUserProfile,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
         }),
         updateUserPassword: makeRoute({
             route: 'POST /v1/management/users/:userId/password',
@@ -147,6 +197,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
+            check: [RouteCheck.ManageLocalUsers],
+        }),
+        privateUpdateUserPassword: makeRoute({
+            route: 'POST /private/v1/management/users/:userId/password',
+            handler: managementController.updateUserPassword,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
         }),
 
         getUsersList: makeRoute({
@@ -171,12 +229,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             handler: usersController.updateUserProfile,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
+            check: [RouteCheck.ManageLocalUsers],
         }),
         updateMyUserPassword: makeRoute({
             route: 'POST /v1/users/me/password',
             handler: usersController.updateUserPassword,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
+            check: [RouteCheck.ManageLocalUsers],
         }),
     } satisfies Record<string, ExtendedAppRouteDescription>;
 
