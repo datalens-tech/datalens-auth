@@ -10,12 +10,12 @@ import type {PlatformAuthorizedUser} from '../types/user';
 import {encodeId} from '../utils/ids';
 
 import {comparePasswords} from './passwords';
-import {makeParser, z, zc} from './zod';
+import {makeParser, z} from './zod';
 
 const parseRequest = makeParser(
     z.strictObject({
-        login: zc.login(),
-        password: zc.password(),
+        login: z.string().min(1),
+        password: z.string().min(1),
     }),
 );
 
