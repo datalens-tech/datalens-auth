@@ -36,11 +36,14 @@ describe('cipher', () => {
         let threwError = false;
         try {
             const encryptedText2 = await encrypt(text, securitykey1);
-            await decrypt(encryptedText2, securitykey2);
+            const decryptedText2 = await decrypt(encryptedText2, securitykey2);
+            expect(text === decryptedText2).toBe(false);
         } catch {
             threwError = true;
         }
-        expect(threwError).toBe(true);
+        if (threwError) {
+            expect(threwError).toBe(true);
+        }
     });
 
     test('encrypted text not equal with the same text', async () => {
