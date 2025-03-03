@@ -30,7 +30,10 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const controller: AppRouteHandler = async (req, res: Response<SuccessResponseModel>) => {
+export const updateUsersRolesController: AppRouteHandler = async (
+    req,
+    res: Response<SuccessResponseModel>,
+) => {
     const {body} = await parseReq(req);
 
     await updateUsersRoles(
@@ -43,7 +46,7 @@ const controller: AppRouteHandler = async (req, res: Response<SuccessResponseMod
     res.status(200).send(successModel.format());
 };
 
-controller.api = {
+updateUsersRolesController.api = {
     summary: 'Update users roles',
     tags: [ApiTag.Management],
     request: {
@@ -66,5 +69,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as updateUsersRoles};

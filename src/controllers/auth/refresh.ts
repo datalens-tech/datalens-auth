@@ -15,7 +15,7 @@ import {
     successModel,
 } from '../reponse-models';
 
-const controller: AppRouteHandler = async (
+export const refreshController: AppRouteHandler = async (
     req,
     res: Response<SuccessResponseModel | ErrorResponseModel>,
 ) => {
@@ -46,7 +46,7 @@ const controller: AppRouteHandler = async (
     }
 };
 
-controller.api = {
+refreshController.api = {
     summary: 'Refresh token',
     tags: [ApiTag.Auth],
     request: {
@@ -72,5 +72,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as refresh};

@@ -8,7 +8,10 @@ import {
     userProfileModel,
 } from '../reponse-models/users/user-profile-model';
 
-const controller: AppRouteHandler = async (req, res: Response<UserProfileResponseModel>) => {
+export const getUserProfileController: AppRouteHandler = async (
+    req,
+    res: Response<UserProfileResponseModel>,
+) => {
     const result = await getUserProfile(
         {ctx: req.ctx},
         {
@@ -19,7 +22,7 @@ const controller: AppRouteHandler = async (req, res: Response<UserProfileRespons
     res.status(200).send(await userProfileModel.format(result));
 };
 
-controller.api = {
+getUserProfileController.api = {
     summary: 'Get current user profile',
     tags: [ApiTag.Users],
     responses: {
@@ -33,5 +36,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as getUserProfile};

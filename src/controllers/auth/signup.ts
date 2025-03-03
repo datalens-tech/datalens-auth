@@ -21,7 +21,10 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const controller: AppRouteHandler = async (req, res: Response<SuccessResponseModel>) => {
+export const signupController: AppRouteHandler = async (
+    req,
+    res: Response<SuccessResponseModel>,
+) => {
     const {body} = await parseReq(req);
 
     const tokens = await signup(
@@ -41,7 +44,7 @@ const controller: AppRouteHandler = async (req, res: Response<SuccessResponseMod
     res.status(200).send(successModel.format());
 };
 
-controller.api = {
+signupController.api = {
     summary: 'Sign up',
     tags: [ApiTag.Auth],
     request: {
@@ -65,5 +68,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as signup};

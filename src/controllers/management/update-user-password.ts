@@ -17,7 +17,10 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const controller: AppRouteHandler = async (req, res: Response<SuccessResponseModel>) => {
+export const updateUserPasswordController: AppRouteHandler = async (
+    req,
+    res: Response<SuccessResponseModel>,
+) => {
     const {params, body} = await parseReq(req);
 
     await updateUserPassword(
@@ -33,7 +36,7 @@ const controller: AppRouteHandler = async (req, res: Response<SuccessResponseMod
     res.status(200).send(successModel.format());
 };
 
-controller.api = {
+updateUserPasswordController.api = {
     summary: 'Update a user password',
     tags: [ApiTag.Management],
     request: {
@@ -57,5 +60,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as updateUserPassword};
