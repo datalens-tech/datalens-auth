@@ -6,7 +6,10 @@ import {JwtAuth} from '../../components/jwt-auth';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {SuccessResponseModel, cookieHeaderSchema, successModel} from '../reponse-models';
 
-const controller: AppRouteHandler = async (req, res: Response<SuccessResponseModel>) => {
+export const logoutController: AppRouteHandler = async (
+    req,
+    res: Response<SuccessResponseModel>,
+) => {
     const {authCookie} = getAuthCookies(req);
 
     if (authCookie && authCookie.refreshToken) {
@@ -18,7 +21,7 @@ const controller: AppRouteHandler = async (req, res: Response<SuccessResponseMod
     res.status(200).send(successModel.format());
 };
 
-controller.api = {
+logoutController.api = {
     summary: 'Logout',
     tags: [ApiTag.Auth],
     request: {
@@ -35,5 +38,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as logout};

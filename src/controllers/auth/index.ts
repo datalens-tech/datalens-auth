@@ -1,11 +1,11 @@
-import {logout} from './logout';
-import {refresh} from './refresh';
-import {signin} from './signin';
-import {signup} from './signup';
+import {logoutController} from './logout';
+import {refreshController} from './refresh';
+import {signinController} from './signin';
+import {signupController} from './signup';
 
 export default {
-    signup,
-    logout,
-    refresh,
-    signin,
+    signupController,
+    logoutController,
+    refreshController,
+    signinController,
 };

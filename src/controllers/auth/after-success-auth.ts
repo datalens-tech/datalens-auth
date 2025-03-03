@@ -20,7 +20,7 @@ const requestSchema = {
 };
 
 export const makeAfterSuccessAuthController = (summary: string) => {
-    const controller: AppRouteHandler = async (
+    const afterSuccessAuthController: AppRouteHandler = async (
         req,
         res: Response<SuccessResponseModel | ErrorResponseModel>,
     ) => {
@@ -41,7 +41,7 @@ export const makeAfterSuccessAuthController = (summary: string) => {
         res.status(200).send(successModel.format());
     };
 
-    controller.api = {
+    afterSuccessAuthController.api = {
         summary,
         tags: [ApiTag.Auth],
         request: {
@@ -74,5 +74,5 @@ export const makeAfterSuccessAuthController = (summary: string) => {
         },
     };
 
-    return controller;
+    return afterSuccessAuthController;
 };

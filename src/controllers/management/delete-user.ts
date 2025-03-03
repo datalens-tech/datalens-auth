@@ -14,7 +14,10 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const controller: AppRouteHandler = async (req, res: Response<SuccessResponseModel>) => {
+export const deleteUserController: AppRouteHandler = async (
+    req,
+    res: Response<SuccessResponseModel>,
+) => {
     const {params} = await parseReq(req);
 
     await deleteUser(
@@ -27,7 +30,7 @@ const controller: AppRouteHandler = async (req, res: Response<SuccessResponseMod
     res.status(200).send(successModel.format());
 };
 
-controller.api = {
+deleteUserController.api = {
     summary: 'Delete a user',
     tags: [ApiTag.Management],
     request: {
@@ -44,5 +47,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as deleteUser};

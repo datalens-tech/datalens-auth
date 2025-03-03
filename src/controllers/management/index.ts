@@ -1,19 +1,19 @@
-import {addUsersRoles} from './add-users-roles';
-import {createUser} from './create-user';
-import {deleteUser} from './delete-user';
-import {getUserProfile} from './get-user-profile';
-import {removeUsersRoles} from './remove-users-roles';
-import {updateUserPassword} from './update-user-password';
-import {updateUserProfile} from './update-user-profile';
-import {updateUsersRoles} from './update-users-roles';
+import {addUsersRolesController} from './add-users-roles';
+import {createUserController} from './create-user';
+import {deleteUserController} from './delete-user';
+import {getUserProfileController} from './get-user-profile';
+import {removeUsersRolesController} from './remove-users-roles';
+import {updateUserPasswordController} from './update-user-password';
+import {updateUserProfileController} from './update-user-profile';
+import {updateUsersRolesController} from './update-users-roles';
 
 export default {
-    addUsersRoles,
-    createUser,
-    deleteUser,
-    getUserProfile,
-    removeUsersRoles,
-    updateUserPassword,
-    updateUserProfile,
-    updateUsersRoles,
+    addUsersRolesController,
+    createUserController,
+    deleteUserController,
+    getUserProfileController,
+    removeUsersRolesController,
+    updateUserPasswordController,
+    updateUserProfileController,
+    updateUsersRolesController,
 };

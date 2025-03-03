@@ -23,7 +23,10 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const controller: AppRouteHandler = async (req, res: Response<UserListResponseModel>) => {
+export const getUsersListController: AppRouteHandler = async (
+    req,
+    res: Response<UserListResponseModel>,
+) => {
     const {query} = await parseReq(req);
 
     const result = await getUsersList(
@@ -40,7 +43,7 @@ const controller: AppRouteHandler = async (req, res: Response<UserListResponseMo
     res.status(200).send(await usersListModel.format(result));
 };
 
-controller.api = {
+getUsersListController.api = {
     summary: 'Users list',
     tags: [ApiTag.Users],
     request: {
@@ -57,5 +60,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as getUsersList};

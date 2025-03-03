@@ -21,7 +21,10 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const controller: AppRouteHandler = async (req, res: Response<CreateUserResponseModel>) => {
+export const createUserController: AppRouteHandler = async (
+    req,
+    res: Response<CreateUserResponseModel>,
+) => {
     const {body} = await parseReq(req);
 
     const result = await createUser(
@@ -39,7 +42,7 @@ const controller: AppRouteHandler = async (req, res: Response<CreateUserResponse
     res.status(200).send(createUserModel.format(result));
 };
 
-controller.api = {
+createUserController.api = {
     summary: 'Create a user',
     tags: [ApiTag.Management],
     request: {
@@ -62,5 +65,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as createUser};

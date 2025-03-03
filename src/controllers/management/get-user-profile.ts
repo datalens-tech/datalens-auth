@@ -17,7 +17,10 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const controller: AppRouteHandler = async (req, res: Response<UserProfileResponseModel>) => {
+export const getUserProfileController: AppRouteHandler = async (
+    req,
+    res: Response<UserProfileResponseModel>,
+) => {
     const {params} = await parseReq(req);
 
     const result = await getUserProfile(
@@ -30,7 +33,7 @@ const controller: AppRouteHandler = async (req, res: Response<UserProfileRespons
     res.status(200).send(await userProfileModel.format(result));
 };
 
-controller.api = {
+getUserProfileController.api = {
     summary: 'Get a user profile',
     tags: [ApiTag.Management],
     request: {
@@ -47,5 +50,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as getUserProfile};

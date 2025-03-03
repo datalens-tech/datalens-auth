@@ -29,7 +29,10 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const controller: AppRouteHandler = async (req, res: Response<SuccessResponseModel>) => {
+export const removeUsersRolesController: AppRouteHandler = async (
+    req,
+    res: Response<SuccessResponseModel>,
+) => {
     const {body} = await parseReq(req);
 
     await removeUsersRoles(
@@ -42,7 +45,7 @@ const controller: AppRouteHandler = async (req, res: Response<SuccessResponseMod
     res.status(200).send(successModel.format());
 };
 
-controller.api = {
+removeUsersRolesController.api = {
     summary: 'Remove users roles',
     tags: [ApiTag.Management],
     request: {
@@ -65,5 +68,3 @@ controller.api = {
         },
     },
 };
-
-export {controller as removeUsersRoles};
