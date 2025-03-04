@@ -25,6 +25,7 @@ export const appAuth = async (req: Request, res: Response, next: NextFunction) =
                     userId: decodeId(userId),
                     sessionId: decodeId(sessionId),
                     roles,
+                    accessToken,
                 });
 
                 req.ctx.log('CHECK_ACCESS_TOKEN_SUCCESS');

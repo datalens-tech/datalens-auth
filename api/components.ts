@@ -6,6 +6,12 @@ export {isEnabledFeature, Feature} from '../src/components/features';
 export type {FeaturesConfig} from '../src/components/features/types';
 
 export {isGatewayError} from '../src/components/gateway';
+export {
+    createAction,
+    getAuthArgs,
+    getAuthHeaders,
+    type AuthArgsData,
+} from '../src/components/gateway/utils';
 
 export {setRegistryToContext} from '../src/components/app-context';
 
