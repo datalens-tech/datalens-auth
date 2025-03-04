@@ -106,6 +106,7 @@ export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArg
                         );
                     }
                 })
+                .orderBy(`${UserModel.tableName}.${UserModelColumn.UserId}`)
                 .limit(pageSize)
                 .offset(pageSize * page);
         })

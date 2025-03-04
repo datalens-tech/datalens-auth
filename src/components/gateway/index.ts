@@ -5,6 +5,8 @@ import {AppContext, AppError, NodeKit} from '@gravity-ui/nodekit';
 import {IPV6_AXIOS_OPTIONS} from '../../constants/axios';
 import {Feature, isEnabledFeature} from '../features';
 
+import {getAuthArgs, getAuthHeaders} from './utils';
+
 export const getGatewayConfig = (
     nodekit: NodeKit,
     config?: Partial<GatewayConfig<AppContext, Request, Response>>,
@@ -17,8 +19,8 @@ export const getGatewayConfig = (
         withDebugHeaders: false,
         ErrorConstructor: AppError,
         proxyHeaders: [],
-        getAuthArgs: () => undefined,
-        getAuthHeaders: () => undefined,
+        getAuthArgs,
+        getAuthHeaders,
         ...(config || {}),
     };
 };

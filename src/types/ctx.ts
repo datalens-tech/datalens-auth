@@ -5,6 +5,7 @@ export interface PlatformCtxUser {
     userId: BigIntId;
     sessionId: BigIntId;
     roles: `${UserRole}`[];
+    accessToken: string;
 }
 
 export interface PlatformCtxInfo {
