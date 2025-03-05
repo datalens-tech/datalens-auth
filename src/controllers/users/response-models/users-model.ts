@@ -9,6 +9,8 @@ const userSchema = z
         email: z.string().nullable(),
         firstName: z.string().nullable(),
         lastName: z.string().nullable(),
+        idpType: z.string().nullable(),
+        idpSlug: z.string().nullable(),
     })
     .describe('User model');
 
@@ -30,6 +32,8 @@ const format = async (
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
+            idpType: user.idpType,
+            idpSlug: user.idpSlug,
         })),
     };
 };

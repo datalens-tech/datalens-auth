@@ -19,6 +19,8 @@ const pickCreatedUserFields = (user: UserModel) => ({
         UserModelColumn.Email,
         UserModelColumn.FirstName,
         UserModelColumn.LastName,
+        UserModelColumn.IdpSlug,
+        UserModelColumn.IdpType,
     ]),
     userId: encodeId(user.userId),
 });
