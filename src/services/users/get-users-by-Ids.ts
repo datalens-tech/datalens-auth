@@ -19,6 +19,8 @@ export const getUsersByIds = async ({ctx, trx}: ServiceArgs, args: GetUsersByIds
             UserModelColumn.Email,
             UserModelColumn.FirstName,
             UserModelColumn.LastName,
+            UserModelColumn.IdpSlug,
+            UserModelColumn.IdpType,
         ])
         .whereIn(UserModelColumn.UserId, Array.from(new Set(subjectIds)))
         .limit(1000)
