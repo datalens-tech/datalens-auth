@@ -68,7 +68,7 @@ export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
                 .timeout(RoleModel.DEFAULT_QUERY_TIMEOUT);
         }
 
-        const tokens = await JwtAuth.startSession(
+        const {accessToken, refreshToken} = await JwtAuth.startSession(
             {ctx, trx: transactionTrx},
             {
                 userId,
@@ -77,7 +77,7 @@ export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
             },
         );
 
-        return tokens;
+        return {accessToken, refreshToken};
     });
 
     ctx.log('SIGNUP_SUCCESS');
