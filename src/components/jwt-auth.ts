@@ -106,7 +106,7 @@ export class JwtAuth {
                 },
             );
 
-            return {accessToken, refreshToken};
+            return {accessToken, refreshToken, sessionId: session.sessionId};
         });
     };
 

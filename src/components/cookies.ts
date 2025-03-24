@@ -81,7 +81,7 @@ export const clearAuthCookies = (req: Request, res: Response) => {
     }).clearCookie(AUTH_EXP_COOKIE_NAME, {...baseCoookieOptions, httpOnly: false});
 };
 
-function getBaseCookieOptions(ctx: AppContext) {
+export function getBaseCookieOptions(ctx: AppContext) {
     const uiAppEndpoint = ctx.config.uiAppEndpoint || '';
     const uiAppHostname = new URL(uiAppEndpoint, 'http://localhost').hostname;
 

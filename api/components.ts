@@ -34,3 +34,10 @@ export {
 } from '../src/components/zod';
 
 export {JwtAuth} from '../src/components/jwt-auth';
+
+export {
+    getBaseCookieOptions,
+    setAuthCookie,
+    clearAuthCookies,
+    getAuthCookies,
+} from '../src/components/cookies';

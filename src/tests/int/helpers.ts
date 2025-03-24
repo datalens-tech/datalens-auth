@@ -67,7 +67,11 @@ type GenerateTokensArgs =
 
 export const generateTokens = async (args: GenerateTokensArgs) => {
     const userId = 'userId' in args ? args.userId : decodeId(args.userStringId);
-    return await JwtAuth.startSession({ctx: appCtx}, {userId, userIp: null});
+    const {accessToken, refreshToken} = await JwtAuth.startSession(
+        {ctx: appCtx},
+        {userId, userIp: null},
+    );
+    return {accessToken, refreshToken};
 };
 
 export const isBigIntId = (value: string) => {
