@@ -5,8 +5,7 @@ import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
 import {getUsersList} from '../../services/users/get-users-list';
-
-import {UserListResponseModel, usersListModel} from './response-models/users-list-model';
+import {userWithRolesModelArray} from '../reponse-models/users/user-with-roles-model-array';
 
 const requestSchema = {
     query: z.object({
@@ -23,9 +22,27 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
+const responseSchema = z
+    .object({
+        nextPageToken: z.string().optional(),
+        users: userWithRolesModelArray.schema,
+    })
+    .describe('Users list');
+
+export type GetUsersListModel = z.infer<typeof responseSchema>;
+
+const format = async (
+    data: Awaited<ReturnType<typeof getUsersList>>,
+): Promise<GetUsersListModel> => {
+    return {
+        nextPageToken: data.nextPageToken,
+        users: await userWithRolesModelArray.format(data.users),
+    };
+};
+
 export const getUsersListController: AppRouteHandler = async (
     req,
-    res: Response<UserListResponseModel>,
+    res: Response<GetUsersListModel>,
 ) => {
     const {query} = await parseReq(req);
 
@@ -40,7 +57,7 @@ export const getUsersListController: AppRouteHandler = async (
         },
     );
 
-    res.status(200).send(await usersListModel.format(result));
+    res.status(200).send(await format(result));
 };
 
 getUsersListController.api = {
@@ -51,10 +68,10 @@ getUsersListController.api = {
     },
     responses: {
         200: {
-            description: usersListModel.schema.description ?? '',
+            description: responseSchema.description ?? '',
             content: {
                 [CONTENT_TYPE_JSON]: {
-                    schema: usersListModel.schema,
+                    schema: responseSchema,
                 },
             },
         },

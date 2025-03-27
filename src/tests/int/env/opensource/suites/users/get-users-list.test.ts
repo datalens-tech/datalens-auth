@@ -1,7 +1,7 @@
 import pick from 'lodash/pick';
 import request from 'supertest';
 
-import type {UserWithRoleResponseModel} from '../../../../../../controllers/users/response-models/user-with-role-model';
+import type {UserWithRolesModel} from '../../../../../../controllers/reponse-models/users/user-with-roles-model';
 import {UserModel, UserModelColumn} from '../../../../../../db/models/user';
 import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
@@ -9,13 +9,13 @@ import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 type CreatedUsers = {
-    admin: UserWithRoleResponseModel;
-    user: UserWithRoleResponseModel;
-    user2: UserWithRoleResponseModel;
-    userWithoutRoles: UserWithRoleResponseModel;
+    admin: UserWithRolesModel;
+    user: UserWithRolesModel;
+    user2: UserWithRolesModel;
+    userWithoutRoles: UserWithRolesModel;
 };
 
-const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRoleResponseModel => ({
+const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRolesModel => ({
     ...pick(user, [
         UserModelColumn.Login,
         UserModelColumn.Email,

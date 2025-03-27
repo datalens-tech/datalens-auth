@@ -3,14 +3,11 @@ import {AppRouteHandler, Response} from '@gravity-ui/expresskit';
 import {ApiTag} from '../../components/api-docs';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {getUserProfile} from '../../services/users/get-user-profile';
-import {
-    UserProfileResponseModel,
-    userProfileModel,
-} from '../reponse-models/users/user-profile-model';
+import {UserProfileModel, userProfileModel} from '../reponse-models/users/user-profile-model';
 
 export const getUserProfileController: AppRouteHandler = async (
     req,
-    res: Response<UserProfileResponseModel>,
+    res: Response<UserProfileModel>,
 ) => {
     const result = await getUserProfile(
         {ctx: req.ctx},
@@ -19,7 +16,7 @@ export const getUserProfileController: AppRouteHandler = async (
         },
     );
 
-    res.status(200).send(await userProfileModel.format(result));
+    res.status(200).send(userProfileModel.format(result));
 };
 
 getUserProfileController.api = {

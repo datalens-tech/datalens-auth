@@ -4,8 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {getUsersByIds} from '../../services/users/get-users-by-Ids';
-
-import {UsersByIdsResponseModel, usersByIdsModel} from './response-models/users-model';
+import {userModelArray} from '../reponse-models/users/user-model-array';
 
 const requestSchema = {
     body: z.object({
@@ -15,9 +14,25 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
+const responseSchema = z
+    .object({
+        users: userModelArray.schema,
+    })
+    .describe('Users by ids');
+
+export type GetUsersByIdsModel = z.infer<typeof responseSchema>;
+
+const format = async (
+    data: Awaited<ReturnType<typeof getUsersByIds>>,
+): Promise<GetUsersByIdsModel> => {
+    return {
+        users: await userModelArray.format(data.users),
+    };
+};
+
 export const getUsersByIdsController: AppRouteHandler = async (
     req,
-    res: Response<UsersByIdsResponseModel>,
+    res: Response<GetUsersByIdsModel>,
 ) => {
     const {body} = await parseReq(req);
 
@@ -28,7 +43,7 @@ export const getUsersByIdsController: AppRouteHandler = async (
         },
     );
 
-    res.status(200).send(await usersByIdsModel.format(result));
+    res.status(200).send(await format(result));
 };
 
 getUsersByIdsController.api = {
@@ -45,10 +60,10 @@ getUsersByIdsController.api = {
     },
     responses: {
         200: {
-            description: usersByIdsModel.schema.description ?? '',
+            description: responseSchema.description ?? '',
             content: {
                 [CONTENT_TYPE_JSON]: {
-                    schema: usersByIdsModel.schema,
+                    schema: responseSchema,
                 },
             },
         },
