@@ -1,10 +1,9 @@
 import {z} from '../../../components/zod';
-import {UserRole} from '../../../constants/role';
-import type {ResultUser} from '../../../services/users/get-users-list';
+import {BigIntId} from '../../../db/types/id';
 import {encodeId} from '../../../utils/ids';
 
 const schema = z
-    .strictObject({
+    .object({
         userId: z.string(),
         login: z.string().nullable(),
         email: z.string().nullable(),
@@ -12,13 +11,14 @@ const schema = z
         lastName: z.string().nullable(),
         idpType: z.string().nullable(),
         idpSlug: z.string().nullable(),
-        roles: z.nativeEnum(UserRole).array(),
     })
-    .describe('User with roles model');
+    .describe('User model');
 
-export type UserWithRoleResponseModel = z.infer<typeof schema>;
+export type UserModel = z.infer<typeof schema>;
 
-const format = (data: ResultUser): z.infer<typeof schema> => {
+export type UserFormatData = Omit<UserModel, 'userId'> & {userId: BigIntId};
+
+const format = (data: UserFormatData): UserModel => {
     return {
         userId: encodeId(data.userId),
         login: data.login,
@@ -27,11 +27,10 @@ const format = (data: ResultUser): z.infer<typeof schema> => {
         lastName: data.lastName,
         idpType: data.idpType,
         idpSlug: data.idpSlug,
-        roles: data.roles as UserRole[],
     };
 };
 
-export const userWithRoleModel = {
+export const userModel = {
     schema,
     format,
 };

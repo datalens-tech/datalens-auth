@@ -4,10 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {getUserProfile} from '../../services/users/get-user-profile';
-import {
-    UserProfileResponseModel,
-    userProfileModel,
-} from '../reponse-models/users/user-profile-model';
+import {UserProfileModel, userProfileModel} from '../reponse-models/users/user-profile-model';
 
 const requestSchema = {
     params: z.object({
@@ -19,7 +16,7 @@ const parseReq = makeReqParser(requestSchema);
 
 export const getUserProfileController: AppRouteHandler = async (
     req,
-    res: Response<UserProfileResponseModel>,
+    res: Response<UserProfileModel>,
 ) => {
     const {params} = await parseReq(req);
 
@@ -30,7 +27,7 @@ export const getUserProfileController: AppRouteHandler = async (
         },
     );
 
-    res.status(200).send(await userProfileModel.format(result));
+    res.status(200).send(userProfileModel.format(result));
 };
 
 getUserProfileController.api = {

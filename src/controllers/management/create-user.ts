@@ -5,8 +5,7 @@ import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
 import {createUser} from '../../services/users/create-user';
-
-import {CreateUserResponseModel, createUserModel} from './response-models/create-user-model';
+import {encodeId} from '../../utils/ids';
 
 const requestSchema = {
     body: z.object({
@@ -21,10 +20,21 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-export const createUserController: AppRouteHandler = async (
-    req,
-    res: Response<CreateUserResponseModel>,
-) => {
+const responseSchema = z
+    .object({
+        userId: z.string(),
+    })
+    .describe('Created user model');
+
+type ResponseBody = z.infer<typeof responseSchema>;
+
+const format = (data: Awaited<ReturnType<typeof createUser>>): ResponseBody => {
+    return {
+        userId: encodeId(data.userId),
+    };
+};
+
+export const createUserController: AppRouteHandler = async (req, res: Response<ResponseBody>) => {
     const {body} = await parseReq(req);
 
     const result = await createUser(
@@ -39,7 +49,7 @@ export const createUserController: AppRouteHandler = async (
         },
     );
 
-    res.status(200).send(createUserModel.format(result));
+    res.status(200).send(format(result));
 };
 
 createUserController.api = {
@@ -56,10 +66,10 @@ createUserController.api = {
     },
     responses: {
         200: {
-            description: createUserModel.schema.description ?? '',
+            description: responseSchema.description ?? '',
             content: {
                 [CONTENT_TYPE_JSON]: {
-                    schema: createUserModel.schema,
+                    schema: responseSchema,
                 },
             },
         },

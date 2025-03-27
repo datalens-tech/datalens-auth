@@ -1,7 +1,7 @@
 import pick from 'lodash/pick';
 import request from 'supertest';
 
-import type {UserProfileResponseModel} from '../../../../../../controllers/reponse-models/users/user-profile-model';
+import type {UserProfileModel} from '../../../../../../controllers/reponse-models/users/user-profile-model';
 import {UserModel, UserModelColumn} from '../../../../../../db/models/user';
 import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
@@ -9,15 +9,15 @@ import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 type CreatedUsers = {
-    admin: UserProfileResponseModel['profile'];
-    user: UserProfileResponseModel['profile'];
-    userWithoutRoles: UserProfileResponseModel['profile'];
+    admin: UserProfileModel['profile'];
+    user: UserProfileModel['profile'];
+    userWithoutRoles: UserProfileModel['profile'];
 };
 
 const pickCreatedUserFields = (
     user: UserModel,
     roles: UserRole[],
-): UserProfileResponseModel['profile'] => ({
+): UserProfileModel['profile'] => ({
     ...pick(user, [
         UserModelColumn.Login,
         UserModelColumn.Email,
