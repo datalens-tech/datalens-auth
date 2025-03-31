@@ -1,7 +1,7 @@
-import type {StringId} from '../db/types/id';
+import type {BigIntId} from '../db/types/id';
 
 export interface PlatformAuthorizedUser {
-    userId: StringId;
+    userId: BigIntId;
     accessToken: string;
     refreshToken: string;
 }

@@ -74,6 +74,12 @@ export const createUser = async ({ctx, trx}: ServiceArgs, args: CreateUserArgs) 
         return createdUser;
     });
 
+    const {createUserSuccess} = registry.common.functions.get();
+    await createUserSuccess({
+        ctx,
+        userId,
+    });
+
     ctx.log('CREATE_USER_SUCCESS', {userId});
 
     return result;
