@@ -24,6 +24,9 @@ export const makeAfterSuccessAuthController = (summary: string) => {
         req,
         res: Response<SuccessResponseModel | ErrorResponseModel>,
     ) => {
+        const registry = req.ctx.get('registry');
+        const {signinSuccess} = registry.common.functions.get();
+
         if (!req.user) {
             res.status(500).send({message: 'No user'});
             return;
@@ -36,6 +39,11 @@ export const makeAfterSuccessAuthController = (summary: string) => {
                 accessToken: req.user.accessToken,
                 refreshToken: req.user.refreshToken,
             },
+        });
+
+        await signinSuccess({
+            ctx: req.ctx,
+            userId: req.user.userId,
         });
 
         res.status(200).send(successModel.format());

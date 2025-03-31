@@ -47,6 +47,8 @@ export interface GetUserListArgs {
 export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArgs) => {
     const {page = 0, pageSize = 20, filterString, roles, idpType} = args;
 
+    const registry = ctx.get('registry');
+
     ctx.log('GET_USERS_LIST');
 
     const result = (await UserModel.query(getReplica(trx))
@@ -140,6 +142,12 @@ export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArg
         page,
         pageSize,
         curPage: users,
+    });
+
+    const {getUsersListSuccess} = registry.common.functions.get();
+    await getUsersListSuccess({
+        ctx,
+        userIds: users.map((user) => user.userId),
     });
 
     ctx.log('GET_USERS_LIST_SUCCESS');

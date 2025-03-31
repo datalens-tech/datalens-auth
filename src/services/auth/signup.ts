@@ -80,6 +80,12 @@ export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
         return {accessToken, refreshToken};
     });
 
+    const {signinSuccess} = registry.common.functions.get();
+    await signinSuccess({
+        ctx,
+        userId,
+    });
+
     ctx.log('SIGNUP_SUCCESS');
 
     return result;

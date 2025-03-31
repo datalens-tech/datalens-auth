@@ -5,5 +5,3 @@ export interface ExampleContructor {
 export interface ExampleInstance {}
 
 export const Example: ExampleContructor = class Example implements ExampleInstance {};
-
-export function example() {}

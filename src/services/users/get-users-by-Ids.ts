@@ -45,6 +45,8 @@ export interface GetUsersByIdsArgs {
 export const getUsersByIds = async ({ctx, trx}: ServiceArgs, args: GetUsersByIdsArgs) => {
     const {subjectIds} = args;
 
+    const registry = ctx.get('registry');
+
     ctx.log('GET_USERS_BY_IDS', {idsSize: subjectIds.length});
 
     const users = (await UserModel.query(getReplica(trx))
@@ -75,6 +77,12 @@ export const getUsersByIds = async ({ctx, trx}: ServiceArgs, args: GetUsersByIds
     }
 
     const result = subjectIds.map((subjectId) => userIdToUser[subjectId]).filter(Boolean);
+
+    const {getUsersByIdsSuccess} = registry.common.functions.get();
+    await getUsersByIdsSuccess({
+        ctx,
+        userIds: result.map((user) => user.userId),
+    });
 
     ctx.log('GET_USERS_BY_IDS_SUCCESS', {usersSize: result.length});
 

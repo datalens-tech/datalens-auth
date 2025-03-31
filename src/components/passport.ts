@@ -7,7 +7,6 @@ import {USER_AGENT_HEADER} from '../constants/header';
 import {UserModel, UserModelColumn} from '../db/models/user';
 import {getReplica} from '../db/utils/db';
 import type {PlatformAuthorizedUser} from '../types/user';
-import {encodeId} from '../utils/ids';
 
 import {comparePasswords} from './passwords';
 import {makeParser, z} from './zod';
@@ -77,7 +76,7 @@ export const initPassport = () => {
                             },
                         );
                         done(null, {
-                            userId: encodeId(user.userId),
+                            userId: user.userId,
                             accessToken,
                             refreshToken,
                         });
