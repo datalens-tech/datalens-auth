@@ -15,10 +15,7 @@ permissions:
 jobs:
   build:
     name: datalens-auth
-    runs-on:
-      - self-hosted
-      - linux
-      - k8s-runner-front-us
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,7 +23,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
       - name: 'Get last release'
         run: |
