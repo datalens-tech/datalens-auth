@@ -9,7 +9,7 @@ import {SuccessResponseModel, successModel} from '../reponse-models';
 const requestSchema = {
     body: z.object({
         newPassword: zc.password(),
-        oldPassword: zc.password(),
+        oldPassword: z.string().min(1),
     }),
 };
 

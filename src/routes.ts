@@ -80,7 +80,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             handler: auth.signupController,
             authPolicy: AuthPolicy.disabled,
             write: true,
-            check: [RouteCheck.ManageLocalUsers],
+            check: [RouteCheck.ManageLocalUsers, RouteCheck.SignupDisabled],
         }),
         logout: makeRoute({
             route: 'GET /logout',

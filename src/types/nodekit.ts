@@ -23,6 +23,7 @@ export interface PlatformAppConfig {
     swaggerEnabled: boolean;
 
     manageLocalUsersDisabled: boolean;
+    signupDisabled: boolean;
 }
 
 export interface PlatformAppDynamicConfig {

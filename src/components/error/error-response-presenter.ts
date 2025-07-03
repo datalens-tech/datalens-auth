@@ -135,6 +135,16 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
+        case AUTH_ERROR.SIGNUP_DISABLED: {
+            return {
+                code: 403,
+                response: {
+                    code,
+                    message: 'Signup is disabled',
+                },
+            };
+        }
+
         default:
             return {
                 code: 500,

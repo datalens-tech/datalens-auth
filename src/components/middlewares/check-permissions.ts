@@ -38,6 +38,17 @@ export const checkPermissions = (req: Request, res: Response, next: NextFunction
                     }
                     break;
                 }
+                case RouteCheck.SignupDisabled: {
+                    if (req.ctx.config.signupDisabled) {
+                        req.ctx.logError(`Check route '${checkRoute}' failed`);
+                        res.status(403).send({
+                            message: 'Signup is disabled',
+                            code: AUTH_ERROR.SIGNUP_DISABLED,
+                        });
+                        return;
+                    }
+                    break;
+                }
                 default:
                     absurd(checkRoute);
             }
