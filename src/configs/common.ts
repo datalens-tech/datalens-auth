@@ -46,6 +46,7 @@ export default {
     swaggerEnabled: isTrueArg(getEnvVariable('SWAGGER_ENABLED')),
 
     manageLocalUsersDisabled: isTrueArg(getEnvVariable('AUTH_MANAGE_LOCAL_USERS_DISABLED')),
+    signupDisabled: isTrueArg(getEnvVariable('AUTH_SIGNUP_DISABLED')),
 
     features,
 } satisfies Partial<AppConfig>;
