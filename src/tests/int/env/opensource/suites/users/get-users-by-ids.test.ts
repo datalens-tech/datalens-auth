@@ -13,7 +13,7 @@ type CreatedUsers = {
     user3: ReturnType<typeof pickCreatedUserFields>;
 };
 
-const pickCreatedUserFields = (user: UserModel) => ({
+const pickCreatedUserFields = (user: UserModel, roles: UserRole[]) => ({
     ...pick(user, [
         UserModelColumn.Login,
         UserModelColumn.Email,
@@ -23,6 +23,7 @@ const pickCreatedUserFields = (user: UserModel) => ({
         UserModelColumn.IdpType,
     ]),
     userId: encodeId(user.userId),
+    roles: expect.toIncludeSameMembers(roles),
 });
 
 describe('Get users by ids', () => {
@@ -36,18 +37,20 @@ describe('Get users by ids', () => {
             email: 'user1@user.ru',
             roles: [UserRole.Visitor],
         });
-        createdUsers['user1'] = pickCreatedUserFields(user1);
+        createdUsers['user1'] = pickCreatedUserFields(user1, [UserRole.Visitor]);
 
         const user2 = await createTestUsers({
             login: 'user2',
             firstName: 'User2',
+            roles: [UserRole.Viewer],
         });
-        createdUsers['user2'] = pickCreatedUserFields(user2);
+        createdUsers['user2'] = pickCreatedUserFields(user2, [UserRole.Viewer]);
 
         const user3 = await createTestUsers({
             login: 'user3',
+            roles: [UserRole.Viewer],
         });
-        createdUsers['user3'] = pickCreatedUserFields(user3);
+        createdUsers['user3'] = pickCreatedUserFields(user3, [UserRole.Viewer]);
 
         userTokens = await generateTokens({userId: user1.userId});
     });
