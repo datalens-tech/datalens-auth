@@ -4,7 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {getUsersByIds} from '../../services/users/get-users-by-Ids';
-import {userModelArray} from '../reponse-models/users/user-model-array';
+import {userWithRolesModelArray} from '../reponse-models/users/user-with-roles-model-array';
 
 const requestSchema = {
     body: z.object({
@@ -16,7 +16,7 @@ const parseReq = makeReqParser(requestSchema);
 
 const responseSchema = z
     .object({
-        users: userModelArray.schema,
+        users: userWithRolesModelArray.schema,
     })
     .describe('Users by ids');
 
@@ -25,8 +25,9 @@ export type GetUsersByIdsModel = z.infer<typeof responseSchema>;
 const format = async (
     data: Awaited<ReturnType<typeof getUsersByIds>>,
 ): Promise<GetUsersByIdsModel> => {
+    const users = data.users.map((user) => ({...user, roles: user.roles.map(({role}) => role)}));
     return {
-        users: await userModelArray.format(data.users),
+        users: await userWithRolesModelArray.format(users),
     };
 };
 
