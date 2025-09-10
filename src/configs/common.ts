@@ -29,7 +29,9 @@ export default {
 
     defaultRole: UserRole.Viewer,
 
-    uiAppEndpoint: process.env.UI_APP_ENDPOINT,
+    uiAppEndpoint: getEnvVariable('UI_APP_ENDPOINT'),
+    disableWildcardCookie: isTrueArg(getEnvVariable('DISABLE_WILDCARD_COOKIE')),
+    cookieSameSiteMode: getEnvVariable('COOKIE_SAME_SITE_MODE'),
 
     accessTokenTTL: 60 * 15, // 15 min
     refreshTokenTTL: 60 * 60 * 24 * 10, // 10 days
