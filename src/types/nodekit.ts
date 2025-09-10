@@ -11,6 +11,9 @@ export interface PlatformAppConfig {
 
     uiAppEndpoint: string;
 
+    disableWildcardCookie?: boolean;
+    cookieSameSiteMode?: string;
+
     accessTokenTTL: number;
     refreshTokenTTL: number;
     sessionTTL: number;
