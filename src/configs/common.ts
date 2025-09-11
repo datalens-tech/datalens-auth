@@ -33,7 +33,9 @@ export default {
     disableWildcardCookie: isTrueArg(getEnvVariable('DISABLE_WILDCARD_COOKIE')),
     cookieSameSiteMode: getEnvVariable('COOKIE_SAME_SITE_MODE'),
 
-    accessTokenTTL: 60 * 15, // 15 min
+    accessTokenTTL: process.env.ACCESS_TOKEN_TTL_SEC
+        ? parseInt(process.env.ACCESS_TOKEN_TTL_SEC, 10)
+        : 60 * 15, // 15 min
     refreshTokenTTL: 60 * 60 * 24 * 10, // 10 days
     sessionTTL: 60 * 60 * 24 * 30, // 30 days
 
