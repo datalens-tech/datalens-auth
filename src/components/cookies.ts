@@ -80,7 +80,10 @@ export const clearAuthCookies = (req: Request, res: Response) => {
     res.clearCookie(AUTH_COOKIE_NAME, {
         ...baseCookieOptions,
         httpOnly: true,
-    }).clearCookie(AUTH_EXP_COOKIE_NAME, {...baseCookieOptions, httpOnly: false});
+    })
+        .clearCookie(AUTH_EXP_COOKIE_NAME, {...baseCookieOptions, httpOnly: false})
+        .clearCookie(AUTH_COOKIE_NAME) // without params for correct clear if any params was changed
+        .clearCookie(AUTH_EXP_COOKIE_NAME); // without params for correct clear if any params was changed
 };
 
 export function getBaseCookieOptions(req: Request) {
@@ -95,12 +98,24 @@ export function getBaseCookieOptions(req: Request) {
         uiAppHostname.endsWith(LOCALHOST_WILDCARD) ||
         disableWildcardCookie;
 
+    let originUrl: URL | undefined;
+
+    if (req.headers.origin) {
+        // check header origin for get real request domain and protocol
+        originUrl = new URL(req.headers.origin, 'http://localhost');
+    }
+
     const secure = Boolean(
-        uiAppEndpoint ? uiAppEndpoint.startsWith('https') : req.protocol === 'https',
+        uiAppEndpoint ? uiAppEndpoint.startsWith('https') : originUrl?.protocol === 'https',
     );
     let domain = isCookieWithoutDomain ? undefined : uiAppHostname;
 
-    if (disableWildcardCookie && uiAppEndpoint && uiAppHostname !== req.hostname) {
+    if (
+        disableWildcardCookie &&
+        uiAppEndpoint &&
+        originUrl?.hostname &&
+        uiAppHostname !== originUrl?.hostname
+    ) {
         // prevent set cookie to any domain, if uiAppEndpoint is set and uiAppEndpoint is not equal to hostname
         domain = uiAppHostname;
     }
