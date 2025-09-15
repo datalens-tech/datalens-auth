@@ -74,16 +74,9 @@ export const getAuthCookies = (req: Request) => {
     };
 };
 
-export const clearAuthCookies = (req: Request, res: Response) => {
-    const baseCookieOptions = getBaseCookieOptions(req);
-
-    res.clearCookie(AUTH_COOKIE_NAME, {
-        ...baseCookieOptions,
-        httpOnly: true,
-    })
-        .clearCookie(AUTH_EXP_COOKIE_NAME, {...baseCookieOptions, httpOnly: false})
-        .clearCookie(AUTH_COOKIE_NAME) // without params for correct clear if any params was changed
-        .clearCookie(AUTH_EXP_COOKIE_NAME); // without params for correct clear if any params was changed
+export const clearAuthCookies = (_: Request, res: Response) => {
+    // without params for correct clear if any params was changed
+    res.clearCookie(AUTH_COOKIE_NAME).clearCookie(AUTH_EXP_COOKIE_NAME);
 };
 
 export function getBaseCookieOptions(req: Request) {

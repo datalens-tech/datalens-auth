@@ -176,7 +176,7 @@ describe('Auth', () => {
         const authCookies = settedCookies.filter((cookie) =>
             [AUTH_COOKIE_NAME, AUTH_EXP_COOKIE_NAME].includes(cookie.name),
         );
-        expect(authCookies.length).toBe(4); // 2 with params, 2 without params
+        expect(authCookies.length).toBe(2);
 
         authCookies.forEach((cookie) => {
             expect(cookie.value).toStrictEqual('');
