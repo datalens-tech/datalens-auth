@@ -371,3 +371,89 @@ describe('Change users roles', () => {
         });
     });
 });
+
+describe('Revoked admin role introspection', () => {
+    let admin = {} as Awaited<ReturnType<typeof createTestUsers>>,
+        revokedAdmin = {} as Awaited<ReturnType<typeof createTestUsers>>,
+        user = {} as Awaited<ReturnType<typeof createTestUsers>>,
+        adminTokens = {} as Awaited<ReturnType<typeof generateTokens>>,
+        revokedAdminTokens = {} as Awaited<ReturnType<typeof generateTokens>>;
+
+    beforeAll(async () => {
+        admin = await createTestUsers({login: 'introspect-admin', roles: [UserRole.Admin]});
+        revokedAdmin = await createTestUsers({
+            login: 'introspect-revoked-admin',
+            roles: [UserRole.Admin],
+        });
+        user = await createTestUsers({login: 'introspect-user', roles: [UserRole.Visitor]});
+
+        adminTokens = await generateTokens({userId: admin.userId});
+        revokedAdminTokens = await generateTokens({userId: revokedAdmin.userId});
+
+        const response = await authMasterToken(
+            request(app).post(makeRoute('privateRemoveUsersRoles')),
+        ).send({
+            deltas: [{role: UserRole.Admin, subjectId: encodeId(revokedAdmin.userId)}],
+        });
+        expect(response.status).toBe(200);
+    });
+
+    test("Revoked admin can't add roles (introspection failed)", async () => {
+        const response = await auth(request(app).post(makeRoute('addUsersRoles')), {
+            accessToken: revokedAdminTokens.accessToken,
+        }).send({
+            deltas: [{role: UserRole.Viewer, subjectId: encodeId(user.userId)}],
+        });
+
+        expect(response.status).toBe(403);
+        expect(response.body).toStrictEqual({
+            message: expect.any(String),
+            code: AUTH_ERROR.ACCESS_DENIED,
+        });
+    });
+
+    test("Revoked admin can't remove roles (introspection failed)", async () => {
+        const response = await auth(request(app).post(makeRoute('removeUsersRoles')), {
+            accessToken: revokedAdminTokens.accessToken,
+        }).send({
+            deltas: [{role: UserRole.Visitor, subjectId: encodeId(user.userId)}],
+        });
+
+        expect(response.status).toBe(403);
+        expect(response.body).toStrictEqual({
+            message: expect.any(String),
+            code: AUTH_ERROR.ACCESS_DENIED,
+        });
+    });
+
+    test("Revoked admin can't update roles (introspection failed)", async () => {
+        const response = await auth(request(app).post(makeRoute('updateUsersRoles')), {
+            accessToken: revokedAdminTokens.accessToken,
+        }).send({
+            deltas: [
+                {
+                    oldRole: UserRole.Visitor,
+                    newRole: UserRole.Viewer,
+                    subjectId: encodeId(user.userId),
+                },
+            ],
+        });
+
+        expect(response.status).toBe(403);
+        expect(response.body).toStrictEqual({
+            message: expect.any(String),
+            code: AUTH_ERROR.ACCESS_DENIED,
+        });
+    });
+
+    test('Active admin can still add roles', async () => {
+        const response = await auth(request(app).post(makeRoute('addUsersRoles')), {
+            accessToken: adminTokens.accessToken,
+        }).send({
+            deltas: [{role: UserRole.Viewer, subjectId: encodeId(user.userId)}],
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({done: true});
+    });
+});

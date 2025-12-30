@@ -7,17 +7,21 @@ import {makeRoute} from '../../../../routes';
 
 describe('Delete user', () => {
     let admin = {} as Awaited<ReturnType<typeof createTestUsers>>,
+        admin2 = {} as Awaited<ReturnType<typeof createTestUsers>>,
         user = {} as Awaited<ReturnType<typeof createTestUsers>>,
         user2 = {} as Awaited<ReturnType<typeof createTestUsers>>,
         adminTokens = {} as Awaited<ReturnType<typeof generateTokens>>,
+        admin2Tokens = {} as Awaited<ReturnType<typeof generateTokens>>,
         userTokens = {} as Awaited<ReturnType<typeof generateTokens>>;
 
     beforeAll(async () => {
         admin = await createTestUsers({roles: [UserRole.Admin]});
+        admin2 = await createTestUsers({roles: [UserRole.Admin], login: 'admin2'});
         user = await createTestUsers({login: 'test-user'});
         user2 = await createTestUsers({login: 'test-user-2'});
 
         adminTokens = await generateTokens({userId: admin.userId});
+        admin2Tokens = await generateTokens({userId: admin2.userId});
         userTokens = await generateTokens({userId: user.userId});
     });
 
@@ -76,16 +80,28 @@ describe('Delete user', () => {
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({done: true});
 
-        const responseProfile = await auth(
+        const responseUserNotExists = await auth(
+            request(app).get(makeRoute('getUserProfile', {userId: encodeId(admin.userId)})),
+            {
+                accessToken: admin2Tokens.accessToken,
+            },
+        );
+        expect(responseUserNotExists.status).toBe(404);
+        expect(responseUserNotExists.body).toStrictEqual({
+            message: expect.any(String),
+            code: AUTH_ERROR.USER_NOT_EXISTS,
+        });
+
+        const responseIntrospectionFailed = await auth(
             request(app).get(makeRoute('getUserProfile', {userId: encodeId(admin.userId)})),
             {
                 accessToken: adminTokens.accessToken,
             },
         );
-        expect(responseProfile.status).toBe(404);
-        expect(responseProfile.body).toStrictEqual({
+        expect(responseIntrospectionFailed.status).toBe(403);
+        expect(responseIntrospectionFailed.body).toStrictEqual({
             message: expect.any(String),
-            code: AUTH_ERROR.USER_NOT_EXISTS,
+            code: AUTH_ERROR.ACCESS_DENIED,
         });
     });
 
@@ -96,16 +112,28 @@ describe('Delete user', () => {
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({done: true});
 
-        const responseProfile = await auth(
+        const responseUserNotExists = await auth(
+            request(app).get(makeRoute('getUserProfile', {userId: encodeId(user2.userId)})),
+            {
+                accessToken: admin2Tokens.accessToken,
+            },
+        );
+        expect(responseUserNotExists.status).toBe(404);
+        expect(responseUserNotExists.body).toStrictEqual({
+            message: expect.any(String),
+            code: AUTH_ERROR.USER_NOT_EXISTS,
+        });
+
+        const responseIntrospectionFailed = await auth(
             request(app).get(makeRoute('getUserProfile', {userId: encodeId(user2.userId)})),
             {
                 accessToken: adminTokens.accessToken,
             },
         );
-        expect(responseProfile.status).toBe(404);
-        expect(responseProfile.body).toStrictEqual({
+        expect(responseIntrospectionFailed.status).toBe(403);
+        expect(responseIntrospectionFailed.body).toStrictEqual({
             message: expect.any(String),
-            code: AUTH_ERROR.USER_NOT_EXISTS,
+            code: AUTH_ERROR.ACCESS_DENIED,
         });
     });
 });

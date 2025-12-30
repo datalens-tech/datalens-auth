@@ -1,11 +1,13 @@
 import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
+import {Permission} from '../../constants/permission';
 import {RouteCheck} from '../../constants/route';
+import {introspectUserPermission} from '../../services/permissions/introspect-user-permission';
 import {absurd} from '../../utils/absurd';
 import {checkPermission as checkPermissionFunc} from '../../utils/permission';
 
-export const checkPermissions = (req: Request, res: Response, next: NextFunction) => {
+export const checkPermissions = async (req: Request, res: Response, next: NextFunction) => {
     const permission = req.routeInfo.permission;
     const check = req.routeInfo.check;
 
@@ -21,6 +23,31 @@ export const checkPermissions = (req: Request, res: Response, next: NextFunction
                 code: AUTH_ERROR.ACCESS_DENIED,
             });
             return;
+        }
+
+        if (permission === Permission.Manage) {
+            const user = req.ctx.get('user');
+            if (!user) {
+                req.ctx.logError('User not found');
+                res.status(403).send({
+                    message: 'User not found',
+                    code: AUTH_ERROR.ACCESS_DENIED,
+                });
+                return;
+            }
+            const hasPermission = await introspectUserPermission(
+                {ctx: req.ctx},
+                {userId: user.userId, permission},
+            );
+
+            if (!hasPermission) {
+                req.ctx.logError('Introspect user permission failed');
+                res.status(403).send({
+                    message: 'You do not have a sufficient permission for this operation',
+                    code: AUTH_ERROR.ACCESS_DENIED,
+                });
+                return;
+            }
         }
     }
 
