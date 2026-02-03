@@ -1,7 +1,10 @@
 import {Request, Response} from '@gravity-ui/expresskit';
+import type {AppContext} from '@gravity-ui/nodekit';
+import {AppError} from '@gravity-ui/nodekit';
 import jwt from 'jsonwebtoken';
 
-import {AUTH_COOKIE_NAME, AUTH_EXP_COOKIE_NAME} from '../constants/cookie';
+import {AUTH_DEFAULT_COOKIE_NAME} from '../constants/cookie';
+import {AUTH_ERROR} from '../constants/error-constants';
 import {AccessTokenPayload} from '../types/token';
 import type {Optional} from '../utils/utility-types';
 
@@ -13,6 +16,21 @@ const LOCALHOST_WILDCARD = '.localhost'; // RFC-6761: https://www.rfc-editor.org
 const ONE_HOUR = 60 * 60 * 1000;
 const SAME_SITE_MODE = ['strict', 'lax', 'none'];
 
+function isSubdomainOrEqual(hostname: string, parentHostname: string): boolean {
+    if (hostname === parentHostname) {
+        return true;
+    }
+    return parentHostname.endsWith(`.${hostname}`);
+}
+
+export const generateCookieName = (ctx: AppContext, postfix?: string) => {
+    const baseCookieName = ctx.config.authCookieName || AUTH_DEFAULT_COOKIE_NAME;
+    return baseCookieName + (postfix ? `_${postfix}` : '');
+};
+
+export const getAuthCookieName = (ctx: AppContext) => generateCookieName(ctx);
+export const getAuthExpCookieName = (ctx: AppContext) => generateCookieName(ctx, 'exp');
+
 export const setAuthCookie = ({
     req,
     res,
@@ -22,14 +40,15 @@ export const setAuthCookie = ({
     res: Response;
     tokens: Tokens;
 }) => {
+    const ctx = req.ctx;
     const {accessToken, refreshToken} = tokens;
-    const refreshTokenTTLSec = req.ctx.config.refreshTokenTTL;
+    const refreshTokenTTLSec = ctx.config.refreshTokenTTL;
     const maxAge = refreshTokenTTLSec * 1000 + ONE_HOUR;
 
     const baseCookieOptions = getBaseCookieOptions(req);
 
     res.cookie(
-        AUTH_COOKIE_NAME,
+        getAuthCookieName(ctx),
         JSON.stringify({
             accessToken,
             refreshToken,
@@ -43,7 +62,7 @@ export const setAuthCookie = ({
 
     const {exp} = jwt.decode(accessToken) as AccessTokenPayload;
 
-    res.cookie(AUTH_EXP_COOKIE_NAME, exp, {
+    res.cookie(getAuthExpCookieName(ctx), exp, {
         ...baseCookieOptions,
         httpOnly: false,
         maxAge,
@@ -51,8 +70,9 @@ export const setAuthCookie = ({
 };
 
 export const getAuthCookies = (req: Request) => {
-    const authCookie = req.cookies[AUTH_COOKIE_NAME] as Optional<string>;
-    const authExpCookie = req.cookies[AUTH_EXP_COOKIE_NAME] as Optional<string>;
+    const ctx = req.ctx;
+    const authCookie = req.cookies[getAuthCookieName(ctx)] as Optional<string>;
+    const authExpCookie = req.cookies[getAuthExpCookieName(ctx)] as Optional<string>;
 
     let parsedAuthCookie: Optional<Tokens>;
     if (authCookie) {
@@ -75,15 +95,18 @@ export const getAuthCookies = (req: Request) => {
 };
 
 export const clearAuthCookies = (req: Request, res: Response) => {
+    const ctx = req.ctx;
     const baseCookieOptions = getBaseCookieOptions(req);
+    const authCookieName = getAuthCookieName(ctx);
+    const authExpCookieName = getAuthExpCookieName(ctx);
 
-    res.clearCookie(AUTH_COOKIE_NAME, {
+    res.clearCookie(authCookieName, {
         ...baseCookieOptions,
         httpOnly: true,
     })
-        .clearCookie(AUTH_EXP_COOKIE_NAME, {...baseCookieOptions, httpOnly: false})
-        .clearCookie(AUTH_COOKIE_NAME) // without params for correct clear if any params was changed
-        .clearCookie(AUTH_EXP_COOKIE_NAME); // without params for correct clear if any params was changed
+        .clearCookie(authExpCookieName, {...baseCookieOptions, httpOnly: false})
+        .clearCookie(authCookieName) // without params for correct clear if any params was changed
+        .clearCookie(authExpCookieName); // without params for correct clear if any params was changed
 };
 
 export function getBaseCookieOptions(req: Request) {
@@ -93,9 +116,24 @@ export function getBaseCookieOptions(req: Request) {
     const uiAppEndpoint = req.ctx.config.uiAppEndpoint || '';
     const uiAppHostname = new URL(uiAppEndpoint, 'http://localhost').hostname;
 
+    const authCookieEndpoint = req.ctx.config.authCookieEndpoint;
+    let targetHostname = uiAppHostname;
+
+    if (authCookieEndpoint) {
+        const authCookieHostname = new URL(authCookieEndpoint, 'http://localhost').hostname;
+
+        if (!isSubdomainOrEqual(authCookieHostname, uiAppHostname)) {
+            throw new AppError(AUTH_ERROR.INVALID_AUTH_COOKIE_ENDPOINT, {
+                code: AUTH_ERROR.INVALID_AUTH_COOKIE_ENDPOINT,
+            });
+        }
+
+        targetHostname = authCookieHostname;
+    }
+
     const isCookieWithoutDomain =
-        LOCALHOST.includes(uiAppHostname) ||
-        uiAppHostname.endsWith(LOCALHOST_WILDCARD) ||
+        LOCALHOST.includes(targetHostname) ||
+        targetHostname.endsWith(LOCALHOST_WILDCARD) ||
         disableWildcardCookie;
 
     let originUrl: URL | undefined;
@@ -108,7 +146,7 @@ export function getBaseCookieOptions(req: Request) {
     const secure = Boolean(
         uiAppEndpoint ? uiAppEndpoint.startsWith('https') : originUrl?.protocol === 'https',
     );
-    let domain = isCookieWithoutDomain ? undefined : uiAppHostname;
+    let domain = isCookieWithoutDomain ? undefined : targetHostname;
 
     if (
         disableWildcardCookie &&

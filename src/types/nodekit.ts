@@ -10,7 +10,9 @@ export interface PlatformAppConfig {
     masterToken: string[];
 
     uiAppEndpoint: string;
+    authCookieEndpoint?: string;
 
+    authCookieName?: string;
     disableWildcardCookie?: boolean;
     cookieSameSiteMode?: string;
 

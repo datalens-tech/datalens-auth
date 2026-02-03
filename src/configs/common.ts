@@ -30,6 +30,8 @@ export default {
     defaultRole: UserRole.Viewer,
 
     uiAppEndpoint: getEnvVariable('UI_APP_ENDPOINT'),
+    authCookieEndpoint: getEnvVariable('AUTH_COOKIE_ENDPOINT'),
+    authCookieName: getEnvVariable('AUTH_COOKIE_NAME'),
     disableWildcardCookie: isTrueArg(getEnvVariable('DISABLE_WILDCARD_COOKIE')),
     cookieSameSiteMode: getEnvVariable('COOKIE_SAME_SITE_MODE'),
 
