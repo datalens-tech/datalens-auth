@@ -145,6 +145,17 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
+        case AUTH_ERROR.INVALID_AUTH_COOKIE_ENDPOINT: {
+            return {
+                code: 400,
+                response: {
+                    code,
+                    message:
+                        'Auth cookie endpoint must be a subdomain of ui endpoint or equal to it',
+                },
+            };
+        }
+
         default:
             return {
                 code: 500,

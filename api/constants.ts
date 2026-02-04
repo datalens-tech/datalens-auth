@@ -12,6 +12,4 @@ export {Permission} from '../src/constants/permission';
 
 export {CONTENT_TYPE_JSON} from '../src/constants/content-type';
 
-export {AUTH_COOKIE_NAME, AUTH_EXP_COOKIE_NAME} from '../src/constants/cookie';
-
 export {RouteCheck} from '../src/constants/route';

@@ -1,8 +1,8 @@
 import setCookieParser from 'set-cookie-parser';
 import request from 'supertest';
 
+import {getAuthCookieName, getAuthExpCookieName} from '../../../../../components/cookies';
 import {JwtAuth} from '../../../../../components/jwt-auth';
-import {AUTH_COOKIE_NAME, AUTH_EXP_COOKIE_NAME} from '../../../../../constants/cookie';
 import {SET_COOKIE_HEADER} from '../../../../../constants/header';
 import {AUTH_ERROR, app, appConfig, appCtx, auth} from '../../../auth';
 import {testUserLogin, testUserPassword} from '../../../constants';
@@ -19,7 +19,7 @@ function checkSettedCookies(responseHeader: Record<string, string | string[]>, s
 
     const settedCookies = setCookieParser.parse(setCookieHeader);
     const authCookies = settedCookies.filter((cookie) =>
-        [AUTH_COOKIE_NAME, AUTH_EXP_COOKIE_NAME].includes(cookie.name),
+        [getAuthCookieName(appCtx), getAuthExpCookieName(appCtx)].includes(cookie.name),
     );
 
     expect(authCookies.length).toBe(2);
@@ -28,10 +28,10 @@ function checkSettedCookies(responseHeader: Record<string, string | string[]>, s
 
     authCookies.forEach((cookie) => {
         const parsedCookie = JSON.parse(cookie.value);
-        if (cookie.name === AUTH_EXP_COOKIE_NAME) {
+        if (cookie.name === getAuthExpCookieName(appCtx)) {
             expect(parsedCookie).toStrictEqual(expect.any(Number));
         }
-        if (cookie.name === AUTH_COOKIE_NAME) {
+        if (cookie.name === getAuthCookieName(appCtx)) {
             expect(parsedCookie).toStrictEqual({
                 accessToken: expect.any(String),
                 refreshToken: expect.any(String),
@@ -174,7 +174,7 @@ describe('Auth', () => {
 
         const settedCookies = setCookieParser.parse(setCookieHeader);
         const authCookies = settedCookies.filter((cookie) =>
-            [AUTH_COOKIE_NAME, AUTH_EXP_COOKIE_NAME].includes(cookie.name),
+            [getAuthCookieName(appCtx), getAuthExpCookieName(appCtx)].includes(cookie.name),
         );
         expect(authCookies.length).toBe(4); // 2 with params, 2 without params
 

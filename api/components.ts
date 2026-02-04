@@ -40,4 +40,7 @@ export {
     setAuthCookie,
     clearAuthCookies,
     getAuthCookies,
+    generateCookieName,
+    getAuthCookieName,
+    getAuthExpCookieName,
 } from '../src/components/cookies';
