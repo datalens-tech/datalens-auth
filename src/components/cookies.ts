@@ -16,11 +16,11 @@ const LOCALHOST_WILDCARD = '.localhost'; // RFC-6761: https://www.rfc-editor.org
 const ONE_HOUR = 60 * 60 * 1000;
 const SAME_SITE_MODE = ['strict', 'lax', 'none'];
 
-function isSubdomainOrEqual(hostname: string, parentHostname: string): boolean {
-    if (hostname === parentHostname) {
+function isSubdomainOrEqual({domain, subdomain}: {domain: string; subdomain: string}): boolean {
+    if (domain === subdomain) {
         return true;
     }
-    return parentHostname.endsWith(`.${hostname}`);
+    return domain.endsWith(`.${subdomain}`);
 }
 
 export const generateCookieName = (ctx: AppContext, postfix?: string) => {
@@ -122,7 +122,7 @@ export function getBaseCookieOptions(req: Request) {
     if (authCookieEndpoint) {
         const authCookieHostname = new URL(authCookieEndpoint, 'http://localhost').hostname;
 
-        if (!isSubdomainOrEqual(authCookieHostname, uiAppHostname)) {
+        if (!isSubdomainOrEqual({domain: uiAppHostname, subdomain: authCookieHostname})) {
             throw new AppError(AUTH_ERROR.INVALID_AUTH_COOKIE_ENDPOINT, {
                 code: AUTH_ERROR.INVALID_AUTH_COOKIE_ENDPOINT,
             });
