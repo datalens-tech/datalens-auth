@@ -11,6 +11,8 @@ export const features: FeaturesConfig = {
     [Feature.UseIpV6]: false,
 };
 
+const appSensitiveKeys = [MASTER_TOKEN_HEADER];
+
 export default {
     appName: 'datalens-auth',
 
@@ -42,8 +44,8 @@ export default {
     tokenPrivateKey: getEnvCert(process.env.TOKEN_PRIVATE_KEY as string),
     tokenPublicKey: getEnvCert(process.env.TOKEN_PUBLIC_KEY as string),
 
-    appSensitiveKeys: [],
-    appSensitiveHeaders: [MASTER_TOKEN_HEADER],
+    appSensitiveKeys: appSensitiveKeys,
+    appSensitiveHeaders: appSensitiveKeys,
 
     masterToken: getEnvTokenVariable('MASTER_TOKEN'),
 
