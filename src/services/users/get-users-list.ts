@@ -42,10 +42,11 @@ export interface GetUserListArgs {
     filterString?: string;
     idpType?: string;
     roles?: `${UserRole}`[];
+    userIds?: BigIntId[];
 }
 
 export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArgs) => {
-    const {page = 0, pageSize = 20, filterString, roles, idpType} = args;
+    const {page = 0, pageSize = 20, filterString, roles, idpType, userIds} = args;
 
     const registry = ctx.get('registry');
 
@@ -106,6 +107,10 @@ export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArg
                             `${UserModel.tableName}.${UserModelColumn.IdpType}`,
                             idpType === 'null' ? null : idpType,
                         );
+                    }
+
+                    if (userIds) {
+                        qb1.whereIn(`${UserModel.tableName}.${UserModelColumn.UserId}`, userIds);
                     }
                 })
                 .orderBy(`${UserModel.tableName}.${UserModelColumn.UserId}`)
