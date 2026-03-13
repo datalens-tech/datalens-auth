@@ -213,6 +213,12 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.InstanceUse,
         }),
+        fetchUsersList: makeRoute({
+            route: 'POST /v1/users/fetch-list',
+            handler: users.fetchUsersListController,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.InstanceUse,
+        }),
         getUsersByIds: makeRoute({
             route: 'POST /v1/users/get-by-ids',
             handler: users.getUsersByIdsController,
