@@ -11,7 +11,7 @@
   },
   "main": "dist/index.js",
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^7.3.0",
+    "@asteasolutions/zod-to-openapi": "^8.4.3",
     "@gravity-ui/expresskit": "^2.2.0",
     "@gravity-ui/gateway": "^3.1.1",
     "@gravity-ui/nodekit": "^2.1.0",
@@ -32,7 +32,7 @@
     "swagger-ui-express": "^5.0.1",
     "utility-types": "^3.11.0",
     "uuid": "^9.0.1",
-    "zod": "^3.24.1"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@blueground/jest-testcontainers": "^3.0.6",

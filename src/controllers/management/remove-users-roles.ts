@@ -12,7 +12,7 @@ const requestSchema = {
     body: z.object({
         deltas: z
             .object({
-                role: z.nativeEnum(UserRole),
+                role: z.enum(UserRole),
                 subjectId: z.string(),
             })
             .array()

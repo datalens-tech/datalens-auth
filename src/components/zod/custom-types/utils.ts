@@ -8,7 +8,7 @@ export const makeIdDecoder = (ctx: z.RefinementCtx) => (val: string) => {
         return decodeId(val as StringId);
     } catch (err) {
         ctx.addIssue({
-            code: z.ZodIssueCode.custom,
+            code: 'custom',
             message: `id '${val}' has incorrect format`,
         });
         return z.NEVER;

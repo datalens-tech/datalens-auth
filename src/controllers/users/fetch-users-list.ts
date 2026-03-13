@@ -13,7 +13,7 @@ const requestSchema = {
         pageSize: z.number().int().min(1).max(1000).optional(),
         filterString: z.string().min(1).max(100).optional(),
         idpType: z.string().min(1).max(100).optional(),
-        roles: z.nativeEnum(UserRole).array().min(1).max(10).optional(),
+        roles: z.enum(UserRole).array().min(1).max(10).optional(),
         userIds: zc.decodeIdArray({min: 1}).optional(),
     }),
 };

@@ -1,10 +1,12 @@
 import {extendZodWithOpenApi} from '@asteasolutions/zod-to-openapi';
 import {AppError} from '@gravity-ui/nodekit';
-import {ZodError, ZodTypeAny, z} from 'zod';
+import {ZodError, z} from 'zod';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
 
 import * as zc from './custom-types';
+
+type AnySchema = z.ZodType<any, any, any>;
 
 extendZodWithOpenApi(z);
 
@@ -20,7 +22,7 @@ const prepareError = (err: unknown): Error => {
 };
 
 export const makeParser =
-    <T extends ZodTypeAny>(schema: T) =>
+    <T extends AnySchema>(schema: T) =>
     async (data: unknown): Promise<z.infer<T>> | never => {
         try {
             const parsedData = await schema.parseAsync(data);
@@ -31,7 +33,7 @@ export const makeParser =
     };
 
 export const makeParserSync =
-    <T extends ZodTypeAny>(schema: T) =>
+    <T extends AnySchema>(schema: T) =>
     (data: unknown): z.infer<T> | never => {
         try {
             const parsedData = schema.parse(data);
@@ -42,21 +44,21 @@ export const makeParserSync =
     };
 
 type MakeReqParserArgs<P, Q, B> = {
-    params?: P extends ZodTypeAny ? P : undefined;
-    query?: Q extends ZodTypeAny ? Q : undefined;
-    body?: B extends ZodTypeAny ? B : undefined;
+    params?: P extends AnySchema ? P : undefined;
+    query?: Q extends AnySchema ? Q : undefined;
+    body?: B extends AnySchema ? B : undefined;
 };
 
 type ReqParseArgs<P, Q, B> = {
-    params?: P extends ZodTypeAny ? Object : unknown;
-    query?: Q extends ZodTypeAny ? Object : unknown;
-    body?: B extends ZodTypeAny ? Object : unknown;
+    params?: P extends AnySchema ? Object : unknown;
+    query?: Q extends AnySchema ? Object : unknown;
+    body?: B extends AnySchema ? Object : unknown;
 };
 
 type ReqParseResult<P, Q, B> = {
-    params: P extends ZodTypeAny ? z.infer<P> : undefined;
-    query: Q extends ZodTypeAny ? z.infer<Q> : undefined;
-    body: B extends ZodTypeAny ? z.infer<B> : undefined;
+    params: P extends AnySchema ? z.infer<P> : undefined;
+    query: Q extends AnySchema ? z.infer<Q> : undefined;
+    body: B extends AnySchema ? z.infer<B> : undefined;
 };
 
 export const makeReqParser =

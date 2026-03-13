@@ -13,7 +13,7 @@ const requestSchema = {
     body: z.object({
         login: zc.login(),
         password: zc.password(),
-        email: z.string().email().optional(),
+        email: z.email().optional(),
         firstName: z.string().min(1).max(200).optional(),
         lastName: z.string().min(1).max(200).optional(),
     }),
