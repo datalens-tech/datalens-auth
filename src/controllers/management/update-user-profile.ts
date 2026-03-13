@@ -11,7 +11,7 @@ const requestSchema = {
         userId: zc.decodeId(),
     }),
     body: z.object({
-        email: z.string().email().optional().nullable(),
+        email: z.email().optional().nullable(),
         firstName: z.string().min(1).max(200).optional().nullable(),
         lastName: z.string().min(1).max(200).optional().nullable(),
     }),

@@ -15,7 +15,7 @@ const openApiRegistry = new OpenAPIRegistry();
 
 export const registerApiRoute = (
     routeDescription: ExtendedAppRouteDescription<unknown>,
-    additionalHeaders?: ZodType<unknown>[],
+    additionalHeaders?: ZodType<unknown, unknown>[],
 ) => {
     const {route, handler} = routeDescription;
     const {api} = handler;
@@ -41,7 +41,7 @@ export const registerApiRoute = (
             }, [])
             .join('/')}`;
 
-        const headers: ZodType<unknown>[] = [];
+        const headers: ZodType<unknown, unknown>[] = [];
 
         if (routeDescription.private) {
             headers.push(

@@ -1,4 +1,6 @@
-import {EnumLike, z} from 'zod';
+import {z} from 'zod';
+
+type EnumLike = Readonly<Record<string, string | number>>;
 
 export const enumToArray = <T extends EnumLike>({
     value,
@@ -10,7 +12,7 @@ export const enumToArray = <T extends EnumLike>({
     max?: number;
 }) =>
     z
-        .string(value)
-        .or(z.string(value).array())
+        .enum(value)
+        .or(z.enum(value).array())
         .transform((val) => (Array.isArray(val) ? val : [val]))
-        .pipe(z.nativeEnum(value).array().min(min).max(max));
+        .pipe(z.enum(value).array().min(min).max(max));

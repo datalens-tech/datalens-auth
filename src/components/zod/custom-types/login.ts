@@ -9,38 +9,38 @@ export const login = () =>
     z.string().superRefine((val, ctx) => {
         if (val.length < min) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: `Login should contain at least ${min} characters`,
-                fatal: true,
+                continue: false,
             });
             return z.NEVER;
         }
 
         if (val.length > max) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: `Login should contain at most ${max} characters`,
-                fatal: true,
+                continue: false,
             });
             return z.NEVER;
         }
 
         if (val.includes('@')) {
             try {
-                z.string().email().parse(val);
+                z.email().parse(val);
             } catch (err) {
                 ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
+                    code: 'custom',
                     message: "Login with '@' character should be valid email",
-                    fatal: true,
+                    continue: false,
                 });
                 return z.NEVER;
             }
         } else if (!LOGIN_REGEX.test(val)) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: LOGIN_REGEX_ERROR_MESSAGE,
-                fatal: true,
+                continue: false,
             });
             return z.NEVER;
         }
