@@ -11,7 +11,7 @@ export const login = () =>
             ctx.addIssue({
                 code: 'custom',
                 message: `Login should contain at least ${min} characters`,
-                continue: false,
+                fatal: true,
             });
             return z.NEVER;
         }
@@ -20,7 +20,7 @@ export const login = () =>
             ctx.addIssue({
                 code: 'custom',
                 message: `Login should contain at most ${max} characters`,
-                continue: false,
+                fatal: true,
             });
             return z.NEVER;
         }
@@ -32,7 +32,7 @@ export const login = () =>
                 ctx.addIssue({
                     code: 'custom',
                     message: "Login with '@' character should be valid email",
-                    continue: false,
+                    fatal: true,
                 });
                 return z.NEVER;
             }
@@ -40,7 +40,7 @@ export const login = () =>
             ctx.addIssue({
                 code: 'custom',
                 message: LOGIN_REGEX_ERROR_MESSAGE,
-                continue: false,
+                fatal: true,
             });
             return z.NEVER;
         }
