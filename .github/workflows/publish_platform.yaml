@@ -17,11 +17,11 @@ jobs:
     name: datalens-auth
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           sparse-checkout: .
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 22
           cache: 'npm'
@@ -64,7 +64,7 @@ jobs:
           git config user.email "" && git config user.name "GitHub Release"
           git add package.json && git add package-lock.json && git commit -am "Bump version to $NEW_VERSION [release]"
           git push --set-upstream origin "$NEW_BRANCH"
-      - uses: actions/create-release@v1
+      - uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -80,7 +80,7 @@ jobs:
         run: |
           mkdir -p ./workflow_ref
           echo "${{ env.NEW_BRANCH }}" > ./workflow_ref/ref
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: workflow_ref
           path: ./workflow_ref/
