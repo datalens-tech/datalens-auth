@@ -11,6 +11,7 @@ import auth from './controllers/auth';
 import healthcheckController from './controllers/healthcheck';
 import homeController from './controllers/home';
 import management from './controllers/management';
+import serviceAccounts from './controllers/service-accounts';
 import users from './controllers/users';
 
 export type GetRoutesOptions = {
@@ -205,6 +206,67 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
+        }),
+
+        createServiceAccount: makeRoute({
+            route: 'POST /v1/management/service-accounts',
+            handler: management.createServiceAccountController,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        privateCreateServiceAccount: makeRoute({
+            route: 'POST /private/v1/management/service-accounts',
+            handler: management.createServiceAccountController,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
+        }),
+        listServiceAccounts: makeRoute({
+            route: 'GET /v1/management/service-accounts',
+            handler: management.listServiceAccountsController,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        privateListServiceAccounts: makeRoute({
+            route: 'GET /private/v1/management/service-accounts',
+            handler: management.listServiceAccountsController,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
+        }),
+        revokeServiceAccount: makeRoute({
+            route: 'DELETE /v1/management/service-accounts/:serviceAccountId',
+            handler: management.revokeServiceAccountController,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        privateRevokeServiceAccount: makeRoute({
+            route: 'DELETE /private/v1/management/service-accounts/:serviceAccountId',
+            handler: management.revokeServiceAccountController,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
+        }),
+        rotateServiceAccountKey: makeRoute({
+            route: 'POST /v1/management/service-accounts/:serviceAccountId/rotate-key',
+            handler: management.rotateServiceAccountKeyController,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        privateRotateServiceAccountKey: makeRoute({
+            route: 'POST /private/v1/management/service-accounts/:serviceAccountId/rotate-key',
+            handler: management.rotateServiceAccountKeyController,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
+        }),
+        exchangeServiceAccountToken: makeRoute({
+            route: 'POST /v1/service-accounts/token',
+            handler: serviceAccounts.exchangeTokenController,
+            authPolicy: AuthPolicy.disabled,
+            write: true,
         }),
 
         getUsersList: makeRoute({

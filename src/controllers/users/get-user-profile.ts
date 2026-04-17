@@ -12,7 +12,7 @@ export const getUserProfileController: AppRouteHandler = async (
     const result = await getUserProfile(
         {ctx: req.ctx},
         {
-            userId: req.ctx.get('user').userId,
+            userId: req.ctx.get('user').userId!,
         },
     );
 

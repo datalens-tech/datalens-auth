@@ -1,1 +1,1 @@
-export const ID_VARIABLES = ['sessionId', 'refreshTokenId', 'userId'];
+export const ID_VARIABLES = ['sessionId', 'refreshTokenId', 'userId', 'serviceAccountId'];

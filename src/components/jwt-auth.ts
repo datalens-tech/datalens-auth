@@ -2,17 +2,23 @@ import {AppContext} from '@gravity-ui/nodekit';
 import jwt from 'jsonwebtoken';
 import {raw, transaction} from 'objection';
 
+import {AUTH_ERROR} from '../constants/error-constants';
 import {
     RefreshTokenModel,
     RefreshTokenModelColumn,
     RefreshTokenModelFields,
 } from '../db/models/refresh-token';
 import {RoleModel, RoleModelColumn} from '../db/models/role';
+import {ServiceAccountModel, ServiceAccountModelColumn} from '../db/models/service-account';
 import {SessionModel, SessionModelColumn} from '../db/models/session';
 import type {BigIntId} from '../db/types/id';
 import {getPrimary} from '../db/utils/db';
 import {ServiceArgs} from '../types/service';
-import {AccessTokenPayload, RefreshTokenPayload} from '../types/token';
+import {
+    AccessTokenPayload,
+    RefreshTokenPayload,
+    ServiceAccountAccessTokenPayload,
+} from '../types/token';
 import {decodeId, encodeId} from '../utils/ids';
 import {Nullable, Optional} from '../utils/utility-types';
 
@@ -279,6 +285,92 @@ export class JwtAuth {
             return result;
         } catch (err) {
             ctx.logError('VERIFY_REFRESH_TOKEN_ERROR', err);
+            throw err;
+        }
+    };
+
+    static generateServiceAccountAccessToken = (
+        {ctx}: ServiceArgs,
+        {
+            serviceAccountId,
+            roles,
+        }: {serviceAccountId: BigIntId; roles: ServiceAccountAccessTokenPayload['roles']},
+    ) => {
+        ctx.log('GENERATE_SA_ACCESS_TOKEN', {serviceAccountId});
+
+        const encodedServiceAccountId = encodeId(serviceAccountId);
+
+        return jwt.sign(
+            {
+                serviceAccountId: encodedServiceAccountId,
+                roles,
+                type: 'service_account',
+            },
+            ctx.config.tokenPrivateKey,
+            {algorithm, expiresIn: `${ctx.config.serviceAccountAccessTokenTTL}s`},
+        );
+    };
+
+    static exchangeServiceAccountToken = async (
+        {trx, ctx}: ServiceArgs,
+        {clientJwt}: {clientJwt: string},
+    ) => {
+        ctx.log('EXCHANGE_SA_TOKEN');
+
+        try {
+            const decoded = jwt.decode(clientJwt, {complete: true});
+            const iss =
+                decoded?.payload && typeof decoded.payload === 'object'
+                    ? (decoded.payload as {iss?: string}).iss
+                    : undefined;
+
+            if (!iss) {
+                throw new Error('Missing iss claim in client JWT');
+            }
+
+            const decodedServiceAccountId = decodeId(iss as Parameters<typeof decodeId>[0]);
+
+            const sa = await ServiceAccountModel.query(getPrimary(trx))
+                .select([
+                    ServiceAccountModelColumn.ServiceAccountId,
+                    ServiceAccountModelColumn.PublicKey,
+                    ServiceAccountModelColumn.Roles,
+                    ServiceAccountModelColumn.RevokedAt,
+                ])
+                .where(ServiceAccountModelColumn.ServiceAccountId, decodedServiceAccountId)
+                .first()
+                .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+
+            if (!sa) {
+                throw Object.assign(new Error('Service account not found'), {
+                    code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
+                });
+            }
+
+            if (sa.revokedAt !== null) {
+                throw Object.assign(new Error('Service account is revoked'), {
+                    code: AUTH_ERROR.SERVICE_ACCOUNT_REVOKED,
+                });
+            }
+
+            const payload = jwt.verify(clientJwt, sa.publicKey, {
+                algorithms: ['RS256'],
+            }) as jwt.JwtPayload;
+
+            if (typeof payload.iat === 'number' && typeof payload.exp === 'number') {
+                if (payload.exp - payload.iat > 600) {
+                    throw new Error('Client JWT TTL exceeds 10 minutes');
+                }
+            }
+
+            ctx.log('EXCHANGE_SA_TOKEN_SUCCESS', {serviceAccountId: decodedServiceAccountId});
+
+            return this.generateServiceAccountAccessToken(
+                {trx, ctx},
+                {serviceAccountId: decodedServiceAccountId, roles: sa.roles},
+            );
+        } catch (err) {
+            ctx.logError('EXCHANGE_SA_TOKEN_ERROR', err);
             throw err;
         }
     };

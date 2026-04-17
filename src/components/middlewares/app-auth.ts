@@ -1,6 +1,7 @@
 import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 
 import {AUTHORIZATION_HEADER, AUTHORIZATION_HEADER_VALUE_PREFIX} from '../../constants/header';
+import {AccessTokenPayload, ServiceAccountAccessTokenPayload} from '../../types/token';
 import {decodeId} from '../../utils/ids';
 import {JwtAuth} from '../jwt-auth';
 
@@ -16,17 +17,28 @@ export const appAuth = async (req: Request, res: Response, next: NextFunction) =
             try {
                 req.ctx.log('CHECK_ACCESS_TOKEN');
 
-                const {userId, sessionId, roles} = JwtAuth.verifyAccessToken({
-                    ctx: req.ctx,
-                    accessToken,
-                });
+                const payload = JwtAuth.verifyAccessToken({ctx: req.ctx, accessToken});
 
-                req.originalContext.set('user', {
-                    userId: decodeId(userId),
-                    sessionId: decodeId(sessionId),
-                    roles,
-                    accessToken,
-                });
+                if ('type' in payload && payload.type === 'service_account') {
+                    const {serviceAccountId, roles} =
+                        payload as unknown as ServiceAccountAccessTokenPayload;
+                    req.originalContext.set('user', {
+                        userId: null,
+                        sessionId: null,
+                        roles,
+                        accessToken,
+                        isServiceAccount: true,
+                        serviceAccountId: decodeId(serviceAccountId),
+                    });
+                } else {
+                    const {userId, sessionId, roles} = payload as AccessTokenPayload;
+                    req.originalContext.set('user', {
+                        userId: decodeId(userId),
+                        sessionId: decodeId(sessionId),
+                        roles,
+                        accessToken,
+                    });
+                }
 
                 req.ctx.log('CHECK_ACCESS_TOKEN_SUCCESS');
 

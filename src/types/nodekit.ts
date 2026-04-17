@@ -19,6 +19,7 @@ export interface PlatformAppConfig {
     accessTokenTTL: number;
     refreshTokenTTL: number;
     sessionTTL: number;
+    serviceAccountAccessTokenTTL: number;
 
     tokenPrivateKey: string;
     tokenPublicKey: string;

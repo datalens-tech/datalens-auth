@@ -24,7 +24,7 @@ export const updateUserPasswordController: AppRouteHandler = async (
     await updateUserPassword(
         {ctx: req.ctx},
         {
-            userId: req.ctx.get('user').userId,
+            userId: req.ctx.get('user').userId!,
             newPassword: body.newPassword,
             oldPassword: body.oldPassword,
             checkOldPassword: true,

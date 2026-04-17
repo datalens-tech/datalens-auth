@@ -40,6 +40,7 @@ export default {
     accessTokenTTL: 60 * 15, // 15 min
     refreshTokenTTL: 60 * 60 * 24 * 10, // 10 days
     sessionTTL: 60 * 60 * 24 * 30, // 30 days
+    serviceAccountAccessTokenTTL: 60 * 60, // 1 hour
 
     tokenPrivateKey: getEnvCert(process.env.TOKEN_PRIVATE_KEY as string),
     tokenPublicKey: getEnvCert(process.env.TOKEN_PUBLIC_KEY as string),

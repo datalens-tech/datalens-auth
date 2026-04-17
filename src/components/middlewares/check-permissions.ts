@@ -35,9 +35,17 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
                 });
                 return;
             }
+            if (user.isServiceAccount) {
+                req.ctx.logError('Service accounts cannot use management endpoints');
+                res.status(403).send({
+                    message: 'You do not have a sufficient permission for this operation',
+                    code: AUTH_ERROR.ACCESS_DENIED,
+                });
+                return;
+            }
             const hasPermission = await introspectUserPermission(
                 {ctx: req.ctx},
-                {userId: user.userId, permission},
+                {userId: user.userId!, permission},
             );
 
             if (!hasPermission) {
