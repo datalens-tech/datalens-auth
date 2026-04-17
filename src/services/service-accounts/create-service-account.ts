@@ -25,7 +25,8 @@ export const createServiceAccount = async (
     const registry = ctx.get('registry');
     const {getId} = registry.getDbInstance();
 
-    ctx.log('CREATE_SERVICE_ACCOUNT');
+    const user = ctx.get('user');
+    ctx.log('CREATE_SERVICE_ACCOUNT', {name, actor: user.userId});
 
     const existing = await ServiceAccountModel.query(getReplica(trx))
         .select(ServiceAccountModelColumn.ServiceAccountId)
@@ -45,7 +46,6 @@ export const createServiceAccount = async (
         privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
     });
 
-    const user = ctx.get('user');
     const serviceAccountId = await getId();
 
     const insertData: PartialModelObject<ServiceAccountModel> = {

@@ -10,9 +10,21 @@ import {checkPermission as checkPermissionFunc} from '../../utils/permission';
 export const checkPermissions = async (req: Request, res: Response, next: NextFunction) => {
     const permission = req.routeInfo.permission;
     const check = req.routeInfo.check;
+    const userOnly = req.routeInfo.userOnly;
+
+    const user = req.ctx.get('user');
+
+    if ((userOnly || permission === Permission.Manage) && user?.isServiceAccount) {
+        req.ctx.logError('Service account is not allowed on this endpoint');
+        res.status(403).send({
+            message: 'You do not have a sufficient permission for this operation',
+            code: AUTH_ERROR.ACCESS_DENIED,
+        });
+        return;
+    }
 
     if (permission) {
-        const userRoles = req.ctx.get('user')?.roles || [];
+        const userRoles = user?.roles || [];
         if (
             userRoles.length === 0 ||
             userRoles.every((role) => checkPermissionFunc({role, permission}) === false)
@@ -26,19 +38,10 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
         }
 
         if (permission === Permission.Manage) {
-            const user = req.ctx.get('user');
             if (!user) {
                 req.ctx.logError('User not found');
                 res.status(403).send({
                     message: 'User not found',
-                    code: AUTH_ERROR.ACCESS_DENIED,
-                });
-                return;
-            }
-            if (user.isServiceAccount) {
-                req.ctx.logError('Service accounts cannot use management endpoints');
-                res.status(403).send({
-                    message: 'You do not have a sufficient permission for this operation',
                     code: AUTH_ERROR.ACCESS_DENIED,
                 });
                 return;

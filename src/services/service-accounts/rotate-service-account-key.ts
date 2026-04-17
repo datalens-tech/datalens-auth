@@ -1,6 +1,7 @@
 import {generateKeyPairSync} from 'node:crypto';
 
 import {AppError} from '@gravity-ui/nodekit';
+import {raw} from 'objection';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
@@ -12,7 +13,8 @@ export const rotateServiceAccountKey = async (
     {ctx, trx}: ServiceArgs,
     {serviceAccountId}: {serviceAccountId: BigIntId},
 ) => {
-    ctx.log('ROTATE_SERVICE_ACCOUNT_KEY', {serviceAccountId});
+    const actor = ctx.get('user')?.userId;
+    ctx.log('ROTATE_SERVICE_ACCOUNT_KEY', {serviceAccountId, actor});
 
     const {publicKey, privateKey} = generateKeyPairSync('rsa', {
         modulusLength: 2048,
@@ -21,9 +23,11 @@ export const rotateServiceAccountKey = async (
     });
 
     const updated = await ServiceAccountModel.query(getPrimary(trx))
-        .patch({[ServiceAccountModelColumn.PublicKey]: publicKey})
+        .patch({
+            [ServiceAccountModelColumn.PublicKey]: publicKey,
+            [ServiceAccountModelColumn.UpdatedAt]: raw('NOW()'),
+        })
         .where(ServiceAccountModelColumn.ServiceAccountId, serviceAccountId)
-        .whereNull(ServiceAccountModelColumn.RevokedAt)
         .returning(ServiceAccountModelColumn.ServiceAccountId)
         .first()
         .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);

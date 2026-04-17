@@ -234,16 +234,16 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             private: true,
             authPolicy: AuthPolicy.disabled,
         }),
-        revokeServiceAccount: makeRoute({
+        deleteServiceAccount: makeRoute({
             route: 'DELETE /v1/management/service-accounts/:serviceAccountId',
-            handler: management.revokeServiceAccountController,
+            handler: management.deleteServiceAccountController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
-        privateRevokeServiceAccount: makeRoute({
+        privateDeleteServiceAccount: makeRoute({
             route: 'DELETE /private/v1/management/service-accounts/:serviceAccountId',
-            handler: management.revokeServiceAccountController,
+            handler: management.deleteServiceAccountController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
@@ -291,6 +291,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             route: 'GET /v1/users/me/profile',
             handler: users.getUserProfileController,
             apiHeaders: [AUTHORIZATION_HEADER],
+            userOnly: true,
         }),
         updateMyUserProfile: makeRoute({
             route: 'POST /v1/users/me/profile',
@@ -298,6 +299,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             check: [RouteCheck.ManageLocalUsers],
+            userOnly: true,
         }),
         updateMyUserPassword: makeRoute({
             route: 'POST /v1/users/me/password',
@@ -305,6 +307,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             check: [RouteCheck.ManageLocalUsers],
+            userOnly: true,
         }),
     } satisfies Record<string, ExtendedAppRouteDescription>;
 

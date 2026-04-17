@@ -166,16 +166,6 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
-        case AUTH_ERROR.SERVICE_ACCOUNT_REVOKED: {
-            return {
-                code: 403,
-                response: {
-                    code,
-                    message: 'The service account is revoked',
-                },
-            };
-        }
-
         case AUTH_ERROR.SERVICE_ACCOUNT_NAME_EXISTS: {
             return {
                 code: 409,

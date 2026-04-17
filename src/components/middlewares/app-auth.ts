@@ -1,7 +1,6 @@
 import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 
 import {AUTHORIZATION_HEADER, AUTHORIZATION_HEADER_VALUE_PREFIX} from '../../constants/header';
-import {AccessTokenPayload, ServiceAccountAccessTokenPayload} from '../../types/token';
 import {decodeId} from '../../utils/ids';
 import {JwtAuth} from '../jwt-auth';
 
@@ -19,23 +18,20 @@ export const appAuth = async (req: Request, res: Response, next: NextFunction) =
 
                 const payload = JwtAuth.verifyAccessToken({ctx: req.ctx, accessToken});
 
-                if ('type' in payload && payload.type === 'service_account') {
-                    const {serviceAccountId, roles} =
-                        payload as unknown as ServiceAccountAccessTokenPayload;
+                if (payload.type === 'service_account') {
                     req.originalContext.set('user', {
                         userId: null,
                         sessionId: null,
-                        roles,
+                        roles: payload.roles,
                         accessToken,
                         isServiceAccount: true,
-                        serviceAccountId: decodeId(serviceAccountId),
+                        serviceAccountId: decodeId(payload.serviceAccountId),
                     });
                 } else {
-                    const {userId, sessionId, roles} = payload as AccessTokenPayload;
                     req.originalContext.set('user', {
-                        userId: decodeId(userId),
-                        sessionId: decodeId(sessionId),
-                        roles,
+                        userId: decodeId(payload.userId),
+                        sessionId: decodeId(payload.sessionId),
+                        roles: payload.roles,
                         accessToken,
                     });
                 }

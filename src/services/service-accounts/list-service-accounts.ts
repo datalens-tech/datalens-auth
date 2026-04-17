@@ -13,8 +13,8 @@ export const listServiceAccounts = async ({ctx, trx}: ServiceArgs) => {
             ServiceAccountModelColumn.Roles,
             ServiceAccountModelColumn.CreatedBy,
             ServiceAccountModelColumn.CreatedAt,
-            ServiceAccountModelColumn.RevokedAt,
         ])
+        .orderBy(ServiceAccountModelColumn.CreatedAt, 'desc')
         .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
 
     return result;

@@ -10,6 +10,7 @@ export interface AccessTokenPayload extends ExpirableTokenPayload {
     userId: StringId;
     sessionId: StringId;
     roles: `${UserRole}`[];
+    type?: undefined;
 }
 
 export interface ServiceAccountAccessTokenPayload extends ExpirableTokenPayload {
@@ -17,6 +18,8 @@ export interface ServiceAccountAccessTokenPayload extends ExpirableTokenPayload 
     roles: `${UserRole}`[];
     type: 'service_account';
 }
+
+export type VerifiedAccessTokenPayload = AccessTokenPayload | ServiceAccountAccessTokenPayload;
 
 export interface RefreshTokenPayload {
     refreshTokenId: StringId;

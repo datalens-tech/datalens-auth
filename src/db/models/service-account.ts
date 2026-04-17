@@ -14,7 +14,6 @@ export const ServiceAccountModelColumn = {
     CreatedBy: 'createdBy',
     CreatedAt: 'createdAt',
     UpdatedAt: 'updatedAt',
-    RevokedAt: 'revokedAt',
 } as const;
 
 type ServiceAccountModelColumnValues = ValuesType<typeof ServiceAccountModelColumn>;
@@ -41,5 +40,4 @@ export class ServiceAccountModel
     createdBy!: BigIntId;
     createdAt!: string;
     updatedAt!: string;
-    revokedAt!: Nullable<string>;
 }

@@ -10,8 +10,7 @@ export async function up(knex: Knex): Promise<void> {
             roles TEXT[] NOT NULL DEFAULT '{}',
             created_by BIGINT NOT NULL REFERENCES auth_users (user_id) ON DELETE RESTRICT,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            revoked_at TIMESTAMPTZ
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
         CREATE UNIQUE INDEX auth_sa_name_idx ON auth_service_accounts USING BTREE (name);

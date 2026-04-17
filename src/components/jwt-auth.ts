@@ -1,4 +1,4 @@
-import {AppContext} from '@gravity-ui/nodekit';
+import {AppContext, AppError} from '@gravity-ui/nodekit';
 import jwt from 'jsonwebtoken';
 import {raw, transaction} from 'objection';
 
@@ -15,12 +15,14 @@ import type {BigIntId} from '../db/types/id';
 import {getPrimary} from '../db/utils/db';
 import {ServiceArgs} from '../types/service';
 import {
-    AccessTokenPayload,
     RefreshTokenPayload,
     ServiceAccountAccessTokenPayload,
+    VerifiedAccessTokenPayload,
 } from '../types/token';
 import {decodeId, encodeId} from '../utils/ids';
 import {Nullable, Optional} from '../utils/utility-types';
+
+const MAX_CLIENT_JWT_TTL_SECONDS = 600;
 
 const algorithm = 'PS256';
 
@@ -259,13 +261,19 @@ export class JwtAuth {
         }
     };
 
-    static verifyAccessToken = ({ctx, accessToken}: {ctx: AppContext; accessToken: string}) => {
+    static verifyAccessToken = ({
+        ctx,
+        accessToken,
+    }: {
+        ctx: AppContext;
+        accessToken: string;
+    }): VerifiedAccessTokenPayload => {
         ctx.log('VERIFY_ACCESS_TOKEN');
 
         try {
             const result = jwt.verify(accessToken, ctx.config.tokenPublicKey, {
                 algorithms: [algorithm],
-            }) as AccessTokenPayload;
+            }) as VerifiedAccessTokenPayload;
             ctx.log('VERIFY_ACCESS_TOKEN_SUCCESS');
             return result;
         } catch (err) {
@@ -290,7 +298,7 @@ export class JwtAuth {
     };
 
     static generateServiceAccountAccessToken = (
-        {ctx}: ServiceArgs,
+        {ctx}: {ctx: AppContext},
         {
             serviceAccountId,
             roles,
@@ -317,61 +325,72 @@ export class JwtAuth {
     ) => {
         ctx.log('EXCHANGE_SA_TOKEN');
 
+        const invalidJwt = (message: string) =>
+            new AppError(message, {code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT});
+
+        let decoded: jwt.Jwt | null;
         try {
-            const decoded = jwt.decode(clientJwt, {complete: true});
-            const iss =
-                decoded?.payload && typeof decoded.payload === 'object'
-                    ? (decoded.payload as {iss?: string}).iss
-                    : undefined;
+            decoded = jwt.decode(clientJwt, {complete: true});
+        } catch (err) {
+            ctx.logError('EXCHANGE_SA_TOKEN_DECODE_ERROR', err);
+            throw invalidJwt('Malformed client JWT');
+        }
 
-            if (!iss) {
-                throw new Error('Missing iss claim in client JWT');
-            }
+        const rawPayload =
+            decoded?.payload && typeof decoded.payload === 'object' ? decoded.payload : null;
+        const iss = rawPayload ? (rawPayload as {iss?: unknown}).iss : undefined;
 
-            const decodedServiceAccountId = decodeId(iss as Parameters<typeof decodeId>[0]);
+        if (typeof iss !== 'string' || iss.length === 0) {
+            throw invalidJwt('Missing or invalid iss claim in client JWT');
+        }
 
-            const sa = await ServiceAccountModel.query(getPrimary(trx))
-                .select([
-                    ServiceAccountModelColumn.ServiceAccountId,
-                    ServiceAccountModelColumn.PublicKey,
-                    ServiceAccountModelColumn.Roles,
-                    ServiceAccountModelColumn.RevokedAt,
-                ])
-                .where(ServiceAccountModelColumn.ServiceAccountId, decodedServiceAccountId)
-                .first()
-                .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+        let decodedServiceAccountId: BigIntId;
+        try {
+            decodedServiceAccountId = decodeId(iss as Parameters<typeof decodeId>[0]);
+        } catch (err) {
+            ctx.logError('EXCHANGE_SA_TOKEN_ISS_DECODE_ERROR', err);
+            throw invalidJwt('Invalid iss claim in client JWT');
+        }
 
-            if (!sa) {
-                throw Object.assign(new Error('Service account not found'), {
-                    code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
-                });
-            }
+        const sa = await ServiceAccountModel.query(getPrimary(trx))
+            .select([
+                ServiceAccountModelColumn.ServiceAccountId,
+                ServiceAccountModelColumn.PublicKey,
+                ServiceAccountModelColumn.Roles,
+            ])
+            .where(ServiceAccountModelColumn.ServiceAccountId, decodedServiceAccountId)
+            .first()
+            .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
 
-            if (sa.revokedAt !== null) {
-                throw Object.assign(new Error('Service account is revoked'), {
-                    code: AUTH_ERROR.SERVICE_ACCOUNT_REVOKED,
-                });
-            }
+        if (!sa) {
+            throw new AppError(AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS, {
+                code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
+            });
+        }
 
-            const payload = jwt.verify(clientJwt, sa.publicKey, {
+        let payload: jwt.JwtPayload;
+        try {
+            payload = jwt.verify(clientJwt, sa.publicKey, {
                 algorithms: ['RS256'],
             }) as jwt.JwtPayload;
-
-            if (typeof payload.iat === 'number' && typeof payload.exp === 'number') {
-                if (payload.exp - payload.iat > 600) {
-                    throw new Error('Client JWT TTL exceeds 10 minutes');
-                }
-            }
-
-            ctx.log('EXCHANGE_SA_TOKEN_SUCCESS', {serviceAccountId: decodedServiceAccountId});
-
-            return this.generateServiceAccountAccessToken(
-                {trx, ctx},
-                {serviceAccountId: decodedServiceAccountId, roles: sa.roles},
-            );
         } catch (err) {
-            ctx.logError('EXCHANGE_SA_TOKEN_ERROR', err);
-            throw err;
+            ctx.logError('EXCHANGE_SA_TOKEN_VERIFY_ERROR', err);
+            throw invalidJwt('Client JWT signature verification failed');
         }
+
+        if (typeof payload.iat !== 'number' || typeof payload.exp !== 'number') {
+            throw invalidJwt('Client JWT must contain numeric iat and exp claims');
+        }
+
+        if (payload.exp - payload.iat > MAX_CLIENT_JWT_TTL_SECONDS) {
+            throw invalidJwt(`Client JWT TTL exceeds ${MAX_CLIENT_JWT_TTL_SECONDS} seconds`);
+        }
+
+        ctx.log('EXCHANGE_SA_TOKEN_SUCCESS', {serviceAccountId: decodedServiceAccountId});
+
+        return this.generateServiceAccountAccessToken(
+            {ctx},
+            {serviceAccountId: decodedServiceAccountId, roles: sa.roles},
+        );
     };
 }
