@@ -8,7 +8,7 @@ import {getPrimary} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
 import {encodeId} from '../../utils/ids';
 
-const algorithm = 'PS256';
+import {SIGNATURE_ALGORITHM} from './constants';
 
 export const generateTokens = async (
     {trx, ctx}: ServiceArgs,
@@ -34,7 +34,7 @@ export const generateTokens = async (
             roles,
         },
         ctx.config.tokenPrivateKey,
-        {algorithm, expiresIn: `${ctx.config.accessTokenTTL}s`},
+        {algorithm: SIGNATURE_ALGORITHM, expiresIn: `${ctx.config.accessTokenTTL}s`},
     );
 
     const refreshTokenId = await getId();
@@ -47,7 +47,7 @@ export const generateTokens = async (
             sessionId: encodedSessionId,
         },
         ctx.config.tokenPrivateKey,
-        {algorithm},
+        {algorithm: SIGNATURE_ALGORITHM},
     );
 
     await RefreshTokenModel.query(getPrimary(trx))

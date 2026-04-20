@@ -3,14 +3,14 @@ import jwt from 'jsonwebtoken';
 
 import {AccessTokenPayload} from '../../types/token';
 
-const algorithm = 'PS256';
+import {SIGNATURE_ALGORITHM} from './constants';
 
 export const verifyAccessToken = ({ctx, accessToken}: {ctx: AppContext; accessToken: string}) => {
     ctx.log('VERIFY_ACCESS_TOKEN');
 
     try {
         const result = jwt.verify(accessToken, ctx.config.tokenPublicKey, {
-            algorithms: [algorithm],
+            algorithms: [SIGNATURE_ALGORITHM],
         }) as AccessTokenPayload;
         ctx.log('VERIFY_ACCESS_TOKEN_SUCCESS');
         return result;
