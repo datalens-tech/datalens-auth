@@ -186,6 +186,16 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
+        case AUTH_ERROR.SERVICE_ACCOUNT_KEY_NOT_EXISTS: {
+            return {
+                code: 404,
+                response: {
+                    code,
+                    message: "The service account key doesn't exist",
+                },
+            };
+        }
+
         default:
             return {
                 code: 500,
