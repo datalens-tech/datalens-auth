@@ -17,7 +17,7 @@ const signClientJwt = (
         iat: overrides?.iat ?? now,
         exp: overrides?.exp ?? now + 300,
     };
-    return jwt.sign(payload, privateKey, {algorithm: 'RS256', keyid: keyId, noTimestamp: true});
+    return jwt.sign(payload, privateKey, {algorithm: 'RS256', keyid: keyId});
 };
 
 describe('Exchange service account token', () => {
