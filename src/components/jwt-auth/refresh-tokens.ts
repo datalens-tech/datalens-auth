@@ -64,6 +64,7 @@ export const refreshTokens = async (
 
         if (joinedModel[RefreshTokenModelColumn.RefreshTokenId] !== decodedRefreshTokenId) {
             if (joinedModel.userIp && joinedModel.userIp !== userIp) {
+                // Delete compromised session
                 await SessionModel.query(getPrimary(trx))
                     .delete()
                     .where(SessionModelColumn.SessionId, decodedSessionId)
