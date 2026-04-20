@@ -1,0 +1,56 @@
+import {generateKeyPairSync} from 'node:crypto';
+
+import {AppError} from '@gravity-ui/nodekit';
+import type {PartialModelObject} from 'objection';
+
+import {AUTH_ERROR} from '../../constants/error-constants';
+import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
+import {ServiceAccountKeyModel} from '../../db/models/service-account-key';
+import type {BigIntId} from '../../db/types/id';
+import {getPrimary, getReplica} from '../../db/utils/db';
+import {ServiceArgs} from '../../types/service';
+
+export const createServiceAccountKey = async (
+    {ctx, trx}: ServiceArgs,
+    {serviceAccountId}: {serviceAccountId: BigIntId},
+) => {
+    const registry = ctx.get('registry');
+    const {getId} = registry.getDbInstance();
+
+    const actor = ctx.get('user')?.userId;
+    ctx.log('CREATE_SERVICE_ACCOUNT_KEY', {serviceAccountId, actor});
+
+    const sa = await ServiceAccountModel.query(getReplica(trx))
+        .select(ServiceAccountModelColumn.ServiceAccountId)
+        .where(ServiceAccountModelColumn.ServiceAccountId, serviceAccountId)
+        .first()
+        .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+
+    if (!sa) {
+        throw new AppError(AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS, {
+            code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
+        });
+    }
+
+    const {publicKey, privateKey} = generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        publicKeyEncoding: {type: 'spki', format: 'pem'},
+        privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
+    });
+
+    const keyId = await getId();
+
+    const insertData: PartialModelObject<ServiceAccountKeyModel> = {
+        keyId,
+        serviceAccountId,
+        publicKey,
+    };
+
+    const result = await ServiceAccountKeyModel.query(getPrimary(trx))
+        .insert(insertData)
+        .timeout(ServiceAccountKeyModel.DEFAULT_QUERY_TIMEOUT);
+
+    ctx.log('CREATE_SERVICE_ACCOUNT_KEY_SUCCESS', {keyId, serviceAccountId});
+
+    return {keyId: result.keyId, serviceAccountId, privateKey};
+};

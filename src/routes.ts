@@ -248,16 +248,42 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             private: true,
             authPolicy: AuthPolicy.disabled,
         }),
-        rotateServiceAccountKey: makeRoute({
-            route: 'POST /v1/management/service-accounts/:serviceAccountId/rotate-key',
-            handler: management.rotateServiceAccountKeyController,
+        createServiceAccountKey: makeRoute({
+            route: 'POST /v1/management/service-accounts/:serviceAccountId/keys',
+            handler: management.createServiceAccountKeyController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
-        privateRotateServiceAccountKey: makeRoute({
-            route: 'POST /private/v1/management/service-accounts/:serviceAccountId/rotate-key',
-            handler: management.rotateServiceAccountKeyController,
+        privateCreateServiceAccountKey: makeRoute({
+            route: 'POST /private/v1/management/service-accounts/:serviceAccountId/keys',
+            handler: management.createServiceAccountKeyController,
+            write: true,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
+        }),
+        listServiceAccountKeys: makeRoute({
+            route: 'GET /v1/management/service-accounts/:serviceAccountId/keys',
+            handler: management.listServiceAccountKeysController,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        privateListServiceAccountKeys: makeRoute({
+            route: 'GET /private/v1/management/service-accounts/:serviceAccountId/keys',
+            handler: management.listServiceAccountKeysController,
+            private: true,
+            authPolicy: AuthPolicy.disabled,
+        }),
+        deleteServiceAccountKey: makeRoute({
+            route: 'DELETE /v1/management/service-accounts/:serviceAccountId/keys/:keyId',
+            handler: management.deleteServiceAccountKeyController,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        privateDeleteServiceAccountKey: makeRoute({
+            route: 'DELETE /private/v1/management/service-accounts/:serviceAccountId/keys/:keyId',
+            handler: management.deleteServiceAccountKeyController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,

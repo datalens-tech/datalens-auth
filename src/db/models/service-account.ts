@@ -9,7 +9,6 @@ export const ServiceAccountModelColumn = {
     ServiceAccountId: 'serviceAccountId',
     Name: 'name',
     Description: 'description',
-    PublicKey: 'publicKey',
     Roles: 'roles',
     CreatedAt: 'createdAt',
     UpdatedAt: 'updatedAt',
@@ -34,7 +33,6 @@ export class ServiceAccountModel
     serviceAccountId!: BigIntId;
     name!: string;
     description!: Nullable<string>;
-    publicKey!: string;
     roles!: `${UserRole}`[];
     createdAt!: string;
     updatedAt!: string;

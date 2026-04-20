@@ -1,5 +1,3 @@
-import {generateKeyPairSync} from 'node:crypto';
-
 import {AppError} from '@gravity-ui/nodekit';
 import type {PartialModelObject} from 'objection';
 
@@ -40,19 +38,12 @@ export const createServiceAccount = async (
         });
     }
 
-    const {publicKey, privateKey} = generateKeyPairSync('rsa', {
-        modulusLength: 2048,
-        publicKeyEncoding: {type: 'spki', format: 'pem'},
-        privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
-    });
-
     const serviceAccountId = await getId();
 
     const insertData: PartialModelObject<ServiceAccountModel> = {
         serviceAccountId,
         name,
         description,
-        publicKey,
         roles,
     };
 
@@ -62,5 +53,5 @@ export const createServiceAccount = async (
 
     ctx.log('CREATE_SERVICE_ACCOUNT_SUCCESS', {serviceAccountId});
 
-    return {serviceAccountId: result.serviceAccountId, privateKey};
+    return {serviceAccountId: result.serviceAccountId};
 };

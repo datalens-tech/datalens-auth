@@ -20,7 +20,6 @@ const parseReq = makeReqParser(requestSchema);
 const responseSchema = z
     .object({
         serviceAccountId: z.string(),
-        privateKey: z.string(),
     })
     .describe('Created service account');
 
@@ -28,7 +27,6 @@ type ResponseBody = z.infer<typeof responseSchema>;
 
 const format = (data: Awaited<ReturnType<typeof createServiceAccount>>): ResponseBody => ({
     serviceAccountId: encodeId(data.serviceAccountId),
-    privateKey: data.privateKey,
 });
 
 export const createServiceAccountController: AppRouteHandler = async (

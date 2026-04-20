@@ -10,6 +10,10 @@ import {
 } from '../db/models/refresh-token';
 import {RoleModel, RoleModelColumn} from '../db/models/role';
 import {ServiceAccountModel, ServiceAccountModelColumn} from '../db/models/service-account';
+import {
+    ServiceAccountKeyModel,
+    ServiceAccountKeyModelColumn,
+} from '../db/models/service-account-key';
 import {SessionModel, SessionModelColumn} from '../db/models/session';
 import type {BigIntId} from '../db/types/id';
 import {getPrimary} from '../db/utils/db';
@@ -353,11 +357,7 @@ export class JwtAuth {
         }
 
         const sa = await ServiceAccountModel.query(getPrimary(trx))
-            .select([
-                ServiceAccountModelColumn.ServiceAccountId,
-                ServiceAccountModelColumn.PublicKey,
-                ServiceAccountModelColumn.Roles,
-            ])
+            .select([ServiceAccountModelColumn.ServiceAccountId, ServiceAccountModelColumn.Roles])
             .where(ServiceAccountModelColumn.ServiceAccountId, decodedServiceAccountId)
             .first()
             .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
@@ -368,13 +368,29 @@ export class JwtAuth {
             });
         }
 
-        let payload: jwt.JwtPayload;
-        try {
-            payload = jwt.verify(clientJwt, sa.publicKey, {
-                algorithms: ['RS256'],
-            }) as jwt.JwtPayload;
-        } catch (err) {
-            ctx.logError('EXCHANGE_SA_TOKEN_VERIFY_ERROR', err);
+        const keys = await ServiceAccountKeyModel.query(getPrimary(trx))
+            .select(ServiceAccountKeyModelColumn.PublicKey)
+            .where(ServiceAccountKeyModelColumn.ServiceAccountId, decodedServiceAccountId)
+            .timeout(ServiceAccountKeyModel.DEFAULT_QUERY_TIMEOUT);
+
+        if (keys.length === 0) {
+            throw invalidJwt('Service account has no active keys');
+        }
+
+        let payload: jwt.JwtPayload | undefined;
+        for (const key of keys) {
+            try {
+                payload = jwt.verify(clientJwt, key.publicKey, {
+                    algorithms: ['RS256'],
+                }) as jwt.JwtPayload;
+                break;
+            } catch {
+                // try next key
+            }
+        }
+
+        if (!payload) {
+            ctx.logError('EXCHANGE_SA_TOKEN_VERIFY_ERROR', new Error('No key matched'));
             throw invalidJwt('Client JWT signature verification failed');
         }
 
