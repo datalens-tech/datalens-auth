@@ -17,8 +17,7 @@ export const createServiceAccountKey = async (
     const registry = ctx.get('registry');
     const {getId} = registry.getDbInstance();
 
-    const actor = ctx.get('subject')?.subjectId;
-    ctx.log('CREATE_SERVICE_ACCOUNT_KEY', {serviceAccountId, actor});
+    ctx.log('CREATE_SERVICE_ACCOUNT_KEY', {serviceAccountId});
 
     const sa = await ServiceAccountModel.query(getReplica(trx))
         .select(ServiceAccountModelColumn.ServiceAccountId)
