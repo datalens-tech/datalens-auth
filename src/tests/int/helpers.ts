@@ -1,4 +1,4 @@
-import {JwtAuth} from '../../components/jwt-auth';
+import {startSession} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {UserRole} from '../../constants/role';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
@@ -67,10 +67,7 @@ type GenerateTokensArgs =
 
 export const generateTokens = async (args: GenerateTokensArgs) => {
     const userId = 'userId' in args ? args.userId : decodeId(args.userStringId);
-    const {accessToken, refreshToken} = await JwtAuth.startSession(
-        {ctx: appCtx},
-        {userId, userIp: null},
-    );
+    const {accessToken, refreshToken} = await startSession({ctx: appCtx}, {userId, userIp: null});
     return {accessToken, refreshToken};
 };
 

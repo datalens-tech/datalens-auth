@@ -33,7 +33,14 @@ export {
     zc,
 } from '../src/components/zod';
 
-export {JwtAuth} from '../src/components/jwt-auth';
+export {
+    closeSession,
+    exchangeServiceAccountToken,
+    refreshTokens,
+    startSession,
+    verifyAccessToken,
+    verifyRefreshToken,
+} from '../src/components/jwt-auth';
 
 export {
     getBaseCookieOptions,

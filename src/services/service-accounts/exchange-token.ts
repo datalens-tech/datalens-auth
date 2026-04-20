@@ -1,4 +1,4 @@
-import {JwtAuth} from '../../components/jwt-auth';
+import {exchangeServiceAccountToken as jwtExchangeServiceAccountToken} from '../../components/jwt-auth';
 import {ServiceArgs} from '../../types/service';
 
 export type ExchangeServiceAccountTokenResult = {
@@ -9,7 +9,7 @@ export const exchangeServiceAccountToken = async (
     {ctx, trx}: ServiceArgs,
     {clientJwt}: {clientJwt: string},
 ): Promise<ExchangeServiceAccountTokenResult> => {
-    const accessToken = await JwtAuth.exchangeServiceAccountToken({ctx, trx}, {clientJwt});
+    const accessToken = await jwtExchangeServiceAccountToken({ctx, trx}, {clientJwt});
 
     return {accessToken};
 };
