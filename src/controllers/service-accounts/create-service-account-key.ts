@@ -4,7 +4,10 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {createServiceAccountKey} from '../../services/service-accounts/create-service-account-key';
-import {encodeId} from '../../utils/ids';
+import {
+    CreateServiceAccountKeyModel,
+    createServiceAccountKeyModel,
+} from '../reponse-models/service-accounts/create-service-account-key-model';
 
 const requestSchema = {
     params: z.object({
@@ -12,21 +15,13 @@ const requestSchema = {
     }),
 };
 
+const responseSchema = createServiceAccountKeyModel.schema;
+
 const parseReq = makeReqParser(requestSchema);
-
-const responseSchema = z
-    .object({
-        keyId: z.string(),
-        serviceAccountId: z.string(),
-        privateKey: z.string(),
-    })
-    .describe('Created service account key');
-
-type ResponseBody = z.infer<typeof responseSchema>;
 
 export const createServiceAccountKeyController: AppRouteHandler = async (
     req,
-    res: Response<ResponseBody>,
+    res: Response<CreateServiceAccountKeyModel>,
 ) => {
     const {params} = await parseReq(req);
 
@@ -35,11 +30,7 @@ export const createServiceAccountKeyController: AppRouteHandler = async (
         {serviceAccountId: params.serviceAccountId},
     );
 
-    res.status(200).send({
-        keyId: encodeId(result.keyId),
-        serviceAccountId: encodeId(result.serviceAccountId),
-        privateKey: result.privateKey,
-    });
+    res.status(200).send(createServiceAccountKeyModel.format(result));
 };
 
 createServiceAccountKeyController.api = {

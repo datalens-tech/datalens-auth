@@ -10,10 +10,15 @@ import type {BigIntId} from '../../db/types/id';
 import {getPrimary, getReplica} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
 
+export type CreateServiceAccountKeyResult = {
+    keyId: BigIntId;
+    privateKey: string;
+};
+
 export const createServiceAccountKey = async (
     {ctx, trx}: ServiceArgs,
     {serviceAccountId}: {serviceAccountId: BigIntId},
-) => {
+): Promise<CreateServiceAccountKeyResult> => {
     const registry = ctx.get('registry');
     const {getId} = registry.getDbInstance();
 
@@ -49,7 +54,7 @@ export const createServiceAccountKey = async (
         .insert(insertData)
         .timeout(ServiceAccountKeyModel.DEFAULT_QUERY_TIMEOUT);
 
-    ctx.log('CREATE_SERVICE_ACCOUNT_KEY_SUCCESS', {keyId, serviceAccountId});
+    ctx.log('CREATE_SERVICE_ACCOUNT_KEY_SUCCESS', {keyId});
 
-    return {keyId: result.keyId, serviceAccountId, privateKey};
+    return {keyId: result.keyId, privateKey};
 };

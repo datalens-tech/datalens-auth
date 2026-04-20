@@ -5,10 +5,10 @@ import {getReplica} from '../../db/utils/db';
 import type {ServiceArgs} from '../../types/service';
 import {checkPermission} from '../../utils/permission';
 
-export interface IntrospectServiceAccountPermissionArgs {
+export type IntrospectServiceAccountPermissionArgs = {
     serviceAccountId: BigIntId;
     permission: `${Permission}`;
-}
+};
 
 export async function introspectServiceAccountPermission(
     {ctx, trx}: ServiceArgs,

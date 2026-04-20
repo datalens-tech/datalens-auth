@@ -8,16 +8,16 @@ import {getPrimary, getReplica} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
 import {Optional} from '../../utils/utility-types';
 
-export interface CreateServiceAccountArgs {
+export type CreateServiceAccountArgs = {
     name: string;
     description: Optional<string>;
     roles: UserRole[];
-}
+};
 
 export const createServiceAccount = async (
     {ctx, trx}: ServiceArgs,
     args: CreateServiceAccountArgs,
-) => {
+): Promise<ServiceAccountModel> => {
     const {name, description, roles} = args;
 
     const registry = ctx.get('registry');
@@ -52,5 +52,5 @@ export const createServiceAccount = async (
 
     ctx.log('CREATE_SERVICE_ACCOUNT_SUCCESS', {serviceAccountId});
 
-    return {serviceAccountId: result.serviceAccountId};
+    return result;
 };

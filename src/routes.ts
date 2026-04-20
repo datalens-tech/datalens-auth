@@ -10,7 +10,6 @@ import {RouteCheck} from './constants/route';
 import auth from './controllers/auth';
 import healthcheckController from './controllers/healthcheck';
 import homeController from './controllers/home';
-import serviceAccountManagement from './controllers/service-account-management';
 import serviceAccounts from './controllers/service-accounts';
 import userManagement from './controllers/user-management';
 import users from './controllers/users';
@@ -211,47 +210,47 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
 
         createServiceAccount: makeRoute({
             route: 'POST /v1/management/service-accounts',
-            handler: serviceAccountManagement.createServiceAccountController,
+            handler: serviceAccounts.createServiceAccountController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         listServiceAccounts: makeRoute({
             route: 'GET /v1/management/service-accounts',
-            handler: serviceAccountManagement.listServiceAccountsController,
+            handler: serviceAccounts.listServiceAccountsController,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         deleteServiceAccount: makeRoute({
             route: 'DELETE /v1/management/service-accounts/:serviceAccountId',
-            handler: serviceAccountManagement.deleteServiceAccountController,
+            handler: serviceAccounts.deleteServiceAccountController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         createServiceAccountKey: makeRoute({
             route: 'POST /v1/management/service-accounts/:serviceAccountId/keys',
-            handler: serviceAccountManagement.createServiceAccountKeyController,
+            handler: serviceAccounts.createServiceAccountKeyController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         listServiceAccountKeys: makeRoute({
             route: 'GET /v1/management/service-accounts/:serviceAccountId/keys',
-            handler: serviceAccountManagement.listServiceAccountKeysController,
+            handler: serviceAccounts.listServiceAccountKeysController,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         deleteServiceAccountKey: makeRoute({
             route: 'DELETE /v1/management/service-accounts/:serviceAccountId/keys/:keyId',
-            handler: serviceAccountManagement.deleteServiceAccountKeyController,
+            handler: serviceAccounts.deleteServiceAccountKeyController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         exchangeServiceAccountToken: makeRoute({
             route: 'POST /v1/service-accounts/token',
-            handler: serviceAccounts.exchangeTokenController,
+            handler: serviceAccounts.exchangeServiceAccountTokenController,
             authPolicy: AuthPolicy.disabled,
             write: true,
         }),

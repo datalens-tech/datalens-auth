@@ -12,7 +12,7 @@ import {ServiceArgs} from '../../types/service';
 export const deleteServiceAccountKey = async (
     {ctx, trx}: ServiceArgs,
     {serviceAccountId, keyId}: {serviceAccountId: BigIntId; keyId: BigIntId},
-) => {
+): Promise<void> => {
     ctx.log('DELETE_SERVICE_ACCOUNT_KEY', {keyId, serviceAccountId});
 
     const deleted = await ServiceAccountKeyModel.query(getPrimary(trx))

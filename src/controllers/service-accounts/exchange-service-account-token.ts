@@ -21,7 +21,7 @@ const responseSchema = z
 
 type ResponseBody = z.infer<typeof responseSchema>;
 
-export const exchangeTokenController: AppRouteHandler = async (
+export const exchangeServiceAccountTokenController: AppRouteHandler = async (
     req,
     res: Response<ResponseBody>,
 ) => {
@@ -32,7 +32,7 @@ export const exchangeTokenController: AppRouteHandler = async (
     res.status(200).send(result);
 };
 
-exchangeTokenController.api = {
+exchangeServiceAccountTokenController.api = {
     summary: 'Exchange service account JWT for access token',
     tags: [ApiTag.Auth],
     request: {

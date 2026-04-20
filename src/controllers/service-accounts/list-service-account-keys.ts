@@ -4,7 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {listServiceAccountKeys} from '../../services/service-accounts/list-service-account-keys';
-import {encodeId} from '../../utils/ids';
+import {serviceAccountKeyModelArray} from '../reponse-models/service-accounts/service-account-key-model-array';
 
 const requestSchema = {
     params: z.object({
@@ -16,12 +16,7 @@ const parseReq = makeReqParser(requestSchema);
 
 const responseSchema = z
     .object({
-        keys: z
-            .object({
-                keyId: z.string(),
-                createdAt: z.string(),
-            })
-            .array(),
+        keys: serviceAccountKeyModelArray.schema,
     })
     .describe('Service account keys list');
 
@@ -39,10 +34,7 @@ export const listServiceAccountKeysController: AppRouteHandler = async (
     );
 
     res.status(200).send({
-        keys: keys.map((k) => ({
-            keyId: encodeId(k.keyId),
-            createdAt: k.createdAt,
-        })),
+        keys: await serviceAccountKeyModelArray.format(keys),
     });
 };
 
