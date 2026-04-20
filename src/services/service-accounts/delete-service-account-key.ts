@@ -13,7 +13,7 @@ export const deleteServiceAccountKey = async (
     {ctx, trx}: ServiceArgs,
     {serviceAccountId, keyId}: {serviceAccountId: BigIntId; keyId: BigIntId},
 ) => {
-    const actor = ctx.get('user')?.userId;
+    const actor = ctx.get('subject')?.subjectId;
     ctx.log('DELETE_SERVICE_ACCOUNT_KEY', {keyId, serviceAccountId, actor});
 
     const deleted = await ServiceAccountKeyModel.query(getPrimary(trx))

@@ -19,17 +19,17 @@ export const appAuth = async (req: Request, res: Response, next: NextFunction) =
                 const payload = JwtAuth.verifyAccessToken({ctx: req.ctx, accessToken});
 
                 if (payload.type === 'service_account') {
-                    req.originalContext.set('user', {
-                        userId: null,
+                    req.originalContext.set('subject', {
+                        type: 'service_account',
+                        subjectId: decodeId(payload.serviceAccountId),
                         sessionId: null,
                         roles: payload.roles,
                         accessToken,
-                        isServiceAccount: true,
-                        serviceAccountId: decodeId(payload.serviceAccountId),
                     });
                 } else {
-                    req.originalContext.set('user', {
-                        userId: decodeId(payload.userId),
+                    req.originalContext.set('subject', {
+                        type: 'user',
+                        subjectId: decodeId(payload.userId),
                         sessionId: decodeId(payload.sessionId),
                         roles: payload.roles,
                         accessToken,

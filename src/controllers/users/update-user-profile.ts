@@ -25,7 +25,7 @@ export const updateUserProfileController: AppRouteHandler = async (
     await updateUserProfile(
         {ctx: req.ctx},
         {
-            userId: req.ctx.get('user').userId!,
+            userId: req.ctx.get('subject').subjectId,
             email: body.email,
             firstName: body.firstName,
             lastName: body.lastName,

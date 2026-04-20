@@ -3,7 +3,7 @@ import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {Permission} from '../../constants/permission';
 import {RouteCheck} from '../../constants/route';
-import {introspectUserPermission} from '../../services/permissions/introspect-user-permission';
+import {introspectSubjectPermission} from '../../services/permissions/introspect-subject-permission';
 import {absurd} from '../../utils/absurd';
 import {checkPermission as checkPermissionFunc} from '../../utils/permission';
 
@@ -12,9 +12,9 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
     const check = req.routeInfo.check;
     const userOnly = req.routeInfo.userOnly;
 
-    const user = req.ctx.get('user');
+    const subject = req.ctx.get('subject');
 
-    if ((userOnly || permission === Permission.Manage) && user?.isServiceAccount) {
+    if (userOnly && subject?.type === 'service_account') {
         req.ctx.logError('Service account is not allowed on this endpoint');
         res.status(403).send({
             message: 'You do not have a sufficient permission for this operation',
@@ -24,7 +24,7 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
     }
 
     if (permission) {
-        const userRoles = user?.roles || [];
+        const userRoles = subject?.roles || [];
         if (
             userRoles.length === 0 ||
             userRoles.every((role) => checkPermissionFunc({role, permission}) === false)
@@ -37,22 +37,15 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
             return;
         }
 
-        if (permission === Permission.Manage) {
-            if (!user) {
-                req.ctx.logError('User not found');
-                res.status(403).send({
-                    message: 'User not found',
-                    code: AUTH_ERROR.ACCESS_DENIED,
-                });
-                return;
-            }
-            const hasPermission = await introspectUserPermission(
+        if (permission === Permission.Manage && subject) {
+            const hasPermission = await introspectSubjectPermission(
                 {ctx: req.ctx},
-                {userId: user.userId!, permission},
+                subject,
+                permission,
             );
 
             if (!hasPermission) {
-                req.ctx.logError('Introspect user permission failed');
+                req.ctx.logError('Introspect permission failed');
                 res.status(403).send({
                     message: 'You do not have a sufficient permission for this operation',
                     code: AUTH_ERROR.ACCESS_DENIED,

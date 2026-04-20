@@ -23,8 +23,8 @@ export const createServiceAccount = async (
     const registry = ctx.get('registry');
     const {getId} = registry.getDbInstance();
 
-    const user = ctx.get('user');
-    ctx.log('CREATE_SERVICE_ACCOUNT', {name, actor: user.userId});
+    const user = ctx.get('subject');
+    ctx.log('CREATE_SERVICE_ACCOUNT', {name, actor: user.subjectId});
 
     const existing = await ServiceAccountModel.query(getReplica(trx))
         .select(ServiceAccountModelColumn.ServiceAccountId)
