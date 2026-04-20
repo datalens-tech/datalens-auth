@@ -248,6 +248,27 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
+        addServiceAccountRoles: makeRoute({
+            route: 'POST /v1/management/service-accounts/:serviceAccountId/roles/add',
+            handler: serviceAccounts.addServiceAccountRolesController,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        updateServiceAccountRoles: makeRoute({
+            route: 'POST /v1/management/service-accounts/:serviceAccountId/roles/update',
+            handler: serviceAccounts.updateServiceAccountRolesController,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
+        removeServiceAccountRoles: makeRoute({
+            route: 'POST /v1/management/service-accounts/:serviceAccountId/roles/remove',
+            handler: serviceAccounts.removeServiceAccountRolesController,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
         exchangeServiceAccountToken: makeRoute({
             route: 'POST /v1/service-accounts/token',
             handler: serviceAccounts.exchangeServiceAccountTokenController,
