@@ -14,8 +14,8 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
 
     const subject = req.ctx.get('subject');
 
-    if (userOnly && subject?.type === 'service_account') {
-        req.ctx.logError('Service account is not allowed on this endpoint');
+    if (userOnly && subject?.type !== 'user') {
+        req.ctx.logError(`${subject?.type} subject type is not allowed on this endpoint`);
         res.status(403).send({
             message: 'You do not have a sufficient permission for this operation',
             code: AUTH_ERROR.ACCESS_DENIED,
