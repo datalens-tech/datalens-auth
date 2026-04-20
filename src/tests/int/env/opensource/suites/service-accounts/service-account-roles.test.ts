@@ -1,6 +1,5 @@
 import request from 'supertest';
 
-import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
 import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
@@ -198,7 +197,7 @@ describe('Service account roles', () => {
     });
 
     test('Returns 404 for non-existent service account on add', async () => {
-        const fakeId = encodeId('9999999999999999999' as any);
+        const fakeId = '7cweyb3kxxp8s';
         const response = await auth(
             request(app).post(makeRoute('addServiceAccountRoles', {serviceAccountId: fakeId})),
             {accessToken: adminTokens.accessToken},
@@ -212,7 +211,7 @@ describe('Service account roles', () => {
     });
 
     test('Returns 404 for non-existent service account on update', async () => {
-        const fakeId = encodeId('9999999999999999998' as any);
+        const fakeId = '7cweyb3kxxp8s';
         const response = await auth(
             request(app).post(makeRoute('updateServiceAccountRoles', {serviceAccountId: fakeId})),
             {accessToken: adminTokens.accessToken},
@@ -226,7 +225,7 @@ describe('Service account roles', () => {
     });
 
     test('Returns 404 for non-existent service account on remove', async () => {
-        const fakeId = encodeId('9999999999999999997' as any);
+        const fakeId = '7cweyb3kxxp8s';
         const response = await auth(
             request(app).post(makeRoute('removeServiceAccountRoles', {serviceAccountId: fakeId})),
             {accessToken: adminTokens.accessToken},
