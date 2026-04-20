@@ -1,0 +1,27 @@
+import {AppContext} from '@gravity-ui/nodekit';
+import jwt from 'jsonwebtoken';
+
+import {RefreshTokenPayload} from '../../types/token';
+
+import {SIGNATURE_ALGORITHM} from './constants';
+
+export const verifyRefreshToken = ({
+    ctx,
+    refreshToken,
+}: {
+    ctx: AppContext;
+    refreshToken: string;
+}) => {
+    ctx.log('VERIFY_REFRESH_TOKEN');
+
+    try {
+        const result = jwt.verify(refreshToken, ctx.config.tokenPublicKey, {
+            algorithms: [SIGNATURE_ALGORITHM],
+        }) as RefreshTokenPayload;
+        ctx.log('VERIFY_REFRESH_TOKEN_SUCCESS');
+        return result;
+    } catch (err) {
+        ctx.logError('VERIFY_REFRESH_TOKEN_ERROR', err);
+        throw err;
+    }
+};

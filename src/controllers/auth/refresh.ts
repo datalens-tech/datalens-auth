@@ -3,7 +3,7 @@ import requestIp from 'request-ip';
 
 import {ApiTag} from '../../components/api-docs';
 import {getAuthCookies, setAuthCookie} from '../../components/cookies';
-import {JwtAuth} from '../../components/jwt-auth';
+import {refreshTokens} from '../../components/jwt-auth';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {
@@ -23,7 +23,7 @@ export const refreshController: AppRouteHandler = async (
 
     if (authCookie && authCookie.refreshToken) {
         try {
-            const tokens = await JwtAuth.refreshTokens(
+            const tokens = await refreshTokens(
                 {ctx: req.ctx},
                 {
                     refreshToken: authCookie.refreshToken,

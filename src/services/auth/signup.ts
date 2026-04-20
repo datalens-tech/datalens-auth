@@ -1,7 +1,7 @@
 import {AppError} from '@gravity-ui/nodekit';
 import {transaction} from 'objection';
 
-import {JwtAuth} from '../../components/jwt-auth';
+import {startSession} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
@@ -68,7 +68,7 @@ export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
                 .timeout(RoleModel.DEFAULT_QUERY_TIMEOUT);
         }
 
-        const {accessToken, refreshToken} = await JwtAuth.startSession(
+        const {accessToken, refreshToken} = await startSession(
             {ctx, trx: transactionTrx},
             {
                 userId,
