@@ -10,8 +10,9 @@ import {RouteCheck} from './constants/route';
 import auth from './controllers/auth';
 import healthcheckController from './controllers/healthcheck';
 import homeController from './controllers/home';
-import management from './controllers/management';
+import serviceAccountManagement from './controllers/service-account-management';
 import serviceAccounts from './controllers/service-accounts';
+import userManagement from './controllers/user-management';
 import users from './controllers/users';
 
 export type GetRoutesOptions = {
@@ -98,7 +99,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
 
         addUsersRoles: makeRoute({
             route: 'POST /v1/management/users/roles/add',
-            handler: management.addUsersRolesController,
+            handler: userManagement.addUsersRolesController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
@@ -106,14 +107,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         }),
         privateAddUsersRoles: makeRoute({
             route: 'POST /private/v1/management/users/roles/add',
-            handler: management.addUsersRolesController,
+            handler: userManagement.addUsersRolesController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
         }),
         updateUsersRoles: makeRoute({
             route: 'POST /v1/management/users/roles/update',
-            handler: management.updateUsersRolesController,
+            handler: userManagement.updateUsersRolesController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
@@ -121,14 +122,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         }),
         privateUpdateUsersRoles: makeRoute({
             route: 'POST /private/v1/management/users/roles/update',
-            handler: management.updateUsersRolesController,
+            handler: userManagement.updateUsersRolesController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
         }),
         removeUsersRoles: makeRoute({
             route: 'POST /v1/management/users/roles/remove',
-            handler: management.removeUsersRolesController,
+            handler: userManagement.removeUsersRolesController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
@@ -136,14 +137,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         }),
         privateRemoveUsersRoles: makeRoute({
             route: 'POST /private/v1/management/users/roles/remove',
-            handler: management.removeUsersRolesController,
+            handler: userManagement.removeUsersRolesController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
         }),
         createUser: makeRoute({
             route: 'POST /v1/management/users/create',
-            handler: management.createUserController,
+            handler: userManagement.createUserController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
@@ -151,14 +152,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         }),
         privateCreateUser: makeRoute({
             route: 'POST /private/v1/management/users/create',
-            handler: management.createUserController,
+            handler: userManagement.createUserController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
         }),
         deleteUser: makeRoute({
             route: 'DELETE /v1/management/users/:userId',
-            handler: management.deleteUserController,
+            handler: userManagement.deleteUserController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
@@ -166,20 +167,20 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         }),
         privateDeleteUser: makeRoute({
             route: 'DELETE /private/v1/management/users/:userId',
-            handler: management.deleteUserController,
+            handler: userManagement.deleteUserController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
         }),
         getUserProfile: makeRoute({
             route: 'GET /v1/management/users/:userId/profile',
-            handler: management.getUserProfileController,
+            handler: userManagement.getUserProfileController,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         updateUserProfile: makeRoute({
             route: 'POST /v1/management/users/:userId/profile',
-            handler: management.updateUserProfileController,
+            handler: userManagement.updateUserProfileController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
@@ -187,14 +188,14 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         }),
         privateUpdateUserProfile: makeRoute({
             route: 'POST /private/v1/management/users/:userId/profile',
-            handler: management.updateUserProfileController,
+            handler: userManagement.updateUserProfileController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
         }),
         updateUserPassword: makeRoute({
             route: 'POST /v1/management/users/:userId/password',
-            handler: management.updateUserPasswordController,
+            handler: userManagement.updateUserPasswordController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
@@ -202,7 +203,7 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         }),
         privateUpdateUserPassword: makeRoute({
             route: 'POST /private/v1/management/users/:userId/password',
-            handler: management.updateUserPasswordController,
+            handler: userManagement.updateUserPasswordController,
             write: true,
             private: true,
             authPolicy: AuthPolicy.disabled,
@@ -210,40 +211,40 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
 
         createServiceAccount: makeRoute({
             route: 'POST /v1/management/service-accounts',
-            handler: management.createServiceAccountController,
+            handler: serviceAccountManagement.createServiceAccountController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         listServiceAccounts: makeRoute({
             route: 'GET /v1/management/service-accounts',
-            handler: management.listServiceAccountsController,
+            handler: serviceAccountManagement.listServiceAccountsController,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         deleteServiceAccount: makeRoute({
             route: 'DELETE /v1/management/service-accounts/:serviceAccountId',
-            handler: management.deleteServiceAccountController,
+            handler: serviceAccountManagement.deleteServiceAccountController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         createServiceAccountKey: makeRoute({
             route: 'POST /v1/management/service-accounts/:serviceAccountId/keys',
-            handler: management.createServiceAccountKeyController,
+            handler: serviceAccountManagement.createServiceAccountKeyController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         listServiceAccountKeys: makeRoute({
             route: 'GET /v1/management/service-accounts/:serviceAccountId/keys',
-            handler: management.listServiceAccountKeysController,
+            handler: serviceAccountManagement.listServiceAccountKeysController,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
         deleteServiceAccountKey: makeRoute({
             route: 'DELETE /v1/management/service-accounts/:serviceAccountId/keys/:keyId',
-            handler: management.deleteServiceAccountKeyController,
+            handler: serviceAccountManagement.deleteServiceAccountKeyController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
