@@ -12,6 +12,7 @@ import {getPrimary} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
 import {decodeId} from '../../utils/ids';
 
+import {SIGNATURE_ALGORITHM} from './constants';
 import {generateServiceAccountAccessToken} from './generate-service-account-access-token';
 
 const MAX_CLIENT_JWT_TTL_SECONDS = 600;
@@ -48,7 +49,7 @@ const resolveVerifiedPayload = async (
 
     try {
         return jwt.verify(clientJwt, key.publicKey, {
-            algorithms: ['RS256'],
+            algorithms: [SIGNATURE_ALGORITHM],
         }) as jwt.JwtPayload;
     } catch {
         ctx.logError('EXCHANGE_SA_TOKEN_VERIFY_ERROR', new Error('Key verification failed'));

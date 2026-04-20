@@ -38,6 +38,7 @@ export {
     exchangeServiceAccountToken,
     refreshTokens,
     startSession,
+    generateTokens,
     verifyAccessToken,
     verifyRefreshToken,
 } from '../src/components/jwt-auth';

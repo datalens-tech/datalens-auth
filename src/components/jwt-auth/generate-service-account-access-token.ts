@@ -5,7 +5,7 @@ import type {BigIntId} from '../../db/types/id';
 import {ServiceAccountAccessTokenPayload} from '../../types/token';
 import {encodeId} from '../../utils/ids';
 
-const algorithm = 'PS256';
+import {SIGNATURE_ALGORITHM} from './constants';
 
 export const generateServiceAccountAccessToken = (
     {ctx}: {ctx: AppContext},
@@ -25,6 +25,6 @@ export const generateServiceAccountAccessToken = (
             type: 'service_account',
         },
         ctx.config.tokenPrivateKey,
-        {algorithm, expiresIn: `${ctx.config.serviceAccountAccessTokenTTL}s`},
+        {algorithm: SIGNATURE_ALGORITHM, expiresIn: `${ctx.config.serviceAccountAccessTokenTTL}s`},
     );
 };

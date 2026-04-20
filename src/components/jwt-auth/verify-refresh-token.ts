@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 import {RefreshTokenPayload} from '../../types/token';
 
-const algorithm = 'PS256';
+import {SIGNATURE_ALGORITHM} from './constants';
 
 export const verifyRefreshToken = ({
     ctx,
@@ -11,12 +11,12 @@ export const verifyRefreshToken = ({
 }: {
     ctx: AppContext;
     refreshToken: string;
-}): RefreshTokenPayload => {
+}) => {
     ctx.log('VERIFY_REFRESH_TOKEN');
 
     try {
         const result = jwt.verify(refreshToken, ctx.config.tokenPublicKey, {
-            algorithms: [algorithm],
+            algorithms: [SIGNATURE_ALGORITHM],
         }) as RefreshTokenPayload;
         ctx.log('VERIFY_REFRESH_TOKEN_SUCCESS');
         return result;

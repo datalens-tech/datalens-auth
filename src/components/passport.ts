@@ -2,12 +2,12 @@ import passport from 'passport';
 import {Strategy as LocalStrategy} from 'passport-local';
 import requestIp from 'request-ip';
 
+import {startSession} from '../components/jwt-auth';
 import {USER_AGENT_HEADER} from '../constants/header';
 import {UserModel, UserModelColumn} from '../db/models/user';
 import {getReplica} from '../db/utils/db';
 import type {PlatformAuthorizedUser} from '../types/user';
 
-import {startSession} from './jwt-auth';
 import {comparePasswords} from './passwords';
 import {makeParser, z} from './zod';
 
