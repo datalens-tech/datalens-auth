@@ -11,7 +11,6 @@ export const ServiceAccountModelColumn = {
     Description: 'description',
     PublicKey: 'publicKey',
     Roles: 'roles',
-    CreatedBy: 'createdBy',
     CreatedAt: 'createdAt',
     UpdatedAt: 'updatedAt',
 } as const;
@@ -37,7 +36,6 @@ export class ServiceAccountModel
     description!: Nullable<string>;
     publicKey!: string;
     roles!: `${UserRole}`[];
-    createdBy!: BigIntId;
     createdAt!: string;
     updatedAt!: string;
 }

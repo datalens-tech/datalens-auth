@@ -11,7 +11,6 @@ export const listServiceAccounts = async ({ctx, trx}: ServiceArgs) => {
             ServiceAccountModelColumn.Name,
             ServiceAccountModelColumn.Description,
             ServiceAccountModelColumn.Roles,
-            ServiceAccountModelColumn.CreatedBy,
             ServiceAccountModelColumn.CreatedAt,
         ])
         .orderBy(ServiceAccountModelColumn.CreatedAt, 'desc')

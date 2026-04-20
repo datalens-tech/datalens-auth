@@ -8,19 +8,16 @@ export async function up(knex: Knex): Promise<void> {
             description TEXT,
             public_key TEXT NOT NULL,
             roles TEXT[] NOT NULL DEFAULT '{}',
-            created_by BIGINT NOT NULL REFERENCES auth_users (user_id) ON DELETE RESTRICT,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
         CREATE UNIQUE INDEX auth_sa_name_idx ON auth_service_accounts USING BTREE (name);
-        CREATE INDEX auth_sa_created_by_idx ON auth_service_accounts USING BTREE (created_by);
     `);
 }
 
 export async function down(knex: Knex): Promise<void> {
     return knex.raw(`
-        DROP INDEX auth_sa_created_by_idx;
         DROP INDEX auth_sa_name_idx;
         DROP TABLE auth_service_accounts;
     `);

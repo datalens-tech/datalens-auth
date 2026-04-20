@@ -15,7 +15,6 @@ const responseSchema = z
                 name: z.string(),
                 description: z.string().nullable(),
                 roles: z.enum(UserRole).array(),
-                createdBy: z.string(),
                 createdAt: z.string(),
             })
             .array(),
@@ -36,7 +35,6 @@ export const listServiceAccountsController: AppRouteHandler = async (
             name: sa.name,
             description: sa.description,
             roles: sa.roles as UserRole[],
-            createdBy: encodeId(sa.createdBy),
             createdAt: sa.createdAt,
         })),
     });

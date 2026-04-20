@@ -54,7 +54,6 @@ export const createServiceAccount = async (
         description,
         publicKey,
         roles,
-        createdBy: user.userId!,
     };
 
     const result = await ServiceAccountModel.query(getPrimary(trx))
