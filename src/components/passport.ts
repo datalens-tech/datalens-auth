@@ -2,7 +2,7 @@ import passport from 'passport';
 import {Strategy as LocalStrategy} from 'passport-local';
 import requestIp from 'request-ip';
 
-import {JwtAuth} from '../components/jwt-auth';
+import {startSession} from '../components/jwt-auth';
 import {USER_AGENT_HEADER} from '../constants/header';
 import {UserModel, UserModelColumn} from '../db/models/user';
 import {getReplica} from '../db/utils/db';
@@ -67,7 +67,7 @@ export const initPassport = () => {
                     });
 
                     if (authResult) {
-                        const {accessToken, refreshToken} = await JwtAuth.startSession(
+                        const {accessToken, refreshToken} = await startSession(
                             {ctx: req.ctx},
                             {
                                 userId: user.userId,

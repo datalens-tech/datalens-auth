@@ -2,7 +2,7 @@ import setCookieParser from 'set-cookie-parser';
 import request from 'supertest';
 
 import {getAuthCookieName, getAuthExpCookieName} from '../../../../../components/cookies';
-import {JwtAuth} from '../../../../../components/jwt-auth';
+import {verifyAccessToken, verifyRefreshToken} from '../../../../../components/jwt-auth';
 import {SET_COOKIE_HEADER} from '../../../../../constants/header';
 import {AUTH_ERROR, app, appConfig, appCtx, auth} from '../../../auth';
 import {testUserLogin, testUserPassword} from '../../../constants';
@@ -40,11 +40,11 @@ function checkSettedCookies(responseHeader: Record<string, string | string[]>, s
             let accessTokenPayload = {};
             let refreshTokenPayload = {};
             try {
-                accessTokenPayload = JwtAuth.verifyAccessToken({
+                accessTokenPayload = verifyAccessToken({
                     ctx: appCtx,
                     accessToken: parsedCookie.accessToken,
                 });
-                refreshTokenPayload = JwtAuth.verifyRefreshToken({
+                refreshTokenPayload = verifyRefreshToken({
                     ctx: appCtx,
                     refreshToken: parsedCookie.refreshToken,
                 });
