@@ -2,7 +2,7 @@ import type {Knex} from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.raw(`
-    CREATE OR REPLACE FUNCTION base36_encode (IN digits bigint, IN coding_base char[])
+    CREATE FUNCTION base36_encode (IN digits bigint, IN coding_base char[])
         RETURNS varchar
         AS $$
     DECLARE
@@ -24,7 +24,7 @@ export async function up(knex: Knex): Promise<void> {
     LANGUAGE plpgsql
     IMMUTABLE;
 
-    CREATE OR REPLACE FUNCTION encode_id (IN id bigint)
+    CREATE FUNCTION encode_id (IN id bigint)
         RETURNS text
         AS $$
     DECLARE
@@ -69,7 +69,7 @@ export async function up(knex: Knex): Promise<void> {
 
 export async function down(knex: Knex): Promise<void> {
     return knex.raw(`
-        DROP FUNCTION encode_id;
         DROP FUNCTION base36_encode;
+        DROP FUNCTION encode_id;
     `);
 }
