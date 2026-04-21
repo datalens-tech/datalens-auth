@@ -15,7 +15,7 @@ export interface AddServiceAccountRolesArgs {
 export const addServiceAccountRoles = async (
     {ctx, trx}: ServiceArgs,
     args: AddServiceAccountRolesArgs,
-) => {
+): Promise<void> => {
     const {deltas} = args;
 
     ctx.log('ADD_SERVICE_ACCOUNT_ROLES');

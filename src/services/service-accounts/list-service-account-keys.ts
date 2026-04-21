@@ -29,7 +29,7 @@ export const listServiceAccountKeys = async (
 ): Promise<ListServiceAccountKeysResult> => {
     const {serviceAccountId, page = 0, pageSize = 20} = args;
 
-    ctx.log('LIST_SERVICE_ACCOUNT_KEYS');
+    ctx.log('LIST_SERVICE_ACCOUNT_KEYS', {serviceAccountId});
 
     const keys = await ServiceAccountKeyModel.query(getReplica(trx))
         .select([

@@ -28,7 +28,7 @@ export interface UpdateServiceAccountRolesArgs {
 export const updateServiceAccountRoles = async (
     {ctx, trx}: ServiceArgs,
     args: UpdateServiceAccountRolesArgs,
-) => {
+): Promise<void> => {
     const {deltas} = args;
 
     ctx.log('UPDATE_SERVICE_ACCOUNT_ROLES');

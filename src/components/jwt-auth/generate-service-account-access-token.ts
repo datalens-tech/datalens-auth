@@ -13,7 +13,7 @@ export const generateServiceAccountAccessToken = (
         serviceAccountId,
         roles,
     }: {serviceAccountId: BigIntId; roles: ServiceAccountAccessTokenPayload['roles']},
-) => {
+): string => {
     ctx.log('GENERATE_SA_ACCESS_TOKEN', {serviceAccountId});
 
     const encodedServiceAccountId = encodeId(serviceAccountId);

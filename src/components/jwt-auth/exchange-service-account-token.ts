@@ -15,10 +15,8 @@ import {getPrimary} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
 import {decodeId} from '../../utils/ids';
 
-import {SIGNATURE_ALGORITHM} from './constants';
+import {DEFAULT_MAX_CLIENT_JWT_TTL_SECONDS, SIGNATURE_ALGORITHM} from './constants';
 import {generateServiceAccountAccessToken} from './generate-service-account-access-token';
-
-const MAX_CLIENT_JWT_TTL_SECONDS = 600;
 
 const resolveVerifiedPayload = async (
     {trx, ctx}: ServiceArgs,
@@ -65,7 +63,7 @@ const resolveVerifiedPayload = async (
 export const exchangeServiceAccountToken = async (
     {trx, ctx}: ServiceArgs,
     {clientJwt}: {clientJwt: string},
-) => {
+): Promise<string> => {
     ctx.log('EXCHANGE_SA_TOKEN');
 
     const invalidJwt = (message: string) =>
@@ -123,8 +121,10 @@ export const exchangeServiceAccountToken = async (
         throw invalidJwt('Client JWT must contain numeric iat and exp claims');
     }
 
-    if (payload.exp - payload.iat > MAX_CLIENT_JWT_TTL_SECONDS) {
-        throw invalidJwt(`Client JWT TTL exceeds ${MAX_CLIENT_JWT_TTL_SECONDS} seconds`);
+    const maxClientJwtTTL =
+        ctx.config.maxServiceAccountClientJwtTTL ?? DEFAULT_MAX_CLIENT_JWT_TTL_SECONDS;
+    if (payload.exp - payload.iat > maxClientJwtTTL) {
+        throw invalidJwt(`Client JWT TTL exceeds ${maxClientJwtTTL} seconds`);
     }
 
     ctx.log('EXCHANGE_SA_TOKEN_SUCCESS', {serviceAccountId: decodedServiceAccountId});

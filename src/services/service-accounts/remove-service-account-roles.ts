@@ -17,7 +17,7 @@ export interface RemoveServiceAccountRolesArgs {
 export const removeServiceAccountRoles = async (
     {ctx, trx}: ServiceArgs,
     args: RemoveServiceAccountRolesArgs,
-) => {
+): Promise<void> => {
     const {deltas} = args;
 
     ctx.log('REMOVE_SERVICE_ACCOUNT_ROLES');

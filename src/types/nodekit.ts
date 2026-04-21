@@ -20,6 +20,7 @@ export interface PlatformAppConfig {
     refreshTokenTTL: number;
     sessionTTL: number;
     serviceAccountAccessTokenTTL: number;
+    maxServiceAccountClientJwtTTL?: number;
 
     tokenPrivateKey: string;
     tokenPublicKey: string;
