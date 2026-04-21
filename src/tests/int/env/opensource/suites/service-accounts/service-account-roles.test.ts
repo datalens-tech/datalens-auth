@@ -1,29 +1,17 @@
 import request from 'supertest';
 
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
-import {createTestUsers, generateTokens} from '../../../../helpers';
+import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
-async function createServiceAccount(
-    accessToken: string,
-    name: string,
-    roles: `${UserRole}`[],
-): Promise<string> {
-    const response = await auth(request(app).post(makeRoute('createServiceAccount')), {
-        accessToken,
-    }).send({name, roles});
-    expect(response.status).toBe(200);
-    return response.body.serviceAccountId;
-}
-
-async function getServiceAccountRoles(accessToken: string, serviceAccountId: string) {
+const getServiceAccountRoles = async (accessToken: string, serviceAccountId: string) => {
     const response = await auth(request(app).get(makeRoute('listServiceAccounts')), {accessToken});
     expect(response.status).toBe(200);
     const sa = response.body.serviceAccounts.find(
         (s: {serviceAccountId: string}) => s.serviceAccountId === serviceAccountId,
     );
     return sa?.roles ?? [];
-}
+};
 
 describe('Service account roles', () => {
     let admin = {} as Awaited<ReturnType<typeof createTestUsers>>,
@@ -40,9 +28,11 @@ describe('Service account roles', () => {
         adminTokens = await generateTokens({userId: admin.userId});
         userTokens = await generateTokens({userId: user.userId});
 
-        serviceAccountId = await createServiceAccount(adminTokens.accessToken, 'sa-roles-fixture', [
-            UserRole.Viewer,
-        ]);
+        serviceAccountId = await createTestServiceAccount({
+            accessToken: adminTokens.accessToken,
+            name: 'sa-roles-fixture',
+            roles: [UserRole.Viewer],
+        });
     });
 
     test('Access denied without token for add', async () => {

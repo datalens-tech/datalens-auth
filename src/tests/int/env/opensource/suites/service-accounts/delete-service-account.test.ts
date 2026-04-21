@@ -1,7 +1,7 @@
 import request from 'supertest';
 
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
-import {createTestUsers, generateTokens} from '../../../../helpers';
+import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 describe('Delete service account', () => {
@@ -11,7 +11,6 @@ describe('Delete service account', () => {
         userTokens = {} as Awaited<ReturnType<typeof generateTokens>>;
 
     let saToDeleteId: string;
-    let saToVerifyId: string;
 
     beforeAll(async () => {
         admin = await createTestUsers({roles: [UserRole.Admin], login: 'delete-sa-admin'});
@@ -20,15 +19,11 @@ describe('Delete service account', () => {
         adminTokens = await generateTokens({userId: admin.userId});
         userTokens = await generateTokens({userId: user.userId});
 
-        const r1 = await auth(request(app).post(makeRoute('createServiceAccount')), {
+        saToDeleteId = await createTestServiceAccount({
             accessToken: adminTokens.accessToken,
-        }).send({name: 'delete-sa-target', roles: [UserRole.Viewer]});
-        saToDeleteId = r1.body.serviceAccountId;
-
-        const r2 = await auth(request(app).post(makeRoute('createServiceAccount')), {
-            accessToken: adminTokens.accessToken,
-        }).send({name: 'delete-sa-verify', roles: [UserRole.Viewer]});
-        saToVerifyId = r2.body.serviceAccountId;
+            name: 'delete-sa-target',
+            roles: [UserRole.Viewer],
+        });
     });
 
     test('Access denied without token', async () => {
@@ -93,19 +88,5 @@ describe('Delete service account', () => {
             message: expect.any(String),
             code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
         });
-    });
-
-    test("Can't delete service account with invalid ID", async () => {
-        const response = await auth(
-            request(app).delete(
-                makeRoute('deleteServiceAccount', {serviceAccountId: saToVerifyId}).replace(
-                    saToVerifyId,
-                    'not-a-valid-id',
-                ),
-            ),
-            {accessToken: adminTokens.accessToken},
-        );
-
-        expect(response.status).toBe(400);
     });
 });

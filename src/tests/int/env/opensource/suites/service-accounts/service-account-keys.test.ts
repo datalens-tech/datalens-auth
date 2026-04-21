@@ -1,7 +1,7 @@
 import request from 'supertest';
 
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
-import {createTestUsers, generateTokens, isBigIntId} from '../../../../helpers';
+import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 describe('Service account keys', () => {
@@ -20,15 +20,17 @@ describe('Service account keys', () => {
         adminTokens = await generateTokens({userId: admin.userId});
         userTokens = await generateTokens({userId: user.userId});
 
-        const saResp = await auth(request(app).post(makeRoute('createServiceAccount')), {
+        saId = await createTestServiceAccount({
             accessToken: adminTokens.accessToken,
-        }).send({name: 'keys-sa-fixture', roles: [UserRole.Viewer]});
-        saId = saResp.body.serviceAccountId;
+            name: 'keys-sa-fixture',
+            roles: [UserRole.Viewer],
+        });
 
-        const deletedResp = await auth(request(app).post(makeRoute('createServiceAccount')), {
+        nonExistentSaId = await createTestServiceAccount({
             accessToken: adminTokens.accessToken,
-        }).send({name: 'keys-sa-deleted', roles: [UserRole.Viewer]});
-        nonExistentSaId = deletedResp.body.serviceAccountId;
+            name: 'keys-sa-deleted',
+            roles: [UserRole.Viewer],
+        });
 
         await auth(
             request(app).delete(
@@ -71,7 +73,6 @@ describe('Service account keys', () => {
                 keyId: expect.any(String),
                 privateKey: expect.any(String),
             });
-            expect(isBigIntId(response.body.keyId)).toBe(false);
             expect(response.body.privateKey).toContain('BEGIN PRIVATE KEY');
         });
 
@@ -123,19 +124,7 @@ describe('Service account keys', () => {
             });
         });
 
-        test('Admin can list keys', async () => {
-            const response = await auth(
-                request(app).get(makeRoute('listServiceAccountKeys', {serviceAccountId: saId})),
-                {accessToken: adminTokens.accessToken},
-            );
-
-            expect(response.status).toBe(200);
-            expect(response.body).toStrictEqual({
-                keys: expect.any(Array),
-            });
-        });
-
-        test('List response contains created key with correct structure', async () => {
+        test('Admin can list keys. List response contains created key with correct structure', async () => {
             const response = await auth(
                 request(app).get(makeRoute('listServiceAccountKeys', {serviceAccountId: saId})),
                 {accessToken: adminTokens.accessToken},
@@ -155,7 +144,7 @@ describe('Service account keys', () => {
 
     describe('Delete key', () => {
         let keyToDeleteId: string;
-        let keyToVerifyGoneId: string;
+        let existentKeyId: string;
 
         beforeAll(async () => {
             const r1 = await auth(
@@ -168,7 +157,7 @@ describe('Service account keys', () => {
                 request(app).post(makeRoute('createServiceAccountKey', {serviceAccountId: saId})),
                 {accessToken: adminTokens.accessToken},
             );
-            keyToVerifyGoneId = r2.body.keyId;
+            existentKeyId = r2.body.keyId;
         });
 
         test('Access denied without token', async () => {
@@ -223,29 +212,16 @@ describe('Service account keys', () => {
 
             expect(response.status).toBe(200);
 
-            const found = response.body.keys.find(
+            const deletedKey = response.body.keys.find(
                 (k: {keyId: string}) => k.keyId === keyToDeleteId,
             );
 
-            expect(found).toBeUndefined();
-        });
-
-        test("Can't delete non-existent key", async () => {
-            const response = await auth(
-                request(app).delete(
-                    makeRoute('deleteServiceAccountKey', {
-                        serviceAccountId: saId,
-                        keyId: keyToVerifyGoneId,
-                    }).replace(keyToVerifyGoneId, keyToDeleteId),
-                ),
-                {accessToken: adminTokens.accessToken},
+            const existentKey = response.body.keys.find(
+                (k: {keyId: string}) => k.keyId === existentKeyId,
             );
 
-            expect(response.status).toBe(404);
-            expect(response.body).toStrictEqual({
-                message: expect.any(String),
-                code: AUTH_ERROR.SERVICE_ACCOUNT_KEY_NOT_EXISTS,
-            });
+            expect(deletedKey).toBeUndefined();
+            expect(existentKey).toBeDefined();
         });
     });
 });

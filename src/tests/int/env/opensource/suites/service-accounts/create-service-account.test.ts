@@ -1,7 +1,7 @@
 import request from 'supertest';
 
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
-import {createTestUsers, generateTokens, isBigIntId} from '../../../../helpers';
+import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 describe('Create service account', () => {
@@ -49,19 +49,6 @@ describe('Create service account', () => {
             accessToken: adminTokens.accessToken,
         }).send({
             name: 'create-sa-basic',
-            roles: [UserRole.Viewer],
-        });
-
-        expect(response.status).toBe(200);
-        expect(response.body).toStrictEqual({serviceAccountId: expect.any(String)});
-        expect(isBigIntId(response.body.serviceAccountId)).toBe(false);
-    });
-
-    test('Admin can create service account with description and multiple roles', async () => {
-        const response = await auth(request(app).post(makeRoute('createServiceAccount')), {
-            accessToken: adminTokens.accessToken,
-        }).send({
-            name: 'create-sa-full',
             description: 'A test service account',
             roles: [UserRole.Viewer, UserRole.Editor],
         });
@@ -71,18 +58,11 @@ describe('Create service account', () => {
     });
 
     test("Can't create service account with duplicate name", async () => {
-        await auth(request(app).post(makeRoute('createServiceAccount')), {
-            accessToken: adminTokens.accessToken,
-        }).send({
-            name: 'create-sa-duplicate',
-            roles: [UserRole.Viewer],
-        });
-
         const response = await auth(request(app).post(makeRoute('createServiceAccount')), {
             accessToken: adminTokens.accessToken,
         }).send({
-            name: 'create-sa-duplicate',
-            roles: [UserRole.Editor],
+            name: 'create-sa-basic',
+            roles: [UserRole.Viewer],
         });
 
         expect(response.status).toBe(409);

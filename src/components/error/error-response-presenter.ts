@@ -181,7 +181,7 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
                 code: 401,
                 response: {
                     code,
-                    message: 'Invalid service account JWT',
+                    message,
                 },
             };
         }

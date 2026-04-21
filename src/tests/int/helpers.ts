@@ -1,3 +1,5 @@
+import request from 'supertest';
+
 import {startSession} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {UserRole} from '../../constants/role';
@@ -7,8 +9,9 @@ import type {BigIntId, StringId} from '../../db/types/id';
 import {registry} from '../../registry/';
 import {decodeId} from '../../utils/ids';
 
-import {appConfig, appCtx} from './auth';
+import {app, appConfig, appCtx, auth} from './auth';
 import {testUserLogin, testUserPassword} from './constants';
+import {makeRoute} from './routes';
 
 export type CreateTestUserArgs = {
     login?: string;
@@ -76,4 +79,24 @@ export const isBigIntId = (value: string) => {
         return typeof BigInt(value) === 'bigint';
     } catch {}
     return false;
+};
+
+export type CreateTestServiceAccountArgs = {
+    accessToken: string;
+    name: string;
+    roles: `${UserRole}`[];
+    description?: string;
+};
+
+export const createTestServiceAccount = async ({
+    accessToken,
+    name,
+    roles,
+    description,
+}: CreateTestServiceAccountArgs): Promise<string> => {
+    const response = await auth(request(app).post(makeRoute('createServiceAccount')), {
+        accessToken,
+    }).send({name, roles, description});
+
+    return response.body.serviceAccountId;
 };

@@ -1,7 +1,7 @@
 import request from 'supertest';
 
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
-import {createTestUsers, generateTokens} from '../../../../helpers';
+import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 describe('List service accounts', () => {
@@ -19,15 +19,12 @@ describe('List service accounts', () => {
         adminTokens = await generateTokens({userId: admin.userId});
         userTokens = await generateTokens({userId: user.userId});
 
-        const response = await auth(request(app).post(makeRoute('createServiceAccount')), {
+        createdServiceAccountId = await createTestServiceAccount({
             accessToken: adminTokens.accessToken,
-        }).send({
             name: 'list-sa-fixture',
             description: 'Fixture service account for list tests',
             roles: [UserRole.Viewer],
         });
-
-        createdServiceAccountId = response.body.serviceAccountId;
     });
 
     test('Access denied without token', async () => {

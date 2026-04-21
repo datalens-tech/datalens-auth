@@ -74,6 +74,11 @@ export const exchangeServiceAccountToken = async (
         throw invalidJwt('Malformed client JWT');
     }
 
+    if (!decoded) {
+        ctx.logError('EXCHANGE_SA_DECODED_TOKEN_EMPTY');
+        throw invalidJwt('Malformed client JWT');
+    }
+
     const rawPayload =
         decoded?.payload && typeof decoded.payload === 'object' ? decoded.payload : null;
     const iss = rawPayload ? (rawPayload as {iss?: unknown}).iss : undefined;

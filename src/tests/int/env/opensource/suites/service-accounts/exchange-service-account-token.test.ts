@@ -1,8 +1,10 @@
+import crypto from 'node:crypto';
+
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
-import {createTestUsers, generateTokens} from '../../../../helpers';
+import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 const signClientJwt = (
@@ -32,13 +34,11 @@ describe('Exchange service account token', () => {
         admin = await createTestUsers({roles: [UserRole.Admin], login: 'exchange-token-admin'});
         adminTokens = await generateTokens({userId: admin.userId});
 
-        const saResp = await auth(request(app).post(makeRoute('createServiceAccount')), {
+        saId = await createTestServiceAccount({
             accessToken: adminTokens.accessToken,
-        }).send({
             name: 'exchange-token-sa',
             roles: [UserRole.Viewer],
         });
-        saId = saResp.body.serviceAccountId;
 
         const keyResp = await auth(
             request(app).post(makeRoute('createServiceAccountKey', {serviceAccountId: saId})),
@@ -66,19 +66,17 @@ describe('Exchange service account token', () => {
 
         expect(response.status).toBe(401);
         expect(response.body).toStrictEqual({
-            message: expect.any(String),
+            message: 'Malformed client JWT',
             code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT,
         });
     });
 
     test('Returns 401 for JWT signed with wrong key', async () => {
-        const {privateKey: wrongKey} = await import('node:crypto').then((c) =>
-            c.generateKeyPairSync('rsa', {
-                modulusLength: 2048,
-                publicKeyEncoding: {type: 'spki', format: 'pem'},
-                privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
-            }),
-        );
+        const {privateKey: wrongKey} = crypto.generateKeyPairSync('rsa', {
+            modulusLength: 2048,
+            publicKeyEncoding: {type: 'spki', format: 'pem'},
+            privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
+        });
 
         const clientJwt = signClientJwt(saId, keyId, wrongKey);
 
@@ -88,7 +86,7 @@ describe('Exchange service account token', () => {
 
         expect(response.status).toBe(401);
         expect(response.body).toStrictEqual({
-            message: expect.any(String),
+            message: 'Client JWT signature verification failed',
             code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT,
         });
     });
@@ -106,7 +104,7 @@ describe('Exchange service account token', () => {
 
         expect(response.status).toBe(401);
         expect(response.body).toStrictEqual({
-            message: expect.any(String),
+            message: 'Client JWT TTL exceeds 600 seconds',
             code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT,
         });
     });
@@ -143,6 +141,46 @@ describe('Exchange service account token', () => {
         expect(response.body).toStrictEqual({
             message: expect.any(String),
             code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
+        });
+    });
+
+    test('Returns 401 for JWT with missing or invalid kid', async () => {
+        const now = Math.floor(Date.now() / 1000);
+        const payload = {
+            iss: saId,
+            iat: now,
+            exp: now + 300,
+        };
+        const clientJwt = jwt.sign(payload, privateKey, {algorithm: 'PS256'});
+
+        const response = await request(app)
+            .post(makeRoute('exchangeServiceAccountToken'))
+            .send({jwt: clientJwt});
+
+        expect(response.status).toBe(401);
+        expect(response.body).toStrictEqual({
+            message: 'Missing or invalid kid in client JWT header',
+            code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT,
+        });
+    });
+
+    test('Returns 401 for JWT with invalid iss claim', async () => {
+        const now = Math.floor(Date.now() / 1000);
+        const payload = {
+            iss: 'invalid-service-account-id',
+            iat: now,
+            exp: now + 300,
+        };
+        const clientJwt = jwt.sign(payload, privateKey, {algorithm: 'PS256', keyid: keyId});
+
+        const response = await request(app)
+            .post(makeRoute('exchangeServiceAccountToken'))
+            .send({jwt: clientJwt});
+
+        expect(response.status).toBe(401);
+        expect(response.body).toStrictEqual({
+            message: 'Invalid iss claim in client JWT',
+            code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT,
         });
     });
 
