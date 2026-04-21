@@ -3,7 +3,10 @@ import {AppRouteHandler, Response} from '@gravity-ui/expresskit';
 import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
-import {exchangeServiceAccountToken} from '../../services/service-accounts/exchange-token';
+import {
+    ExchangeServiceAccountTokenResult,
+    exchangeServiceAccountToken,
+} from '../../services/service-accounts/exchange-token';
 
 const requestSchema = {
     body: z.object({
@@ -11,25 +14,31 @@ const requestSchema = {
     }),
 };
 
-const parseReq = makeReqParser(requestSchema);
-
 const responseSchema = z
     .object({
         accessToken: z.string(),
     })
     .describe('Service account access token');
 
-type ResponseBody = z.infer<typeof responseSchema>;
+type ExchangeServiceAccountTokenModel = z.infer<typeof responseSchema>;
+
+const format = (data: ExchangeServiceAccountTokenResult): ExchangeServiceAccountTokenModel => {
+    return {
+        accessToken: data.accessToken,
+    };
+};
+
+const parseReq = makeReqParser(requestSchema);
 
 export const exchangeServiceAccountTokenController: AppRouteHandler = async (
     req,
-    res: Response<ResponseBody>,
+    res: Response<ExchangeServiceAccountTokenModel>,
 ) => {
     const {body} = await parseReq(req);
 
     const result = await exchangeServiceAccountToken({ctx: req.ctx}, {clientJwt: body.jwt});
 
-    res.status(200).send(result);
+    res.status(200).send(format(result));
 };
 
 exchangeServiceAccountTokenController.api = {

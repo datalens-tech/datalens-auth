@@ -3,11 +3,11 @@ import {AppRouteHandler, Response} from '@gravity-ui/expresskit';
 import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
-import {createServiceAccountKey} from '../../services/service-accounts/create-service-account-key';
 import {
-    CreateServiceAccountKeyModel,
-    createServiceAccountKeyModel,
-} from '../reponse-models/service-accounts/create-service-account-key-model';
+    CreateServiceAccountKeyResult,
+    createServiceAccountKey,
+} from '../../services/service-accounts/create-service-account-key';
+import {encodeId} from '../../utils/ids';
 
 const requestSchema = {
     params: z.object({
@@ -15,7 +15,21 @@ const requestSchema = {
     }),
 };
 
-const responseSchema = createServiceAccountKeyModel.schema;
+const responseSchema = z
+    .object({
+        keyId: z.string(),
+        privateKey: z.string(),
+    })
+    .describe('Created service account key');
+
+type CreateServiceAccountKeyModel = z.infer<typeof responseSchema>;
+
+const format = (data: CreateServiceAccountKeyResult): CreateServiceAccountKeyModel => {
+    return {
+        keyId: encodeId(data.keyId),
+        privateKey: data.privateKey,
+    };
+};
 
 const parseReq = makeReqParser(requestSchema);
 
@@ -30,7 +44,7 @@ export const createServiceAccountKeyController: AppRouteHandler = async (
         {serviceAccountId: params.serviceAccountId},
     );
 
-    res.status(200).send(createServiceAccountKeyModel.format(result));
+    res.status(200).send(format(result));
 };
 
 createServiceAccountKeyController.api = {

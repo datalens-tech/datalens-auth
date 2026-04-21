@@ -1,4 +1,4 @@
-import {AppRouteHandler, Response} from '@gravity-ui/expresskit';
+import {AppRouteHandler} from '@gravity-ui/expresskit';
 
 import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
@@ -14,18 +14,7 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const responseSchema = z
-    .object({
-        keys: serviceAccountKeyModelArray.schema,
-    })
-    .describe('Service account keys list');
-
-type ResponseBody = z.infer<typeof responseSchema>;
-
-export const listServiceAccountKeysController: AppRouteHandler = async (
-    req,
-    res: Response<ResponseBody>,
-) => {
+export const listServiceAccountKeysController: AppRouteHandler = async (req, res) => {
     const {params} = await parseReq(req);
 
     const keys = await listServiceAccountKeys(
@@ -46,10 +35,10 @@ listServiceAccountKeysController.api = {
     },
     responses: {
         200: {
-            description: responseSchema.description ?? '',
+            description: serviceAccountKeyModelArray.schema.description ?? '',
             content: {
                 [CONTENT_TYPE_JSON]: {
-                    schema: responseSchema,
+                    schema: serviceAccountKeyModelArray.schema,
                 },
             },
         },

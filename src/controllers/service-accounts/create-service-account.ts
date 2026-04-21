@@ -1,11 +1,11 @@
-import {AppRouteHandler, Response} from '@gravity-ui/expresskit';
+import {AppRouteHandler} from '@gravity-ui/expresskit';
 
 import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
 import {createServiceAccount} from '../../services/service-accounts/create-service-account';
-import {encodeId} from '../../utils/ids';
+import {serviceAccountModel} from '../reponse-models/service-accounts/service-account-model';
 
 const requestSchema = {
     body: z.object({
@@ -17,22 +17,7 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-const responseSchema = z
-    .object({
-        serviceAccountId: z.string(),
-    })
-    .describe('Created service account');
-
-type ResponseBody = z.infer<typeof responseSchema>;
-
-const format = (data: Awaited<ReturnType<typeof createServiceAccount>>): ResponseBody => ({
-    serviceAccountId: encodeId(data.serviceAccountId),
-});
-
-export const createServiceAccountController: AppRouteHandler = async (
-    req,
-    res: Response<ResponseBody>,
-) => {
+export const createServiceAccountController: AppRouteHandler = async (req, res) => {
     const {body} = await parseReq(req);
 
     const result = await createServiceAccount(
@@ -44,7 +29,7 @@ export const createServiceAccountController: AppRouteHandler = async (
         },
     );
 
-    res.status(200).send(format(result));
+    res.status(200).send(serviceAccountModel.format(result));
 };
 
 createServiceAccountController.api = {
@@ -61,10 +46,10 @@ createServiceAccountController.api = {
     },
     responses: {
         200: {
-            description: responseSchema.description ?? '',
+            description: serviceAccountModel.schema.description ?? '',
             content: {
                 [CONTENT_TYPE_JSON]: {
-                    schema: responseSchema,
+                    schema: serviceAccountModel.schema,
                 },
             },
         },
