@@ -1,18 +1,29 @@
 import {AppRouteHandler, Response} from '@gravity-ui/expresskit';
 
 import {ApiTag} from '../../components/api-docs';
-import {makeReqParser, z, zc} from '../../components/zod';
+import {makeIdDecoder, makeReqParser, z} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
 import {addServiceAccountRoles} from '../../services/service-accounts/add-service-account-roles';
-import {SuccessResponseModel, successModel} from '../reponse-models';
+import {macrotasksMap} from '../../utils/ids';
+import {SuccessResponseModel, successModel} from '../response-models';
 
 const requestSchema = {
-    params: z.object({
-        serviceAccountId: zc.decodeId(),
-    }),
     body: z.object({
-        roles: z.enum(UserRole).array().min(1).max(100),
+        deltas: z
+            .object({
+                role: z.enum(UserRole),
+                subjectId: z.string(),
+            })
+            .array()
+            .min(1)
+            .max(50)
+            .transform(async (values, ctx) => {
+                return await macrotasksMap(values, (value) => ({
+                    ...value,
+                    subjectId: makeIdDecoder(ctx)(value.subjectId),
+                }));
+            }),
     }),
 };
 
@@ -22,13 +33,12 @@ export const addServiceAccountRolesController: AppRouteHandler = async (
     req,
     res: Response<SuccessResponseModel>,
 ) => {
-    const {params, body} = await parseReq(req);
+    const {body} = await parseReq(req);
 
     await addServiceAccountRoles(
         {ctx: req.ctx},
         {
-            serviceAccountId: params.serviceAccountId,
-            roles: body.roles,
+            deltas: body.deltas,
         },
     );
 
@@ -39,7 +49,6 @@ addServiceAccountRolesController.api = {
     summary: 'Add service account roles',
     tags: [ApiTag.Management],
     request: {
-        params: requestSchema.params,
         body: {
             content: {
                 [CONTENT_TYPE_JSON]: {

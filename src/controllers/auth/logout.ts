@@ -4,7 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {clearAuthCookies, getAuthCookies} from '../../components/cookies';
 import {closeSession} from '../../components/jwt-auth';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
-import {SuccessResponseModel, cookieHeaderSchema, successModel} from '../reponse-models';
+import {SuccessResponseModel, cookieHeaderSchema, successModel} from '../response-models';
 
 export const logoutController: AppRouteHandler = async (
     req,

@@ -1,7 +1,7 @@
 import pick from 'lodash/pick';
 import request from 'supertest';
 
-import type {UserWithRolesModel} from '../../../../../../controllers/reponse-models/users/user-with-roles-model';
+import type {UserWithRolesModel} from '../../../../../../controllers/response-models/users/user-with-roles-model';
 import {UserModel, UserModelColumn} from '../../../../../../db/models/user';
 import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';

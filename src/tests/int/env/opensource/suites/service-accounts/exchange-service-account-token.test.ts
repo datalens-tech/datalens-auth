@@ -140,7 +140,7 @@ describe('Exchange service account token', () => {
         expect(response.status).toBe(404);
         expect(response.body).toStrictEqual({
             message: expect.any(String),
-            code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
+            code: AUTH_ERROR.SERVICE_ACCOUNT_KEY_NOT_EXISTS,
         });
     });
 

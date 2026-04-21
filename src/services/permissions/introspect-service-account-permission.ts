@@ -1,5 +1,8 @@
 import {Permission} from '../../constants/permission';
-import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
+import {
+    ServiceAccountRoleModel,
+    ServiceAccountRoleModelColumn,
+} from '../../db/models/service-account-role';
 import type {BigIntId} from '../../db/types/id';
 import {getReplica} from '../../db/utils/db';
 import type {ServiceArgs} from '../../types/service';
@@ -10,28 +13,29 @@ export type IntrospectServiceAccountPermissionArgs = {
     permission: `${Permission}`;
 };
 
-export async function introspectServiceAccountPermission(
+export const introspectServiceAccountPermission = async (
     {ctx, trx}: ServiceArgs,
     args: IntrospectServiceAccountPermissionArgs,
-): Promise<boolean> {
+): Promise<boolean> => {
     const {serviceAccountId, permission} = args;
 
     ctx.log('INTROSPECT_SERVICE_ACCOUNT_PERMISSION', {serviceAccountId, permission});
 
-    const sa = await ServiceAccountModel.query(getReplica(trx))
-        .select(ServiceAccountModelColumn.Roles)
-        .where(ServiceAccountModelColumn.ServiceAccountId, serviceAccountId)
-        .first()
-        .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+    const serviceAccountRoles = await ServiceAccountRoleModel.query(getReplica(trx))
+        .select(ServiceAccountRoleModelColumn.Role)
+        .where(ServiceAccountRoleModelColumn.ServiceAccountId, serviceAccountId)
+        .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
 
-    if (!sa) {
-        ctx.log('INTROSPECT_SERVICE_ACCOUNT_PERMISSION_NOT_FOUND');
+    if (serviceAccountRoles.length === 0) {
+        ctx.log('INTROSPECT_SERVICE_ACCOUNT_PERMISSION_NO_ROLES');
         return false;
     }
 
-    const hasPermission = sa.roles.some((role) => checkPermission({role, permission}));
+    const hasPermission = serviceAccountRoles.some((roleRecord) =>
+        checkPermission({role: roleRecord.role, permission}),
+    );
 
     ctx.log('INTROSPECT_SERVICE_ACCOUNT_PERMISSION_RESULT', {hasPermission});
 
     return hasPermission;
-}
+};

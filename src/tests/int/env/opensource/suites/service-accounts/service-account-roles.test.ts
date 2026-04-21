@@ -38,29 +38,39 @@ describe('Service account roles', () => {
     test('Access denied without token for add', async () => {
         const response = await request(app)
             .post(makeRoute('addServiceAccountRoles', {serviceAccountId}))
-            .send({roles: [UserRole.Editor]});
+            .send({deltas: [{role: UserRole.Editor, subjectId: serviceAccountId}]});
         expect(response.status).toBe(401);
     });
 
     test('Access denied without token for update', async () => {
         const response = await request(app)
             .post(makeRoute('updateServiceAccountRoles', {serviceAccountId}))
-            .send({deltas: [{oldRole: UserRole.Viewer, newRole: UserRole.Editor}]});
+            .send({
+                deltas: [
+                    {
+                        oldRole: UserRole.Viewer,
+                        newRole: UserRole.Editor,
+                        subjectId: serviceAccountId,
+                    },
+                ],
+            });
         expect(response.status).toBe(401);
     });
 
     test('Access denied without token for remove', async () => {
         const response = await request(app)
             .post(makeRoute('removeServiceAccountRoles', {serviceAccountId}))
-            .send({roles: [UserRole.Viewer]});
+            .send({deltas: [{role: UserRole.Viewer, subjectId: serviceAccountId}]});
         expect(response.status).toBe(401);
     });
 
     test("User can't add roles to service account", async () => {
         const response = await auth(
             request(app).post(makeRoute('addServiceAccountRoles', {serviceAccountId})),
-            {accessToken: userTokens.accessToken},
-        ).send({roles: [UserRole.Editor]});
+            {
+                accessToken: userTokens.accessToken,
+            },
+        ).send({deltas: [{role: UserRole.Editor, subjectId: serviceAccountId}]});
 
         expect(response.status).toBe(403);
         expect(response.body).toStrictEqual({
@@ -72,8 +82,14 @@ describe('Service account roles', () => {
     test("User can't update roles on service account", async () => {
         const response = await auth(
             request(app).post(makeRoute('updateServiceAccountRoles', {serviceAccountId})),
-            {accessToken: userTokens.accessToken},
-        ).send({deltas: [{oldRole: UserRole.Viewer, newRole: UserRole.Editor}]});
+            {
+                accessToken: userTokens.accessToken,
+            },
+        ).send({
+            deltas: [
+                {oldRole: UserRole.Viewer, newRole: UserRole.Editor, subjectId: serviceAccountId},
+            ],
+        });
 
         expect(response.status).toBe(403);
         expect(response.body).toStrictEqual({
@@ -85,8 +101,10 @@ describe('Service account roles', () => {
     test("User can't remove roles from service account", async () => {
         const response = await auth(
             request(app).post(makeRoute('removeServiceAccountRoles', {serviceAccountId})),
-            {accessToken: userTokens.accessToken},
-        ).send({roles: [UserRole.Viewer]});
+            {
+                accessToken: userTokens.accessToken,
+            },
+        ).send({deltas: [{role: UserRole.Viewer, subjectId: serviceAccountId}]});
 
         expect(response.status).toBe(403);
         expect(response.body).toStrictEqual({
@@ -98,8 +116,10 @@ describe('Service account roles', () => {
     test('Admin can add a role', async () => {
         const response = await auth(
             request(app).post(makeRoute('addServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({roles: [UserRole.Editor]});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({deltas: [{role: UserRole.Editor, subjectId: serviceAccountId}]});
 
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({done: true});
@@ -111,8 +131,15 @@ describe('Service account roles', () => {
     test('Admin can add roles that already exist (idempotent)', async () => {
         const response = await auth(
             request(app).post(makeRoute('addServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({roles: [UserRole.Viewer, UserRole.Creator]});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({
+            deltas: [
+                {role: UserRole.Viewer, subjectId: serviceAccountId},
+                {role: UserRole.Creator, subjectId: serviceAccountId},
+            ],
+        });
 
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({done: true});
@@ -124,8 +151,14 @@ describe('Service account roles', () => {
     test('Admin can update a role', async () => {
         const response = await auth(
             request(app).post(makeRoute('updateServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({deltas: [{oldRole: UserRole.Creator, newRole: UserRole.Admin}]});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({
+            deltas: [
+                {oldRole: UserRole.Creator, newRole: UserRole.Admin, subjectId: serviceAccountId},
+            ],
+        });
 
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({done: true});
@@ -137,8 +170,14 @@ describe('Service account roles', () => {
     test("Admin can't update a non-existent old role", async () => {
         const response = await auth(
             request(app).post(makeRoute('updateServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({deltas: [{oldRole: UserRole.Creator, newRole: UserRole.Visitor}]});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({
+            deltas: [
+                {oldRole: UserRole.Creator, newRole: UserRole.Visitor, subjectId: serviceAccountId},
+            ],
+        });
 
         expect(response.status).toBe(404);
         expect(response.body).toStrictEqual({
@@ -150,8 +189,14 @@ describe('Service account roles', () => {
     test("Admin can't update a role to one that already exists", async () => {
         const response = await auth(
             request(app).post(makeRoute('updateServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({deltas: [{oldRole: UserRole.Viewer, newRole: UserRole.Editor}]});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({
+            deltas: [
+                {oldRole: UserRole.Viewer, newRole: UserRole.Editor, subjectId: serviceAccountId},
+            ],
+        });
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -163,8 +208,10 @@ describe('Service account roles', () => {
     test('Admin can remove a role', async () => {
         const response = await auth(
             request(app).post(makeRoute('removeServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({roles: [UserRole.Admin]});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({deltas: [{role: UserRole.Admin, subjectId: serviceAccountId}]});
 
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({done: true});
@@ -176,8 +223,15 @@ describe('Service account roles', () => {
     test('Admin can remove roles that do not exist (graceful)', async () => {
         const response = await auth(
             request(app).post(makeRoute('removeServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({roles: [UserRole.Admin, UserRole.Creator]});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({
+            deltas: [
+                {role: UserRole.Admin, subjectId: serviceAccountId},
+                {role: UserRole.Creator, subjectId: serviceAccountId},
+            ],
+        });
 
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({done: true});
@@ -186,53 +240,13 @@ describe('Service account roles', () => {
         expect(roles).toIncludeSameMembers([UserRole.Viewer, UserRole.Editor]);
     });
 
-    test('Returns 404 for non-existent service account on add', async () => {
-        const fakeId = '7cweyb3kxxp8s';
-        const response = await auth(
-            request(app).post(makeRoute('addServiceAccountRoles', {serviceAccountId: fakeId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({roles: [UserRole.Viewer]});
-
-        expect(response.status).toBe(404);
-        expect(response.body).toStrictEqual({
-            message: expect.any(String),
-            code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
-        });
-    });
-
-    test('Returns 404 for non-existent service account on update', async () => {
-        const fakeId = '7cweyb3kxxp8s';
-        const response = await auth(
-            request(app).post(makeRoute('updateServiceAccountRoles', {serviceAccountId: fakeId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({deltas: [{oldRole: UserRole.Viewer, newRole: UserRole.Editor}]});
-
-        expect(response.status).toBe(404);
-        expect(response.body).toStrictEqual({
-            message: expect.any(String),
-            code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
-        });
-    });
-
-    test('Returns 404 for non-existent service account on remove', async () => {
-        const fakeId = '7cweyb3kxxp8s';
-        const response = await auth(
-            request(app).post(makeRoute('removeServiceAccountRoles', {serviceAccountId: fakeId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({roles: [UserRole.Viewer]});
-
-        expect(response.status).toBe(404);
-        expect(response.body).toStrictEqual({
-            message: expect.any(String),
-            code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
-        });
-    });
-
-    test('Validation error when roles array is empty on add', async () => {
+    test('Validation error when deltas array is empty on add', async () => {
         const response = await auth(
             request(app).post(makeRoute('addServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({roles: []});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({deltas: []});
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({
@@ -245,7 +259,9 @@ describe('Service account roles', () => {
     test('Validation error when deltas array is empty on update', async () => {
         const response = await auth(
             request(app).post(makeRoute('updateServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
+            {
+                accessToken: adminTokens.accessToken,
+            },
         ).send({deltas: []});
 
         expect(response.status).toBe(400);
@@ -256,11 +272,13 @@ describe('Service account roles', () => {
         });
     });
 
-    test('Validation error when roles array is empty on remove', async () => {
+    test('Validation error when deltas array is empty on remove', async () => {
         const response = await auth(
             request(app).post(makeRoute('removeServiceAccountRoles', {serviceAccountId})),
-            {accessToken: adminTokens.accessToken},
-        ).send({roles: []});
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        ).send({deltas: []});
 
         expect(response.status).toBe(400);
         expect(response.body).toStrictEqual({

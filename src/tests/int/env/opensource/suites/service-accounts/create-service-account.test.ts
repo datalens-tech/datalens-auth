@@ -58,7 +58,6 @@ describe('Create service account', () => {
             serviceAccountId: expect.any(String),
             name: 'create-sa-basic',
             description: 'A test service account',
-            roles: [UserRole.Viewer, UserRole.Editor],
         });
     });
 

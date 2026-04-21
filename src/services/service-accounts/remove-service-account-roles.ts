@@ -1,48 +1,68 @@
-import {AppError} from '@gravity-ui/nodekit';
-
-import {AUTH_ERROR} from '../../constants/error-constants';
 import {UserRole} from '../../constants/role';
-import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
-import type {BigIntId} from '../../db/types/id';
+import {
+    ServiceAccountRoleModel,
+    ServiceAccountRoleModelColumn,
+} from '../../db/models/service-account-role';
+import {BigIntId} from '../../db/types/id';
 import {getPrimary, getReplica} from '../../db/utils/db';
-import {setCurrentTime} from '../../db/utils/query';
 import {ServiceArgs} from '../../types/service';
 
-export type RemoveServiceAccountRolesArgs = {
-    serviceAccountId: BigIntId;
-    roles: `${UserRole}`[];
-};
+const SPLITTER = '~@~';
+type RoleAndServiceAccountIdKey = `${UserRole}${typeof SPLITTER}${BigIntId}`;
+
+export interface RemoveServiceAccountRolesArgs {
+    deltas: {role: `${UserRole}`; subjectId: BigIntId}[];
+}
 
 export const removeServiceAccountRoles = async (
     {ctx, trx}: ServiceArgs,
     args: RemoveServiceAccountRolesArgs,
-): Promise<void> => {
-    const {serviceAccountId, roles} = args;
+) => {
+    const {deltas} = args;
 
-    ctx.log('REMOVE_SERVICE_ACCOUNT_ROLES', {serviceAccountId});
+    ctx.log('REMOVE_SERVICE_ACCOUNT_ROLES');
 
-    const sa = await ServiceAccountModel.query(getReplica(trx))
-        .select([ServiceAccountModelColumn.ServiceAccountId, ServiceAccountModelColumn.Roles])
-        .where(ServiceAccountModelColumn.ServiceAccountId, serviceAccountId)
-        .first()
-        .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+    const allServiceAccountIds = new Set<BigIntId>();
 
-    if (!sa) {
-        throw new AppError(AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS, {
-            code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
-        });
+    for (const delta of deltas) {
+        const {subjectId} = delta;
+        allServiceAccountIds.add(subjectId);
     }
 
-    const removeSet = new Set(roles);
-    const remaining = sa.roles.filter((r) => !removeSet.has(r));
+    const roleModels = await ServiceAccountRoleModel.query(getReplica(trx))
+        .select([
+            ServiceAccountRoleModelColumn.RoleId,
+            ServiceAccountRoleModelColumn.ServiceAccountId,
+            ServiceAccountRoleModelColumn.Role,
+        ])
+        .whereIn(ServiceAccountRoleModelColumn.ServiceAccountId, Array.from(allServiceAccountIds))
+        .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
 
-    await ServiceAccountModel.query(getPrimary(trx))
-        .patch({
-            [ServiceAccountModelColumn.Roles]: remaining,
-            [ServiceAccountModelColumn.UpdatedAt]: setCurrentTime(),
-        })
-        .where(ServiceAccountModelColumn.ServiceAccountId, serviceAccountId)
-        .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+    const roleAndServiceAccountIdToRoleModel: Record<
+        RoleAndServiceAccountIdKey,
+        ServiceAccountRoleModel
+    > = {};
+    for (const roleModel of roleModels) {
+        const serviceAccountId = roleModel.serviceAccountId;
+        const roleAndServiceAccountIdKey: RoleAndServiceAccountIdKey = `${roleModel.role}${SPLITTER}${serviceAccountId}`;
+        roleAndServiceAccountIdToRoleModel[roleAndServiceAccountIdKey] = roleModel;
+    }
 
-    ctx.log('REMOVE_SERVICE_ACCOUNT_ROLES_SUCCESS', {serviceAccountId});
+    const roleIdsForRemove = new Set<BigIntId>();
+
+    for (const delta of deltas) {
+        const {subjectId, role} = delta;
+        const roleAndServiceAccountIdKey: RoleAndServiceAccountIdKey = `${role}${SPLITTER}${subjectId}`;
+        const roleModel = roleAndServiceAccountIdToRoleModel[roleAndServiceAccountIdKey];
+        if (roleModel) {
+            roleIdsForRemove.add(roleModel.roleId);
+        }
+    }
+
+    await ServiceAccountRoleModel.query(getPrimary(trx))
+        .delete()
+        .whereIn(ServiceAccountRoleModelColumn.RoleId, Array.from(roleIdsForRemove))
+        .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
+
+    ctx.log('REMOVE_SERVICE_ACCOUNT_ROLES_SUCCESS');
 };

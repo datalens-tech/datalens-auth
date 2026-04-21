@@ -3,7 +3,7 @@ import {AppRouteHandler, Response} from '@gravity-ui/expresskit';
 import {ApiTag} from '../../components/api-docs';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {getUserProfile} from '../../services/users/get-user-profile';
-import {UserProfileModel, userProfileModel} from '../reponse-models/users/user-profile-model';
+import {UserProfileModel, userProfileModel} from '../response-models/users/user-profile-model';
 
 export const getUserProfileController: AppRouteHandler = async (
     req,

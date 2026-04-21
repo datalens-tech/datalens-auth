@@ -1,9 +1,13 @@
 import {AppError} from '@gravity-ui/nodekit';
-import type {PartialModelObject} from 'objection';
+import {transaction} from 'objection';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {UserRole} from '../../constants/role';
 import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
+import {
+    ServiceAccountRoleModel,
+    ServiceAccountRoleModelColumn,
+} from '../../db/models/service-account-role';
 import {getPrimary, getReplica} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
 import {Optional} from '../../utils/utility-types';
@@ -11,7 +15,7 @@ import {Optional} from '../../utils/utility-types';
 export type CreateServiceAccountArgs = {
     name: string;
     description: Optional<string>;
-    roles: UserRole[];
+    roles: Optional<UserRole[]>;
 };
 
 export const createServiceAccount = async (
@@ -39,16 +43,33 @@ export const createServiceAccount = async (
 
     const serviceAccountId = await getId();
 
-    const insertData: PartialModelObject<ServiceAccountModel> = {
-        serviceAccountId,
-        name,
-        description,
-        roles,
-    };
+    const result = await transaction(getPrimary(trx), async (transactionTrx) => {
+        const createdServiceAccount = await ServiceAccountModel.query(transactionTrx)
+            .insert({
+                [ServiceAccountModelColumn.ServiceAccountId]: serviceAccountId,
+                [ServiceAccountModelColumn.Name]: name,
+                [ServiceAccountModelColumn.Description]: description,
+            })
+            .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
 
-    const result = await ServiceAccountModel.query(getPrimary(trx))
-        .insert(insertData)
-        .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+        const resultRoles = (Array.isArray(roles) ? roles : [ctx.config.defaultRole]).filter(
+            Boolean,
+        );
+
+        if (resultRoles.length) {
+            const normalizedRoles = Array.from(new Set(resultRoles));
+            await ServiceAccountRoleModel.query(transactionTrx)
+                .insert(
+                    normalizedRoles.map((role) => ({
+                        [ServiceAccountRoleModelColumn.ServiceAccountId]: serviceAccountId,
+                        [ServiceAccountRoleModelColumn.Role]: role,
+                    })),
+                )
+                .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
+        }
+
+        return createdServiceAccount;
+    });
 
     ctx.log('CREATE_SERVICE_ACCOUNT_SUCCESS', {serviceAccountId});
 

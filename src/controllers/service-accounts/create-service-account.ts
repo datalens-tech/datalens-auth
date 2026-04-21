@@ -5,7 +5,7 @@ import {makeReqParser, z} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
 import {createServiceAccount} from '../../services/service-accounts/create-service-account';
-import {serviceAccountModel} from '../reponse-models/service-accounts/service-account-model';
+import {serviceAccountModel} from '../response-models/service-accounts/service-account-model';
 
 const requestSchema = {
     body: z.object({

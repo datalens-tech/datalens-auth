@@ -13,7 +13,7 @@ import {
     errorModel,
     setCookieHeaderSchema,
     successModel,
-} from '../reponse-models';
+} from '../response-models';
 
 export const refreshController: AppRouteHandler = async (
     req,

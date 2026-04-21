@@ -4,7 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {deleteUser} from '../../services/users/delete-user';
-import {SuccessResponseModel, successModel} from '../reponse-models';
+import {SuccessResponseModel, successModel} from '../response-models';
 
 const requestSchema = {
     params: z.object({

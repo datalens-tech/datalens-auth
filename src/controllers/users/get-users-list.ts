@@ -5,7 +5,7 @@ import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
 import {getUsersList} from '../../services/users/get-users-list';
-import {userWithRolesModelArray} from '../reponse-models/users/user-with-roles-model-array';
+import {userWithRolesModelArray} from '../response-models/users/user-with-roles-model-array';
 
 const requestSchema = {
     query: z.object({

@@ -1,7 +1,6 @@
 import type {ValuesType} from 'utility-types';
 
 import {Model} from '../';
-import {UserRole} from '../../constants/role';
 import type {Nullable} from '../../utils/utility-types';
 import type {BigIntId} from '../types/id';
 
@@ -9,7 +8,6 @@ export const ServiceAccountModelColumn = {
     ServiceAccountId: 'serviceAccountId',
     Name: 'name',
     Description: 'description',
-    Roles: 'roles',
     CreatedAt: 'createdAt',
     UpdatedAt: 'updatedAt',
 } as const;
@@ -33,7 +31,6 @@ export class ServiceAccountModel
     serviceAccountId!: BigIntId;
     name!: string;
     description!: Nullable<string>;
-    roles!: `${UserRole}`[];
     createdAt!: string;
     updatedAt!: string;
 }

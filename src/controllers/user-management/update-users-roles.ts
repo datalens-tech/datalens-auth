@@ -6,7 +6,7 @@ import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
 import {updateUsersRoles} from '../../services/roles/update-users-roles';
 import {macrotasksMap} from '../../utils/ids';
-import {SuccessResponseModel, successModel} from '../reponse-models';
+import {SuccessResponseModel, successModel} from '../response-models';
 
 const requestSchema = {
     body: z.object({

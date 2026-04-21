@@ -4,7 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {listServiceAccountKeys} from '../../services/service-accounts/list-service-account-keys';
-import {serviceAccountKeyModelArray} from '../reponse-models/service-accounts/service-account-key-model-array';
+import {serviceAccountKeyModelArray} from '../response-models/service-accounts/service-account-key-model-array';
 
 const requestSchema = {
     params: z.object({

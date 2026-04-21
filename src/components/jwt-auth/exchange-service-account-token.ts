@@ -2,11 +2,14 @@ import {AppError} from '@gravity-ui/nodekit';
 import jwt from 'jsonwebtoken';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
-import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
 import {
     ServiceAccountKeyModel,
     ServiceAccountKeyModelColumn,
 } from '../../db/models/service-account-key';
+import {
+    ServiceAccountRoleModel,
+    ServiceAccountRoleModelColumn,
+} from '../../db/models/service-account-role';
 import type {BigIntId, StringId} from '../../db/types/id';
 import {getPrimary} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
@@ -44,7 +47,9 @@ const resolveVerifiedPayload = async (
         .timeout(ServiceAccountKeyModel.DEFAULT_QUERY_TIMEOUT);
 
     if (!key) {
-        throw invalidJwt('Key not found for kid');
+        throw new AppError(AUTH_ERROR.SERVICE_ACCOUNT_KEY_NOT_EXISTS, {
+            code: AUTH_ERROR.SERVICE_ACCOUNT_KEY_NOT_EXISTS,
+        });
     }
 
     try {
@@ -95,17 +100,10 @@ export const exchangeServiceAccountToken = async (
         throw invalidJwt('Invalid iss claim in client JWT');
     }
 
-    const sa = await ServiceAccountModel.query(getPrimary(trx))
-        .select([ServiceAccountModelColumn.ServiceAccountId, ServiceAccountModelColumn.Roles])
-        .where(ServiceAccountModelColumn.ServiceAccountId, decodedServiceAccountId)
-        .first()
-        .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
-
-    if (!sa) {
-        throw new AppError(AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS, {
-            code: AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS,
-        });
-    }
+    const roles = await ServiceAccountRoleModel.query(getPrimary(trx))
+        .select(ServiceAccountRoleModelColumn.Role)
+        .where(ServiceAccountRoleModelColumn.ServiceAccountId, decodedServiceAccountId)
+        .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
 
     const rawKid =
         decoded?.header && typeof decoded.header === 'object'
@@ -133,6 +131,6 @@ export const exchangeServiceAccountToken = async (
 
     return generateServiceAccountAccessToken(
         {ctx},
-        {serviceAccountId: decodedServiceAccountId, roles: sa.roles},
+        {serviceAccountId: decodedServiceAccountId, roles: roles.map((r) => r.role)},
     );
 };

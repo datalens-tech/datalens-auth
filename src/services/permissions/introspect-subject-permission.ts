@@ -5,11 +5,11 @@ import type {ServiceArgs} from '../../types/service';
 import {introspectServiceAccountPermission} from './introspect-service-account-permission';
 import {introspectUserPermission} from './introspect-user-permission';
 
-export async function introspectSubjectPermission(
+export const introspectSubjectPermission = async (
     args: ServiceArgs,
     subject: PlatformCtxSubject,
     permission: `${Permission}`,
-): Promise<boolean> {
+): Promise<boolean> => {
     if (subject.type === 'user') {
         return introspectUserPermission(args, {
             userId: subject.subjectId,
@@ -20,4 +20,4 @@ export async function introspectSubjectPermission(
         serviceAccountId: subject.subjectId,
         permission,
     });
-}
+};
