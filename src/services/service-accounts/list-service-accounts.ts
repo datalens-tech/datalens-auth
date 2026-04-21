@@ -65,27 +65,9 @@ export const listServiceAccounts = async (
             `${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.ServiceAccountId}`,
             `${ServiceAccountRoleModel.tableName}.${ServiceAccountRoleModelColumn.ServiceAccountId}`,
         )
-        .whereIn(
-            `${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.ServiceAccountId}`,
-            (builder) => {
-                builder
-                    .distinct(
-                        `${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.ServiceAccountId}`,
-                    )
-                    .from(ServiceAccountModel.tableName)
-                    .leftJoin(
-                        ServiceAccountRoleModel.tableName,
-                        `${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.ServiceAccountId}`,
-                        `${ServiceAccountRoleModel.tableName}.${ServiceAccountRoleModelColumn.ServiceAccountId}`,
-                    )
-                    .orderBy(
-                        `${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.ServiceAccountId}`,
-                    )
-                    .limit(pageSize)
-                    .offset(pageSize * page);
-            },
-        )
-        .orderBy(`${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.ServiceAccountId}`)
+        .orderBy(`${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.CreatedAt}`, 'desc')
+        .limit(pageSize)
+        .offset(pageSize * page)
         .timeout(
             ServiceAccountModel.DEFAULT_QUERY_TIMEOUT,
         )) as unknown as JoinedServiceAccountRoleModel[];

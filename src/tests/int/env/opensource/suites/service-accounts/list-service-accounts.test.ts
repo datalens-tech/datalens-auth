@@ -11,6 +11,7 @@ describe('List service accounts', () => {
         userTokens = {} as Awaited<ReturnType<typeof generateTokens>>;
 
     let createdServiceAccountId: string;
+    const createdServiceAccountIds: string[] = [];
 
     beforeAll(async () => {
         admin = await createTestUsers({roles: [UserRole.Admin], login: 'list-sa-admin'});
@@ -25,6 +26,17 @@ describe('List service accounts', () => {
             description: 'Fixture service account for list tests',
             roles: [UserRole.Viewer],
         });
+
+        // Create additional service accounts for pagination tests
+        for (let i = 0; i < 2; i++) {
+            const id = await createTestServiceAccount({
+                accessToken: adminTokens.accessToken,
+                name: `list-sa-pagination-${i}`,
+                description: `Service account ${i} for pagination tests`,
+                roles: [UserRole.Viewer],
+            });
+            createdServiceAccountIds.push(id);
+        }
     });
 
     test('Access denied without token', async () => {
@@ -54,14 +66,7 @@ describe('List service accounts', () => {
         expect(response.body).toStrictEqual({
             serviceAccounts: expect.any(Array),
         });
-    });
-
-    test('List response contains created service account with correct structure', async () => {
-        const response = await auth(request(app).get(makeRoute('listServiceAccounts')), {
-            accessToken: adminTokens.accessToken,
-        });
-
-        expect(response.status).toBe(200);
+        expect(response.body.serviceAccounts.length).toEqual(3);
 
         const found = response.body.serviceAccounts.find(
             (sa: {serviceAccountId: string}) => sa.serviceAccountId === createdServiceAccountId,
@@ -75,5 +80,37 @@ describe('List service accounts', () => {
             createdAt: expect.any(String),
             updatedAt: expect.any(String),
         });
+    });
+
+    test('Pagination works correctly', async () => {
+        const pageSize = 2;
+        const response = await auth(
+            request(app).get(makeRoute('listServiceAccounts')).query({pageSize}),
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual({
+            serviceAccounts: expect.any(Array),
+            nextPageToken: '1',
+        });
+        expect(response.body.serviceAccounts.length).toEqual(2);
+
+        const response2 = await auth(
+            request(app)
+                .get(makeRoute('listServiceAccounts'))
+                .query({pageSize, page: response.body.nextPageToken}),
+            {
+                accessToken: adminTokens.accessToken,
+            },
+        );
+
+        expect(response2.status).toBe(200);
+        expect(response2.body).toStrictEqual({
+            serviceAccounts: expect.any(Array),
+        });
+        expect(response2.body.serviceAccounts.length).toEqual(1);
     });
 });

@@ -94,6 +94,7 @@ describe('Service account keys', () => {
 
     describe('List keys', () => {
         let keyId: string;
+        const additionalKeyIds: string[] = [];
 
         beforeAll(async () => {
             const keyResp = await auth(
@@ -101,6 +102,17 @@ describe('Service account keys', () => {
                 {accessToken: adminTokens.accessToken},
             );
             keyId = keyResp.body.keyId;
+
+            // Create additional keys for pagination tests
+            for (let i = 0; i < 2; i++) {
+                const resp = await auth(
+                    request(app).post(
+                        makeRoute('createServiceAccountKey', {serviceAccountId: saId}),
+                    ),
+                    {accessToken: adminTokens.accessToken},
+                );
+                additionalKeyIds.push(resp.body.keyId);
+            }
         });
 
         test('Access denied without token', async () => {
@@ -131,14 +143,51 @@ describe('Service account keys', () => {
             );
 
             expect(response.status).toBe(200);
+            expect(response.body).toStrictEqual({
+                keys: expect.any(Array),
+            });
 
-            const found = response.body.find((k: {keyId: string}) => k.keyId === keyId);
+            const found = response.body.keys.find((k: {keyId: string}) => k.keyId === keyId);
 
             expect(found).toStrictEqual({
                 keyId,
                 serviceAccountId: saId,
                 createdAt: expect.any(String),
             });
+        });
+
+        test('Pagination works correctly', async () => {
+            const pageSize = 3;
+            const response = await auth(
+                request(app)
+                    .get(makeRoute('listServiceAccountKeys', {serviceAccountId: saId}))
+                    .query({pageSize}),
+                {
+                    accessToken: adminTokens.accessToken,
+                },
+            );
+
+            expect(response.status).toBe(200);
+            expect(response.body).toStrictEqual({
+                keys: expect.any(Array),
+                nextPageToken: '1',
+            });
+            expect(response.body.keys.length).toEqual(3);
+
+            const response2 = await auth(
+                request(app)
+                    .get(makeRoute('listServiceAccountKeys', {serviceAccountId: saId}))
+                    .query({pageSize, page: response.body.nextPageToken}),
+                {
+                    accessToken: adminTokens.accessToken,
+                },
+            );
+
+            expect(response2.status).toBe(200);
+            expect(response2.body).toStrictEqual({
+                keys: expect.any(Array),
+            });
+            expect(response2.body.keys.length).toEqual(1);
         });
     });
 
@@ -212,11 +261,11 @@ describe('Service account keys', () => {
 
             expect(response.status).toBe(200);
 
-            const deletedKey = response.body.find(
+            const deletedKey = response.body.keys.find(
                 (k: {keyId: string}) => k.keyId === keyToDeleteId,
             );
 
-            const existentKey = response.body.find(
+            const existentKey = response.body.keys.find(
                 (k: {keyId: string}) => k.keyId === existentKeyId,
             );
 
