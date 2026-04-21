@@ -22,9 +22,7 @@ export const listServiceAccountKeysController: AppRouteHandler = async (req, res
         {serviceAccountId: params.serviceAccountId},
     );
 
-    res.status(200).send({
-        keys: await serviceAccountKeyModelArray.format(keys),
-    });
+    res.status(200).send(await serviceAccountKeyModelArray.format(keys));
 };
 
 listServiceAccountKeysController.api = {

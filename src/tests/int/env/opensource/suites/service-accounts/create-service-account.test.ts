@@ -54,7 +54,12 @@ describe('Create service account', () => {
         });
 
         expect(response.status).toBe(200);
-        expect(response.body).toStrictEqual({serviceAccountId: expect.any(String)});
+        expect(response.body).toMatchObject({
+            serviceAccountId: expect.any(String),
+            name: 'create-sa-basic',
+            description: 'A test service account',
+            roles: [UserRole.Viewer, UserRole.Editor],
+        });
     });
 
     test("Can't create service account with duplicate name", async () => {

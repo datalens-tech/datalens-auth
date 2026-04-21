@@ -132,7 +132,7 @@ describe('Service account keys', () => {
 
             expect(response.status).toBe(200);
 
-            const found = response.body.keys.find((k: {keyId: string}) => k.keyId === keyId);
+            const found = response.body.find((k: {keyId: string}) => k.keyId === keyId);
 
             expect(found).toStrictEqual({
                 keyId,
@@ -212,11 +212,11 @@ describe('Service account keys', () => {
 
             expect(response.status).toBe(200);
 
-            const deletedKey = response.body.keys.find(
+            const deletedKey = response.body.find(
                 (k: {keyId: string}) => k.keyId === keyToDeleteId,
             );
 
-            const existentKey = response.body.keys.find(
+            const existentKey = response.body.find(
                 (k: {keyId: string}) => k.keyId === existentKeyId,
             );
 
