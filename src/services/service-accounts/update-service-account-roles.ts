@@ -21,9 +21,9 @@ type UpsertData = {
     role: `${UserRole}`;
 }[];
 
-export interface UpdateServiceAccountRolesArgs {
+export type UpdateServiceAccountRolesArgs = {
     deltas: {oldRole: `${UserRole}`; newRole: `${UserRole}`; subjectId: BigIntId}[];
-}
+};
 
 export const updateServiceAccountRoles = async (
     {ctx, trx}: ServiceArgs,

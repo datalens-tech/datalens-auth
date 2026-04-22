@@ -24,7 +24,17 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
     }
 
     if (permission) {
-        const userRoles = subject?.roles || [];
+        if (!subject) {
+            req.ctx.logError('Subject not found');
+            res.status(403).send({
+                message: 'Subject not found',
+                code: AUTH_ERROR.ACCESS_DENIED,
+            });
+            return;
+        }
+
+        const userRoles = subject.roles;
+
         if (
             userRoles.length === 0 ||
             userRoles.every((role) => checkPermissionFunc({role, permission}) === false)
@@ -37,7 +47,7 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
             return;
         }
 
-        if (permission === Permission.Manage && subject) {
+        if (permission === Permission.Manage) {
             const hasPermission = await introspectSubjectPermission(
                 {ctx: req.ctx},
                 subject,

@@ -10,9 +10,9 @@ import {ServiceArgs} from '../../types/service';
 const SPLITTER = '~@~';
 type RoleAndServiceAccountIdKey = `${UserRole}${typeof SPLITTER}${BigIntId}`;
 
-export interface RemoveServiceAccountRolesArgs {
+export type RemoveServiceAccountRolesArgs = {
     deltas: {role: `${UserRole}`; subjectId: BigIntId}[];
-}
+};
 
 export const removeServiceAccountRoles = async (
     {ctx, trx}: ServiceArgs,

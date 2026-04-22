@@ -8,9 +8,9 @@ import {getPrimary} from '../../db/utils/db';
 import {setCurrentTime} from '../../db/utils/query';
 import {ServiceArgs} from '../../types/service';
 
-export interface AddServiceAccountRolesArgs {
+export type AddServiceAccountRolesArgs = {
     deltas: {role: `${UserRole}`; subjectId: BigIntId}[];
-}
+};
 
 export const addServiceAccountRoles = async (
     {ctx, trx}: ServiceArgs,

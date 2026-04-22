@@ -38,7 +38,7 @@ export const listServiceAccountKeys = async (
             ServiceAccountKeyModelColumn.ServiceAccountId,
         ])
         .where(ServiceAccountKeyModelColumn.ServiceAccountId, serviceAccountId)
-        .orderBy(ServiceAccountKeyModelColumn.CreatedAt, 'desc')
+        .orderBy(ServiceAccountKeyModelColumn.ServiceAccountId, 'desc')
         .limit(pageSize)
         .offset(pageSize * page)
         .timeout(ServiceAccountKeyModel.DEFAULT_QUERY_TIMEOUT);

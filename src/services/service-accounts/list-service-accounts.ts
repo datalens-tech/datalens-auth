@@ -65,7 +65,10 @@ export const listServiceAccounts = async (
             `${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.ServiceAccountId}`,
             `${ServiceAccountRoleModel.tableName}.${ServiceAccountRoleModelColumn.ServiceAccountId}`,
         )
-        .orderBy(`${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.CreatedAt}`, 'desc')
+        .orderBy(
+            `${ServiceAccountModel.tableName}.${ServiceAccountModelColumn.ServiceAccountId}`,
+            'desc',
+        )
         .limit(pageSize)
         .offset(pageSize * page)
         .timeout(
