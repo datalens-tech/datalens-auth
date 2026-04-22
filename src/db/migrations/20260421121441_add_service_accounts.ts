@@ -10,6 +10,8 @@ export async function up(knex: Knex): Promise<void> {
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
+        CREATE UNIQUE INDEX auth_service_accounts_name_uniq_idx ON auth_service_accounts USING BTREE (name);
+
         CREATE TABLE auth_service_account_keys (
             key_id BIGINT NOT NULL DEFAULT auth_get_id() PRIMARY KEY,
             service_account_id BIGINT NOT NULL REFERENCES auth_service_accounts (service_account_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -43,6 +45,7 @@ export async function down(knex: Knex): Promise<void> {
         DROP INDEX auth_sa_keys_sa_id_idx;
         DROP TABLE auth_service_account_keys;
 
+        DROP INDEX auth_service_accounts_name_uniq_idx;
         DROP TABLE auth_service_accounts;
     `);
 }

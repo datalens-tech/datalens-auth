@@ -15,6 +15,8 @@ export const deleteServiceAccount = async (
     const deleted = await ServiceAccountModel.query(getPrimary(trx))
         .delete()
         .where(ServiceAccountModelColumn.ServiceAccountId, serviceAccountId)
+        .returning(ServiceAccountModelColumn.ServiceAccountId)
+        .first()
         .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
 
     if (!deleted) {
