@@ -1,7 +1,7 @@
-import {generateKeyPairSync} from 'node:crypto';
+import {generateKeyPair} from 'node:crypto';
+import {promisify} from 'node:util';
 
 import {AppError} from '@gravity-ui/nodekit';
-import type {PartialModelObject} from 'objection';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
@@ -9,6 +9,8 @@ import {ServiceAccountKeyModel} from '../../db/models/service-account-key';
 import type {BigIntId} from '../../db/types/id';
 import {getPrimary, getReplica} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
+
+const generateKeyPairAsync = promisify(generateKeyPair);
 
 export type CreateServiceAccountKeyResult = {
     keyId: BigIntId;
@@ -36,7 +38,7 @@ export const createServiceAccountKey = async (
         });
     }
 
-    const {publicKey, privateKey} = generateKeyPairSync('rsa', {
+    const {publicKey, privateKey} = await generateKeyPairAsync('rsa', {
         modulusLength: 2048,
         publicKeyEncoding: {type: 'spki', format: 'pem'},
         privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
@@ -44,14 +46,8 @@ export const createServiceAccountKey = async (
 
     const keyId = await getId();
 
-    const insertData: PartialModelObject<ServiceAccountKeyModel> = {
-        keyId,
-        serviceAccountId,
-        publicKey,
-    };
-
     const result = await ServiceAccountKeyModel.query(getPrimary(trx))
-        .insert(insertData)
+        .insert({keyId, serviceAccountId, publicKey})
         .timeout(ServiceAccountKeyModel.DEFAULT_QUERY_TIMEOUT);
 
     ctx.log('CREATE_SERVICE_ACCOUNT_KEY_SUCCESS', {keyId});

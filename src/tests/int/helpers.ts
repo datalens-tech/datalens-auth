@@ -98,5 +98,7 @@ export const createTestServiceAccount = async ({
         accessToken,
     }).send({name, roles, description});
 
+    expect(response.status).toBe(200);
+
     return response.body.serviceAccountId;
 };

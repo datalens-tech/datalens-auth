@@ -18,6 +18,9 @@ import {decodeId} from '../../utils/ids';
 import {DEFAULT_MAX_CLIENT_JWT_TTL_SECONDS, SIGNATURE_ALGORITHM} from './constants';
 import {generateServiceAccountAccessToken} from './generate-service-account-access-token';
 
+const invalidJwt = (message: string) =>
+    new AppError(message, {code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT});
+
 const resolveVerifiedPayload = async (
     {trx, ctx}: ServiceArgs,
     {
@@ -26,9 +29,6 @@ const resolveVerifiedPayload = async (
         serviceAccountId,
     }: {clientJwt: string; kid: string; serviceAccountId: BigIntId},
 ): Promise<jwt.JwtPayload> => {
-    const invalidJwt = (message: string) =>
-        new AppError(message, {code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT});
-
     let decodedKeyId: BigIntId;
     try {
         decodedKeyId = decodeId(kid as StringId);
@@ -55,7 +55,7 @@ const resolveVerifiedPayload = async (
             algorithms: [SIGNATURE_ALGORITHM],
         }) as jwt.JwtPayload;
     } catch {
-        ctx.logError('EXCHANGE_SA_TOKEN_VERIFY_ERROR', new Error('Key verification failed'));
+        ctx.logError('EXCHANGE_SA_TOKEN_VERIFY_ERROR');
         throw invalidJwt('Client JWT signature verification failed');
     }
 };
@@ -65,9 +65,6 @@ export const exchangeServiceAccountToken = async (
     {clientJwt}: {clientJwt: string},
 ): Promise<string> => {
     ctx.log('EXCHANGE_SA_TOKEN');
-
-    const invalidJwt = (message: string) =>
-        new AppError(message, {code: AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT});
 
     let decoded: jwt.Jwt | null;
     try {
@@ -98,11 +95,6 @@ export const exchangeServiceAccountToken = async (
         throw invalidJwt('Invalid iss claim in client JWT');
     }
 
-    const roles = await ServiceAccountRoleModel.query(getPrimary(trx))
-        .select(ServiceAccountRoleModelColumn.Role)
-        .where(ServiceAccountRoleModelColumn.ServiceAccountId, decodedServiceAccountId)
-        .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
-
     const rawKid =
         decoded?.header && typeof decoded.header === 'object'
             ? (decoded.header as {kid?: unknown}).kid
@@ -127,10 +119,20 @@ export const exchangeServiceAccountToken = async (
         throw invalidJwt(`Client JWT TTL exceeds ${maxClientJwtTTL} seconds`);
     }
 
+    const roles = await ServiceAccountRoleModel.query(getPrimary(trx))
+        .select(ServiceAccountRoleModelColumn.Role)
+        .where(ServiceAccountRoleModelColumn.ServiceAccountId, decodedServiceAccountId)
+        .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
+
+    const accessToken = generateServiceAccountAccessToken(
+        {ctx},
+        {
+            serviceAccountId: decodedServiceAccountId,
+            roles: roles.map((r) => r.role),
+        },
+    );
+
     ctx.log('EXCHANGE_SA_TOKEN_SUCCESS', {serviceAccountId: decodedServiceAccountId});
 
-    return generateServiceAccountAccessToken(
-        {ctx},
-        {serviceAccountId: decodedServiceAccountId, roles: roles.map((r) => r.role)},
-    );
+    return accessToken;
 };
