@@ -1,8 +1,9 @@
 import {AppContext} from '@gravity-ui/nodekit';
 import jwt from 'jsonwebtoken';
 
+import {ACCESS_TOKEN_TYPE} from '../../constants/token';
 import type {BigIntId} from '../../db/types/id';
-import {ServiceAccountAccessTokenPayload} from '../../types/token';
+import {ServiceAccountAccessTokenClaims, ServiceAccountAccessTokenPayload} from '../../types/token';
 import {encodeId} from '../../utils/ids';
 
 import {SIGNATURE_ALGORITHM} from './constants';
@@ -18,13 +19,14 @@ export const generateServiceAccountAccessToken = (
 
     const encodedServiceAccountId = encodeId(serviceAccountId);
 
-    return jwt.sign(
-        {
-            serviceAccountId: encodedServiceAccountId,
-            roles,
-            type: 'service_account',
-        },
-        ctx.config.tokenPrivateKey,
-        {algorithm: SIGNATURE_ALGORITHM, expiresIn: `${ctx.config.serviceAccountAccessTokenTTL}s`},
-    );
+    const payload: ServiceAccountAccessTokenClaims = {
+        userId: encodedServiceAccountId,
+        roles,
+        type: ACCESS_TOKEN_TYPE.SERVICE_ACCOUNT,
+    };
+
+    return jwt.sign(payload, ctx.config.tokenPrivateKey, {
+        algorithm: SIGNATURE_ALGORITHM,
+        expiresIn: `${ctx.config.serviceAccountAccessTokenTTL}s`,
+    });
 };
