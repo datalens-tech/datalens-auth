@@ -2,7 +2,9 @@ import type {Knex} from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.raw(`
-        ALTER TABLE auth_users ADD COLUMN type TEXT NOT NULL DEFAULT 'user';
+        ALTER TABLE auth_users ADD COLUMN type TEXT;
+        UPDATE auth_users SET type = 'user';
+        ALTER TABLE auth_users ALTER COLUMN type SET NOT NULL;
         ALTER TABLE auth_users ADD COLUMN description TEXT;
         ALTER TABLE auth_users ADD COLUMN name TEXT;
 
