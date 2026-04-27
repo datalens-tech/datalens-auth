@@ -19,18 +19,7 @@ const schema = z
 
 export type UserModel = z.infer<typeof schema>;
 
-export type UserFormatData = {
-    userId: BigIntId;
-    login: string | null;
-    email: string | null;
-    firstName: string | null;
-    lastName: string | null;
-    idpType: string | null;
-    idpSlug: string | null;
-    name?: string | null;
-    description?: string | null;
-    type?: string;
-};
+export type UserFormatData = Omit<UserModel, 'userId'> & {userId: BigIntId};
 
 const format = (data: UserFormatData): UserModel => {
     return {

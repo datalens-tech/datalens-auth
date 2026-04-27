@@ -44,7 +44,7 @@ export const createTestUsers = async ({
             [UserModelColumn.Email]: email,
             [UserModelColumn.FirstName]: firstName,
             [UserModelColumn.LastName]: lastName,
-            ...(type !== undefined && {[UserModelColumn.Type]: type}),
+            [UserModelColumn.Type]: type,
         })
         .returning('*')
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
