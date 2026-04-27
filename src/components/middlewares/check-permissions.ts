@@ -10,9 +10,31 @@ import {checkPermission as checkPermissionFunc} from '../../utils/permission';
 export const checkPermissions = async (req: Request, res: Response, next: NextFunction) => {
     const permission = req.routeInfo.permission;
     const check = req.routeInfo.check;
+    const userOnly = req.routeInfo.userOnly;
+
+    const subject = req.ctx.get('subject');
+
+    if (userOnly && subject?.type !== 'user') {
+        req.ctx.logError(`${subject?.type} subject type is not allowed on this endpoint`);
+        res.status(403).send({
+            message: 'You do not have a sufficient permission for this operation',
+            code: AUTH_ERROR.ACCESS_DENIED,
+        });
+        return;
+    }
 
     if (permission) {
-        const userRoles = req.ctx.get('user')?.roles || [];
+        if (!subject) {
+            req.ctx.logError('Subject not found');
+            res.status(403).send({
+                message: 'Subject not found',
+                code: AUTH_ERROR.ACCESS_DENIED,
+            });
+            return;
+        }
+
+        const userRoles = subject.roles;
+
         if (
             userRoles.length === 0 ||
             userRoles.every((role) => checkPermissionFunc({role, permission}) === false)
@@ -26,22 +48,13 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
         }
 
         if (permission === Permission.Manage) {
-            const user = req.ctx.get('user');
-            if (!user) {
-                req.ctx.logError('User not found');
-                res.status(403).send({
-                    message: 'User not found',
-                    code: AUTH_ERROR.ACCESS_DENIED,
-                });
-                return;
-            }
             const hasPermission = await introspectUserPermission(
                 {ctx: req.ctx},
-                {userId: user.userId, permission},
+                {userId: subject.subjectId, permission},
             );
 
             if (!hasPermission) {
-                req.ctx.logError('Introspect user permission failed');
+                req.ctx.logError('Introspect permission failed');
                 res.status(403).send({
                     message: 'You do not have a sufficient permission for this operation',
                     code: AUTH_ERROR.ACCESS_DENIED,

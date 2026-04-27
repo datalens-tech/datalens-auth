@@ -1,7 +1,8 @@
 import pick from 'lodash/pick';
 import request from 'supertest';
 
-import type {UserWithRolesModel} from '../../../../../../controllers/reponse-models/users/user-with-roles-model';
+import {USER_TYPE} from '../../../../../../constants/user';
+import type {UserWithRolesModel} from '../../../../../../controllers/response-models/users/user-with-roles-model';
 import {UserModel, UserModelColumn} from '../../../../../../db/models/user';
 import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
@@ -13,6 +14,7 @@ type CreatedUsers = {
     user: UserWithRolesModel;
     user2: UserWithRolesModel;
     userWithoutRoles: UserWithRolesModel;
+    serviceAccount: UserWithRolesModel;
 };
 
 const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRolesModel => ({
@@ -23,6 +25,9 @@ const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRole
         UserModelColumn.LastName,
         UserModelColumn.IdpSlug,
         UserModelColumn.IdpType,
+        UserModelColumn.Name,
+        UserModelColumn.Description,
+        UserModelColumn.Type,
     ]),
     userId: encodeId(user.userId),
     roles: expect.toIncludeSameMembers(roles),
@@ -71,6 +76,13 @@ describe('Fetch users list', () => {
             roles: [],
         });
         createdUsers['userWithoutRoles'] = pickCreatedUserFields(userWithoutRoles, []);
+
+        const serviceAccount = await createTestUsers({
+            login: 'fetch-test-service-account',
+            type: USER_TYPE.SERVICE_ACCOUNT,
+            roles: [],
+        });
+        createdUsers['serviceAccount'] = pickCreatedUserFields(serviceAccount, []);
 
         userTokens = await generateTokens({userId: user.userId});
         simpleUserTokens = await generateTokens({userId: userWithoutRoles.userId});
@@ -138,6 +150,37 @@ describe('Fetch users list', () => {
         expect(response2.body).toStrictEqual({
             nextPageToken: '2',
             users: [createdUsers['user']],
+        });
+    });
+
+    test('Filter by type', async () => {
+        const allUserIds = [
+            createdUsers['admin'].userId,
+            createdUsers['user'].userId,
+            createdUsers['user2'].userId,
+            createdUsers['userWithoutRoles'].userId,
+            createdUsers['serviceAccount'].userId,
+        ];
+
+        const response1 = await auth(request(app).post(makeRoute('fetchUsersList')), {
+            accessToken: userTokens.accessToken,
+        }).send({userIds: allUserIds, type: USER_TYPE.USER, pageSize: 1000});
+        expect(response1.status).toBe(200);
+        expect(response1.body).toStrictEqual({
+            users: [
+                createdUsers['admin'],
+                createdUsers['user'],
+                createdUsers['user2'],
+                createdUsers['userWithoutRoles'],
+            ],
+        });
+
+        const response2 = await auth(request(app).post(makeRoute('fetchUsersList')), {
+            accessToken: userTokens.accessToken,
+        }).send({userIds: allUserIds, type: USER_TYPE.SERVICE_ACCOUNT, pageSize: 1000});
+        expect(response2.status).toBe(200);
+        expect(response2.body).toStrictEqual({
+            users: [createdUsers['serviceAccount']],
         });
     });
 });

@@ -13,3 +13,5 @@ export {Permission} from '../src/constants/permission';
 export {CONTENT_TYPE_JSON} from '../src/constants/content-type';
 
 export {RouteCheck} from '../src/constants/route';
+
+export {USER_TYPE} from '../src/constants/user';

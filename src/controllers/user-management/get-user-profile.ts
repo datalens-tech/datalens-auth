@@ -4,7 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {getUserProfile} from '../../services/users/get-user-profile';
-import {UserProfileModel, userProfileModel} from '../reponse-models/users/user-profile-model';
+import {UserProfileModel, userProfileModel} from '../response-models/users/user-profile-model';
 
 const requestSchema = {
     params: z.object({

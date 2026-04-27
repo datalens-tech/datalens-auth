@@ -156,6 +156,46 @@ export const prepareErrorResponse = (error: AppError | DBError) => {
             };
         }
 
+        case AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS: {
+            return {
+                code: 404,
+                response: {
+                    code,
+                    message: "The service account doesn't exist",
+                },
+            };
+        }
+
+        case AUTH_ERROR.SERVICE_ACCOUNT_NAME_EXISTS: {
+            return {
+                code: 409,
+                response: {
+                    code,
+                    message: 'A service account with this name already exists',
+                },
+            };
+        }
+
+        case AUTH_ERROR.INVALID_SERVICE_ACCOUNT_JWT: {
+            return {
+                code: 401,
+                response: {
+                    code,
+                    message,
+                },
+            };
+        }
+
+        case AUTH_ERROR.SERVICE_ACCOUNT_KEY_NOT_EXISTS: {
+            return {
+                code: 404,
+                response: {
+                    code,
+                    message: "The service account key doesn't exist",
+                },
+            };
+        }
+
         default:
             return {
                 code: 500,

@@ -1,14 +1,18 @@
+import request from 'supertest';
+
 import {startSession} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {UserRole} from '../../constants/role';
+import {USER_TYPE} from '../../constants/user';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import type {BigIntId, StringId} from '../../db/types/id';
 import {registry} from '../../registry/';
 import {decodeId} from '../../utils/ids';
 
-import {appConfig, appCtx} from './auth';
+import {app, appConfig, appCtx, auth} from './auth';
 import {testUserLogin, testUserPassword} from './constants';
+import {makeRoute} from './routes';
 
 export type CreateTestUserArgs = {
     login?: string;
@@ -17,6 +21,7 @@ export type CreateTestUserArgs = {
     email?: string;
     firstName?: string;
     lastName?: string;
+    type?: string;
 };
 
 export const createTestUsers = async ({
@@ -26,6 +31,7 @@ export const createTestUsers = async ({
     email,
     firstName,
     lastName,
+    type = USER_TYPE.USER,
 }: CreateTestUserArgs) => {
     const {db, getId} = registry.getDbInstance();
 
@@ -39,6 +45,7 @@ export const createTestUsers = async ({
             [UserModelColumn.Email]: email,
             [UserModelColumn.FirstName]: firstName,
             [UserModelColumn.LastName]: lastName,
+            [UserModelColumn.Type]: type,
         })
         .returning('*')
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
@@ -76,4 +83,26 @@ export const isBigIntId = (value: string) => {
         return typeof BigInt(value) === 'bigint';
     } catch {}
     return false;
+};
+
+export type CreateTestServiceAccountArgs = {
+    accessToken: string;
+    name: string;
+    roles: `${UserRole}`[];
+    description?: string;
+};
+
+export const createTestServiceAccount = async ({
+    accessToken,
+    name,
+    roles,
+    description,
+}: CreateTestServiceAccountArgs): Promise<string> => {
+    const response = await auth(request(app).post(makeRoute('createServiceAccount')), {
+        accessToken,
+    }).send({name, roles, description});
+
+    expect(response.status).toBe(200);
+
+    return response.body.userId;
 };

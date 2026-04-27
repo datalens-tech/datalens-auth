@@ -1,6 +1,7 @@
 import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 
 import {AUTHORIZATION_HEADER, AUTHORIZATION_HEADER_VALUE_PREFIX} from '../../constants/header';
+import {ACCESS_TOKEN_TYPE} from '../../constants/token';
 import {decodeId} from '../../utils/ids';
 import {verifyAccessToken} from '../jwt-auth';
 
@@ -16,17 +17,25 @@ export const appAuth = async (req: Request, res: Response, next: NextFunction) =
             try {
                 req.ctx.log('CHECK_ACCESS_TOKEN');
 
-                const {userId, sessionId, roles} = verifyAccessToken({
-                    ctx: req.ctx,
-                    accessToken,
-                });
+                const payload = verifyAccessToken({ctx: req.ctx, accessToken});
 
-                req.originalContext.set('user', {
-                    userId: decodeId(userId),
-                    sessionId: decodeId(sessionId),
-                    roles,
-                    accessToken,
-                });
+                if (payload.type === ACCESS_TOKEN_TYPE.SERVICE_ACCOUNT) {
+                    req.originalContext.set('subject', {
+                        type: ACCESS_TOKEN_TYPE.SERVICE_ACCOUNT,
+                        subjectId: decodeId(payload.userId),
+                        sessionId: null,
+                        roles: payload.roles,
+                        accessToken,
+                    });
+                } else {
+                    req.originalContext.set('subject', {
+                        type: ACCESS_TOKEN_TYPE.USER,
+                        subjectId: decodeId(payload.userId),
+                        sessionId: decodeId(payload.sessionId),
+                        roles: payload.roles,
+                        accessToken,
+                    });
+                }
 
                 req.ctx.log('CHECK_ACCESS_TOKEN_SUCCESS');
 
