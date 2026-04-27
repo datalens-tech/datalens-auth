@@ -2,14 +2,11 @@ import {AppError} from '@gravity-ui/nodekit';
 import jwt from 'jsonwebtoken';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
+import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import {
     ServiceAccountKeyModel,
     ServiceAccountKeyModelColumn,
 } from '../../db/models/service-account-key';
-import {
-    ServiceAccountRoleModel,
-    ServiceAccountRoleModelColumn,
-} from '../../db/models/service-account-role';
 import type {BigIntId, StringId} from '../../db/types/id';
 import {getPrimary} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
@@ -119,10 +116,10 @@ export const exchangeServiceAccountToken = async (
         throw invalidJwt(`Client JWT TTL exceeds ${maxClientJwtTTL} seconds`);
     }
 
-    const roles = await ServiceAccountRoleModel.query(getPrimary(trx))
-        .select(ServiceAccountRoleModelColumn.Role)
-        .where(ServiceAccountRoleModelColumn.ServiceAccountId, decodedServiceAccountId)
-        .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
+    const roles = await RoleModel.query(getPrimary(trx))
+        .select(RoleModelColumn.Role)
+        .where(RoleModelColumn.UserId, decodedServiceAccountId)
+        .timeout(RoleModel.DEFAULT_QUERY_TIMEOUT);
 
     const accessToken = generateServiceAccountAccessToken(
         {ctx},

@@ -5,7 +5,7 @@ import {makeReqParser, z} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
 import {createServiceAccount} from '../../services/service-accounts/create-service-account';
-import {serviceAccountModel} from '../response-models/service-accounts/service-account-model';
+import {userModel} from '../response-models/users/user-model';
 
 const requestSchema = {
     body: z.object({
@@ -29,7 +29,7 @@ export const createServiceAccountController: AppRouteHandler = async (req, res) 
         },
     );
 
-    res.status(200).send(serviceAccountModel.format(result));
+    res.status(200).send(userModel.format(result));
 };
 
 createServiceAccountController.api = {
@@ -46,10 +46,10 @@ createServiceAccountController.api = {
     },
     responses: {
         200: {
-            description: serviceAccountModel.schema.description ?? '',
+            description: userModel.schema.description ?? '',
             content: {
                 [CONTENT_TYPE_JSON]: {
-                    schema: serviceAccountModel.schema,
+                    schema: userModel.schema,
                 },
             },
         },

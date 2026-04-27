@@ -215,19 +215,6 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
-        listServiceAccounts: makeRoute({
-            route: 'GET /v1/management/service-accounts',
-            handler: serviceAccounts.listServiceAccountsController,
-            apiHeaders: [AUTHORIZATION_HEADER],
-            permission: Permission.Manage,
-        }),
-        deleteServiceAccount: makeRoute({
-            route: 'DELETE /v1/management/service-accounts/:serviceAccountId',
-            handler: serviceAccounts.deleteServiceAccountController,
-            write: true,
-            apiHeaders: [AUTHORIZATION_HEADER],
-            permission: Permission.Manage,
-        }),
         createServiceAccountKey: makeRoute({
             route: 'POST /v1/management/service-accounts/:serviceAccountId/keys',
             handler: serviceAccounts.createServiceAccountKeyController,
@@ -244,27 +231,6 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
         deleteServiceAccountKey: makeRoute({
             route: 'DELETE /v1/management/service-accounts/:serviceAccountId/keys/:keyId',
             handler: serviceAccounts.deleteServiceAccountKeyController,
-            write: true,
-            apiHeaders: [AUTHORIZATION_HEADER],
-            permission: Permission.Manage,
-        }),
-        addServiceAccountRoles: makeRoute({
-            route: 'POST /v1/management/service-accounts/roles/add',
-            handler: serviceAccounts.addServiceAccountRolesController,
-            write: true,
-            apiHeaders: [AUTHORIZATION_HEADER],
-            permission: Permission.Manage,
-        }),
-        updateServiceAccountRoles: makeRoute({
-            route: 'POST /v1/management/service-accounts/roles/update',
-            handler: serviceAccounts.updateServiceAccountRolesController,
-            write: true,
-            apiHeaders: [AUTHORIZATION_HEADER],
-            permission: Permission.Manage,
-        }),
-        removeServiceAccountRoles: makeRoute({
-            route: 'POST /v1/management/service-accounts/roles/remove',
-            handler: serviceAccounts.removeServiceAccountRolesController,
             write: true,
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,

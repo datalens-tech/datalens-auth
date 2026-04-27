@@ -55,9 +55,10 @@ describe('Create service account', () => {
 
         expect(response.status).toBe(200);
         expect(response.body).toMatchObject({
-            serviceAccountId: expect.any(String),
+            userId: expect.any(String),
             name: 'create-sa-basic',
             description: 'A test service account',
+            type: 'serviceAccount',
         });
     });
 

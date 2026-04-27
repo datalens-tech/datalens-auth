@@ -113,7 +113,7 @@ describe('Exchange service account token', () => {
         const deletedSaResp = await auth(request(app).post(makeRoute('createServiceAccount')), {
             accessToken: adminTokens.accessToken,
         }).send({name: 'exchange-token-deleted-sa', roles: [UserRole.Viewer]});
-        const deletedSaId = deletedSaResp.body.serviceAccountId;
+        const deletedSaId = deletedSaResp.body.userId;
 
         const deletedKeyResp = await auth(
             request(app).post(
@@ -122,10 +122,9 @@ describe('Exchange service account token', () => {
             {accessToken: adminTokens.accessToken},
         );
 
-        await auth(
-            request(app).delete(makeRoute('deleteServiceAccount', {serviceAccountId: deletedSaId})),
-            {accessToken: adminTokens.accessToken},
-        );
+        await auth(request(app).delete(makeRoute('deleteUser', {userId: deletedSaId})), {
+            accessToken: adminTokens.accessToken,
+        });
 
         const clientJwt = signClientJwt(
             deletedSaId,

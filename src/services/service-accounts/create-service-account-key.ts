@@ -4,8 +4,9 @@ import {promisify} from 'node:util';
 import {AppError} from '@gravity-ui/nodekit';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
-import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
+import {USER_TYPE} from '../../constants/user';
 import {ServiceAccountKeyModel} from '../../db/models/service-account-key';
+import {UserModel, UserModelColumn} from '../../db/models/user';
 import type {BigIntId} from '../../db/types/id';
 import {getPrimary, getReplica} from '../../db/utils/db';
 import {ServiceArgs} from '../../types/service';
@@ -26,11 +27,12 @@ export const createServiceAccountKey = async (
 
     ctx.log('CREATE_SERVICE_ACCOUNT_KEY', {serviceAccountId});
 
-    const sa = await ServiceAccountModel.query(getReplica(trx))
-        .select(ServiceAccountModelColumn.ServiceAccountId)
-        .where(ServiceAccountModelColumn.ServiceAccountId, serviceAccountId)
+    const sa = await UserModel.query(getReplica(trx))
+        .select(UserModelColumn.UserId)
+        .where(UserModelColumn.UserId, serviceAccountId)
+        .where(UserModelColumn.Type, USER_TYPE.SERVICE_ACCOUNT)
         .first()
-        .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+        .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
     if (!sa) {
         throw new AppError(AUTH_ERROR.SERVICE_ACCOUNT_NOT_EXISTS, {

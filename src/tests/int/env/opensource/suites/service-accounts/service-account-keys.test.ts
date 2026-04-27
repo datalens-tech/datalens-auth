@@ -32,12 +32,9 @@ describe('Service account keys', () => {
             roles: [UserRole.Viewer],
         });
 
-        await auth(
-            request(app).delete(
-                makeRoute('deleteServiceAccount', {serviceAccountId: nonExistentSaId}),
-            ),
-            {accessToken: adminTokens.accessToken},
-        );
+        await auth(request(app).delete(makeRoute('deleteUser', {userId: nonExistentSaId})), {
+            accessToken: adminTokens.accessToken,
+        });
     });
 
     describe('Create key', () => {

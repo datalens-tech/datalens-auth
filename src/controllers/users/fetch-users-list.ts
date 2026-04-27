@@ -4,6 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
+import {USER_TYPE} from '../../constants/user';
 import {getUsersList} from '../../services/users/get-users-list';
 import {userWithRolesModelArray} from '../response-models/users/user-with-roles-model-array';
 
@@ -15,6 +16,7 @@ const requestSchema = {
         idpType: z.string().min(1).max(100).optional(),
         roles: z.enum(UserRole).array().min(1).max(10).optional(),
         userIds: zc.decodeIdArray({min: 1}).optional(),
+        type: z.enum(USER_TYPE).optional(),
     }),
 };
 
@@ -53,6 +55,7 @@ export const fetchUsersListController: AppRouteHandler = async (
             idpType: body.idpType,
             roles: body.roles,
             userIds: body.userIds,
+            type: body.type,
         },
     );
 

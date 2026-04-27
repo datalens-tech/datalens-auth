@@ -16,6 +16,9 @@ export const UserModelColumn = {
     IdpUserId: 'idpUserId',
     IdpSlug: 'idpSlug',
     IdpType: 'idpType',
+    Type: 'type',
+    Description: 'description',
+    Name: 'name',
 } as const;
 
 type UserModelColumnValues = ValuesType<typeof UserModelColumn>;
@@ -42,4 +45,7 @@ export class UserModel extends Model implements Record<UserModelColumnValues, un
     idpUserId!: Nullable<string>;
     idpSlug!: Nullable<string>;
     idpType!: Nullable<string>;
+    type!: string;
+    description!: Nullable<string>;
+    name!: Nullable<string>;
 }

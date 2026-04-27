@@ -11,12 +11,26 @@ const schema = z
         lastName: z.string().nullable(),
         idpType: z.string().nullable(),
         idpSlug: z.string().nullable(),
+        name: z.string().nullable().optional(),
+        description: z.string().nullable().optional(),
+        type: z.string().optional(),
     })
     .describe('User model');
 
 export type UserModel = z.infer<typeof schema>;
 
-export type UserFormatData = Omit<UserModel, 'userId'> & {userId: BigIntId};
+export type UserFormatData = {
+    userId: BigIntId;
+    login: string | null;
+    email: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    idpType: string | null;
+    idpSlug: string | null;
+    name?: string | null;
+    description?: string | null;
+    type?: string;
+};
 
 const format = (data: UserFormatData): UserModel => {
     return {
@@ -27,6 +41,9 @@ const format = (data: UserFormatData): UserModel => {
         lastName: data.lastName,
         idpType: data.idpType,
         idpSlug: data.idpSlug,
+        name: data.name,
+        description: data.description,
+        type: data.type,
     };
 };
 

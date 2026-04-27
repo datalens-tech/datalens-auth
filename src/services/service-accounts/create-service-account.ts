@@ -3,25 +3,22 @@ import {transaction} from 'objection';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {UserRole} from '../../constants/role';
-import {ServiceAccountModel, ServiceAccountModelColumn} from '../../db/models/service-account';
-import {
-    ServiceAccountRoleModel,
-    ServiceAccountRoleModelColumn,
-} from '../../db/models/service-account-role';
+import {USER_TYPE} from '../../constants/user';
+import {UserModel, UserModelColumn} from '../../db/models/user';
 import {getPrimary, getReplica} from '../../db/utils/db';
+import {insertRoles} from '../../db/utils/roles';
 import {ServiceArgs} from '../../types/service';
-import {Optional} from '../../utils/utility-types';
 
-export type CreateServiceAccountArgs = {
+export interface CreateServiceAccountArgs {
     name: string;
-    description: Optional<string>;
-    roles: Optional<UserRole[]>;
-};
+    description?: string;
+    roles?: UserRole[];
+}
 
 export const createServiceAccount = async (
     {ctx, trx}: ServiceArgs,
     args: CreateServiceAccountArgs,
-): Promise<ServiceAccountModel> => {
+): Promise<UserModel> => {
     const {name, description, roles} = args;
 
     const registry = ctx.get('registry');
@@ -29,11 +26,11 @@ export const createServiceAccount = async (
 
     ctx.log('CREATE_SERVICE_ACCOUNT', {name});
 
-    const existing = await ServiceAccountModel.query(getReplica(trx))
-        .select(ServiceAccountModelColumn.ServiceAccountId)
-        .where(ServiceAccountModelColumn.Name, name)
+    const existing = await UserModel.query(getReplica(trx))
+        .select(UserModelColumn.UserId)
+        .where(UserModelColumn.Name, name)
         .first()
-        .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+        .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
     if (existing) {
         throw new AppError(AUTH_ERROR.SERVICE_ACCOUNT_NAME_EXISTS, {
@@ -41,37 +38,27 @@ export const createServiceAccount = async (
         });
     }
 
-    const serviceAccountId = await getId();
+    const userId = await getId();
 
     const result = await transaction(getPrimary(trx), async (transactionTrx) => {
-        const createdServiceAccount = await ServiceAccountModel.query(transactionTrx)
+        const created = await UserModel.query(transactionTrx)
             .insert({
-                [ServiceAccountModelColumn.ServiceAccountId]: serviceAccountId,
-                [ServiceAccountModelColumn.Name]: name,
-                [ServiceAccountModelColumn.Description]: description,
+                [UserModelColumn.UserId]: userId,
+                [UserModelColumn.Name]: name,
+                [UserModelColumn.Description]: description,
+                [UserModelColumn.Type]: USER_TYPE.SERVICE_ACCOUNT,
             })
-            .timeout(ServiceAccountModel.DEFAULT_QUERY_TIMEOUT);
+            .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
-        const resultRoles = (Array.isArray(roles) ? roles : [ctx.config.defaultRole]).filter(
-            Boolean,
-        );
+        await insertRoles(transactionTrx, userId, roles, ctx.config.defaultRole as UserRole);
 
-        if (resultRoles.length) {
-            const normalizedRoles = Array.from(new Set(resultRoles));
-            await ServiceAccountRoleModel.query(transactionTrx)
-                .insert(
-                    normalizedRoles.map((role) => ({
-                        [ServiceAccountRoleModelColumn.ServiceAccountId]: serviceAccountId,
-                        [ServiceAccountRoleModelColumn.Role]: role,
-                    })),
-                )
-                .timeout(ServiceAccountRoleModel.DEFAULT_QUERY_TIMEOUT);
-        }
-
-        return createdServiceAccount;
+        return created;
     });
 
-    ctx.log('CREATE_SERVICE_ACCOUNT_SUCCESS', {serviceAccountId});
+    const {createUserSuccess} = registry.common.functions.get();
+    await createUserSuccess({ctx, userId});
+
+    ctx.log('CREATE_SERVICE_ACCOUNT_SUCCESS', {serviceAccountId: userId});
 
     return result;
 };

@@ -3,7 +3,7 @@ import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {Permission} from '../../constants/permission';
 import {RouteCheck} from '../../constants/route';
-import {introspectSubjectPermission} from '../../services/permissions/introspect-subject-permission';
+import {introspectUserPermission} from '../../services/permissions/introspect-user-permission';
 import {absurd} from '../../utils/absurd';
 import {checkPermission as checkPermissionFunc} from '../../utils/permission';
 
@@ -48,10 +48,9 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
         }
 
         if (permission === Permission.Manage) {
-            const hasPermission = await introspectSubjectPermission(
+            const hasPermission = await introspectUserPermission(
                 {ctx: req.ctx},
-                subject,
-                permission,
+                {userId: subject.subjectId, permission},
             );
 
             if (!hasPermission) {
