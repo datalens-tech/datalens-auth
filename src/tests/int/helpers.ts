@@ -3,6 +3,7 @@ import request from 'supertest';
 import {startSession} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {UserRole} from '../../constants/role';
+import {USER_TYPE} from '../../constants/user';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import type {BigIntId, StringId} from '../../db/types/id';
@@ -30,7 +31,7 @@ export const createTestUsers = async ({
     email,
     firstName,
     lastName,
-    type,
+    type = USER_TYPE.USER,
 }: CreateTestUserArgs) => {
     const {db, getId} = registry.getDbInstance();
 

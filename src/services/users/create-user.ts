@@ -4,6 +4,7 @@ import {transaction} from 'objection';
 import {hashPassword} from '../../components/passwords';
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {UserRole} from '../../constants/role';
+import {USER_TYPE} from '../../constants/user';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import {getPrimary, getReplica} from '../../db/utils/db';
 import {lowerEqual} from '../../db/utils/query';
@@ -51,6 +52,7 @@ export const createUser = async ({ctx, trx}: ServiceArgs, args: CreateUserArgs) 
                 [UserModelColumn.Email]: email,
                 [UserModelColumn.FirstName]: firstName,
                 [UserModelColumn.LastName]: lastName,
+                [UserModelColumn.Type]: USER_TYPE.USER,
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
