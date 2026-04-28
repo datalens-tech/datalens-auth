@@ -2,7 +2,7 @@ import type {Knex} from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.raw(`
-        CREATE TYPE auth_user_type AS ENUM ('user', 'serviceAccount');
+        CREATE TYPE auth_user_type AS ENUM ('user', 'service_account');
 
         ALTER TABLE auth_users ADD COLUMN type auth_user_type;
         UPDATE auth_users SET type = 'user';
