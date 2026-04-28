@@ -10,8 +10,9 @@ export async function up(knex: Knex): Promise<void> {
         ALTER TABLE auth_users ADD COLUMN description TEXT;
         ALTER TABLE auth_users ADD COLUMN name TEXT;
 
-        CREATE UNIQUE INDEX auth_users_uniq_name_idx ON auth_users
-            USING BTREE (name);
+        CREATE UNIQUE INDEX auth_users_uniq_name_idx ON auth_users USING BTREE (name);
+        CREATE INDEX auth_users_name_lower_idx ON auth_users (LOWER(name));
+        CREATE INDEX auth_users_name_trgm_idx ON auth_users USING gin (LOWER(name) gin_trgm_ops);
 
         CREATE TABLE auth_service_account_keys (
             key_id BIGINT NOT NULL DEFAULT auth_get_id() PRIMARY KEY,

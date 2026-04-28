@@ -56,7 +56,12 @@ export const createUser = async ({ctx, trx}: ServiceArgs, args: CreateUserArgs) 
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
-        await insertRoles(transactionTrx, userId, roles, ctx.config.defaultRole as UserRole);
+        await insertRoles({
+            trx: transactionTrx,
+            userId,
+            roles,
+            defaultRole: ctx.config.defaultRole as UserRole,
+        });
 
         return createdUser;
     });

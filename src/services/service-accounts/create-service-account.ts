@@ -50,7 +50,12 @@ export const createServiceAccount = async (
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
-        await insertRoles(transactionTrx, userId, roles, ctx.config.defaultRole as UserRole);
+        await insertRoles({
+            trx: transactionTrx,
+            userId,
+            defaultRole: ctx.config.defaultRole as UserRole,
+            roles,
+        });
 
         return created;
     });

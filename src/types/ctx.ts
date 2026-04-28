@@ -1,9 +1,9 @@
 import type {UserRole} from '../constants/role';
-import {ACCESS_TOKEN_TYPE} from '../constants/token';
+import {USER_TYPE} from '../constants/user';
 import type {BigIntId} from '../db/types/id';
 
 export type PlatformCtxUser = {
-    type: typeof ACCESS_TOKEN_TYPE.USER;
+    type: typeof USER_TYPE.USER;
     subjectId: BigIntId;
     sessionId: BigIntId;
     roles: `${UserRole}`[];
@@ -11,7 +11,7 @@ export type PlatformCtxUser = {
 };
 
 export type PlatformCtxServiceAccount = {
-    type: typeof ACCESS_TOKEN_TYPE.SERVICE_ACCOUNT;
+    type: typeof USER_TYPE.SERVICE_ACCOUNT;
     subjectId: BigIntId;
     sessionId: null;
     roles: `${UserRole}`[];

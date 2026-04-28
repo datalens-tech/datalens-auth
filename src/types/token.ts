@@ -1,5 +1,5 @@
 import {UserRole} from '../constants/role';
-import {ACCESS_TOKEN_TYPE} from '../constants/token';
+import {USER_TYPE} from '../constants/user';
 import type {StringId} from '../db/types/id';
 
 export interface ExpirableTokenPayload {
@@ -8,7 +8,7 @@ export interface ExpirableTokenPayload {
 }
 
 export type UserAccessTokenClaims = {
-    type?: typeof ACCESS_TOKEN_TYPE.USER;
+    type?: typeof USER_TYPE.USER;
     userId: StringId;
     sessionId: StringId;
     roles: `${UserRole}`[];
@@ -17,7 +17,7 @@ export type UserAccessTokenClaims = {
 export type UserAccessTokenPayload = ExpirableTokenPayload & UserAccessTokenClaims;
 
 export type ServiceAccountAccessTokenClaims = {
-    type: typeof ACCESS_TOKEN_TYPE.SERVICE_ACCOUNT;
+    type: typeof USER_TYPE.SERVICE_ACCOUNT;
     userId: StringId;
     roles: `${UserRole}`[];
 };

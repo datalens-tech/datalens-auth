@@ -3,6 +3,7 @@ import {NextFunction, Request, Response} from '@gravity-ui/expresskit';
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {Permission} from '../../constants/permission';
 import {RouteCheck} from '../../constants/route';
+import {USER_TYPE} from '../../constants/user';
 import {introspectUserPermission} from '../../services/permissions/introspect-user-permission';
 import {absurd} from '../../utils/absurd';
 import {checkPermission as checkPermissionFunc} from '../../utils/permission';
@@ -14,7 +15,7 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
 
     const subject = req.ctx.get('subject');
 
-    if (userOnly && subject?.type !== 'user') {
+    if (userOnly && subject?.type !== USER_TYPE.USER) {
         req.ctx.logError(`${subject?.type} subject type is not allowed on this endpoint`);
         res.status(403).send({
             message: 'You do not have a sufficient permission for this operation',
