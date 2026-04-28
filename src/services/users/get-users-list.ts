@@ -21,7 +21,6 @@ const selectedUserColumns = [
     UserModelColumn.IdpSlug,
     UserModelColumn.IdpType,
     UserModelColumn.Name,
-    UserModelColumn.Description,
     UserModelColumn.Type,
 ] as const;
 

@@ -26,7 +26,6 @@ const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRole
         UserModelColumn.IdpSlug,
         UserModelColumn.IdpType,
         UserModelColumn.Name,
-        UserModelColumn.Description,
         UserModelColumn.Type,
     ]),
     userId: encodeId(user.userId),
