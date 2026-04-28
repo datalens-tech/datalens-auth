@@ -7,7 +7,6 @@ export async function up(knex: Knex): Promise<void> {
         ALTER TABLE auth_users ADD COLUMN type auth_user_type;
         UPDATE auth_users SET type = 'user';
         ALTER TABLE auth_users ALTER COLUMN type SET NOT NULL;
-        ALTER TABLE auth_users ADD COLUMN description TEXT;
         ALTER TABLE auth_users ADD COLUMN name TEXT;
 
         CREATE UNIQUE INDEX auth_users_uniq_name_idx ON auth_users USING BTREE (name);
@@ -33,7 +32,6 @@ export async function down(knex: Knex): Promise<void> {
         DROP INDEX auth_users_uniq_name_idx;
 
         ALTER TABLE auth_users DROP COLUMN name;
-        ALTER TABLE auth_users DROP COLUMN description;
         ALTER TABLE auth_users DROP COLUMN type;
 
         DROP TYPE auth_user_type;

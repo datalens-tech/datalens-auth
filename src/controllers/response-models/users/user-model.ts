@@ -12,7 +12,6 @@ const schema = z
         idpType: z.string().nullable(),
         idpSlug: z.string().nullable(),
         name: z.string().nullable().optional(),
-        description: z.string().nullable().optional(),
         type: z.string().optional(),
     })
     .describe('User model');
@@ -31,7 +30,6 @@ const format = (data: UserFormatData): UserModel => {
         idpType: data.idpType,
         idpSlug: data.idpSlug,
         name: data.name,
-        description: data.description,
         type: data.type,
     };
 };

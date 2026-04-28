@@ -89,18 +89,16 @@ export type CreateTestServiceAccountArgs = {
     accessToken: string;
     name: string;
     roles: `${UserRole}`[];
-    description?: string;
 };
 
 export const createTestServiceAccount = async ({
     accessToken,
     name,
     roles,
-    description,
 }: CreateTestServiceAccountArgs): Promise<string> => {
     const response = await auth(request(app).post(makeRoute('createServiceAccount')), {
         accessToken,
-    }).send({name, roles, description});
+    }).send({name, roles});
 
     expect(response.status).toBe(200);
 

@@ -11,7 +11,6 @@ import {ServiceArgs} from '../../types/service';
 
 export interface CreateServiceAccountArgs {
     name: string;
-    description?: string;
     roles?: UserRole[];
 }
 
@@ -19,7 +18,7 @@ export const createServiceAccount = async (
     {ctx, trx}: ServiceArgs,
     args: CreateServiceAccountArgs,
 ): Promise<UserModel> => {
-    const {name, description, roles} = args;
+    const {name, roles} = args;
 
     const registry = ctx.get('registry');
     const {getId} = registry.getDbInstance();
@@ -45,7 +44,6 @@ export const createServiceAccount = async (
             .insert({
                 [UserModelColumn.UserId]: userId,
                 [UserModelColumn.Name]: name,
-                [UserModelColumn.Description]: description,
                 [UserModelColumn.Type]: USER_TYPE.SERVICE_ACCOUNT,
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);

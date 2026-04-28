@@ -10,7 +10,6 @@ import {userModel} from '../response-models/users/user-model';
 const requestSchema = {
     body: z.object({
         name: z.string().min(1).max(200),
-        description: z.string().min(1).max(500).optional(),
         roles: z.enum(UserRole).array().min(1).max(100),
     }),
 };
@@ -24,7 +23,6 @@ export const createServiceAccountController: AppRouteHandler = async (req, res) 
         {ctx: req.ctx},
         {
             name: body.name,
-            description: body.description,
             roles: body.roles,
         },
     );

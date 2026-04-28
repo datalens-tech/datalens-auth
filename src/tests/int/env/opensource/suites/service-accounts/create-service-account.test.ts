@@ -49,7 +49,6 @@ describe('Create service account', () => {
             accessToken: adminTokens.accessToken,
         }).send({
             name: 'create-sa-basic',
-            description: 'A test service account',
             roles: [UserRole.Viewer, UserRole.Editor],
         });
 
@@ -57,7 +56,6 @@ describe('Create service account', () => {
         expect(response.body).toMatchObject({
             userId: expect.any(String),
             name: 'create-sa-basic',
-            description: 'A test service account',
             type: 'serviceAccount',
         });
     });
