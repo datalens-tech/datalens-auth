@@ -2,7 +2,9 @@ import type {Knex} from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.raw(`
-        ALTER TABLE auth_users ADD COLUMN type TEXT;
+        CREATE TYPE auth_user_type AS ENUM ('user', 'serviceAccount');
+
+        ALTER TABLE auth_users ADD COLUMN type auth_user_type;
         UPDATE auth_users SET type = 'user';
         ALTER TABLE auth_users ALTER COLUMN type SET NOT NULL;
         ALTER TABLE auth_users ADD COLUMN description TEXT;
@@ -32,5 +34,7 @@ export async function down(knex: Knex): Promise<void> {
         ALTER TABLE auth_users DROP COLUMN name;
         ALTER TABLE auth_users DROP COLUMN description;
         ALTER TABLE auth_users DROP COLUMN type;
+
+        DROP TYPE auth_user_type;
     `);
 }
