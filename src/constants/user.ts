@@ -1,4 +1,4 @@
 export const USER_TYPE = {
     USER: 'user',
-    SERVICE_ACCOUNT: 'serviceAccount',
+    SERVICE_ACCOUNT: 'service_account',
 } as const;

@@ -1,5 +1,6 @@
 import request from 'supertest';
 
+import {USER_TYPE} from '../../../../../../constants/user';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
 import {createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
@@ -56,7 +57,7 @@ describe('Create service account', () => {
         expect(response.body).toMatchObject({
             userId: expect.any(String),
             name: 'create-sa-basic',
-            type: 'serviceAccount',
+            type: USER_TYPE.SERVICE_ACCOUNT,
         });
     });
 
