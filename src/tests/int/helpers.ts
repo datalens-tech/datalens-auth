@@ -21,7 +21,6 @@ export type CreateTestUserArgs = {
     email?: string;
     firstName?: string;
     lastName?: string;
-    type?: string;
 };
 
 export const createTestUsers = async ({
@@ -31,7 +30,6 @@ export const createTestUsers = async ({
     email,
     firstName,
     lastName,
-    type = USER_TYPE.USER,
 }: CreateTestUserArgs) => {
     const {db, getId} = registry.getDbInstance();
 
@@ -45,7 +43,7 @@ export const createTestUsers = async ({
             [UserModelColumn.Email]: email,
             [UserModelColumn.FirstName]: firstName,
             [UserModelColumn.LastName]: lastName,
-            [UserModelColumn.Type]: type,
+            [UserModelColumn.Type]: USER_TYPE.USER,
         })
         .returning('*')
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
