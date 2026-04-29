@@ -1,5 +1,6 @@
 import request from 'supertest';
 
+import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
 import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
@@ -20,17 +21,17 @@ describe('Service account keys', () => {
         adminTokens = await generateTokens({userId: admin.userId});
         userTokens = await generateTokens({userId: user.userId});
 
-        saId = await createTestServiceAccount({
-            accessToken: adminTokens.accessToken,
+        const sa = await createTestServiceAccount({
             name: 'keys-sa-fixture',
             roles: [UserRole.Viewer],
         });
+        saId = encodeId(sa.userId);
 
-        nonExistentSaId = await createTestServiceAccount({
-            accessToken: adminTokens.accessToken,
+        const nonExistentSa = await createTestServiceAccount({
             name: 'keys-sa-deleted',
             roles: [UserRole.Viewer],
         });
+        nonExistentSaId = encodeId(nonExistentSa.userId);
 
         await auth(request(app).delete(makeRoute('deleteUser', {userId: nonExistentSaId})), {
             accessToken: adminTokens.accessToken,

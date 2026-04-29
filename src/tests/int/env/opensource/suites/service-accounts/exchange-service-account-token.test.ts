@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 
+import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
 import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
@@ -34,11 +35,11 @@ describe('Exchange service account token', () => {
         admin = await createTestUsers({roles: [UserRole.Admin], login: 'exchange-token-admin'});
         adminTokens = await generateTokens({userId: admin.userId});
 
-        saId = await createTestServiceAccount({
-            accessToken: adminTokens.accessToken,
+        const sa = await createTestServiceAccount({
             name: 'exchange-token-sa',
             roles: [UserRole.Viewer],
         });
+        saId = encodeId(sa.userId);
 
         const keyResp = await auth(
             request(app).post(makeRoute('createServiceAccountKey', {serviceAccountId: saId})),

@@ -6,7 +6,7 @@ import type {UserWithRolesModel} from '../../../../../../controllers/response-mo
 import {UserModel, UserModelColumn} from '../../../../../../db/models/user';
 import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
-import {createTestUsers, generateTokens} from '../../../../helpers';
+import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 type CreatedUsers = {
@@ -76,9 +76,8 @@ describe('Get users list', () => {
         });
         createdUsers['userWithoutRoles'] = pickCreatedUserFields(userWithoutRoles, []);
 
-        const serviceAccount = await createTestUsers({
-            login: 'test-service-account',
-            type: USER_TYPE.SERVICE_ACCOUNT,
+        const serviceAccount = await createTestServiceAccount({
+            name: 'test-service-account',
             roles: [],
         });
         createdUsers['serviceAccount'] = pickCreatedUserFields(serviceAccount, []);

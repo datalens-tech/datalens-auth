@@ -1,5 +1,3 @@
-import request from 'supertest';
-
 import {startSession} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {UserRole} from '../../constants/role';
@@ -10,9 +8,8 @@ import type {BigIntId, StringId} from '../../db/types/id';
 import {registry} from '../../registry/';
 import {decodeId} from '../../utils/ids';
 
-import {app, appConfig, appCtx, auth} from './auth';
+import {appConfig, appCtx} from './auth';
 import {testUserLogin, testUserPassword} from './constants';
-import {makeRoute} from './routes';
 
 export type CreateTestUserArgs = {
     login?: string;
@@ -84,21 +81,34 @@ export const isBigIntId = (value: string) => {
 };
 
 export type CreateTestServiceAccountArgs = {
-    accessToken: string;
     name: string;
-    roles: `${UserRole}`[];
+    roles?: `${UserRole}`[];
 };
 
-export const createTestServiceAccount = async ({
-    accessToken,
-    name,
-    roles,
-}: CreateTestServiceAccountArgs): Promise<string> => {
-    const response = await auth(request(app).post(makeRoute('createServiceAccount')), {
-        accessToken,
-    }).send({name, roles});
+export const createTestServiceAccount = async ({name, roles}: CreateTestServiceAccountArgs) => {
+    const {db, getId} = registry.getDbInstance();
 
-    expect(response.status).toBe(200);
+    const serviceAccount = await UserModel.query(db.primary)
+        .insert({
+            [UserModelColumn.UserId]: await getId(),
+            [UserModelColumn.Name]: name,
+            [UserModelColumn.Type]: USER_TYPE.SERVICE_ACCOUNT,
+        })
+        .returning('*')
+        .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
-    return response.body.userId;
+    const resultRoles = Array.isArray(roles) ? roles : [appConfig.defaultRole].filter(Boolean);
+
+    if (resultRoles.length) {
+        await RoleModel.query(db.primary)
+            .insert(
+                resultRoles.map((role) => ({
+                    [RoleModelColumn.UserId]: serviceAccount[UserModelColumn.UserId],
+                    [RoleModelColumn.Role]: role,
+                })),
+            )
+            .timeout(RoleModel.DEFAULT_QUERY_TIMEOUT);
+    }
+
+    return serviceAccount;
 };
