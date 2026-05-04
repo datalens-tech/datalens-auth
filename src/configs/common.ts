@@ -13,6 +13,8 @@ export const features: FeaturesConfig = {
 
 const appSensitiveKeys = [MASTER_TOKEN_HEADER];
 
+const ACCESS_TOKEN_TTL = 60 * 15; // 15 min
+
 export default {
     appName: 'datalens-auth',
 
@@ -37,10 +39,10 @@ export default {
     disableWildcardCookie: isTrueArg(getEnvVariable('DISABLE_WILDCARD_COOKIE')),
     cookieSameSiteMode: getEnvVariable('COOKIE_SAME_SITE_MODE'),
 
-    accessTokenTTL: 60 * 15, // 15 min
+    accessTokenTTL: ACCESS_TOKEN_TTL,
     refreshTokenTTL: 60 * 60 * 24 * 10, // 10 days
     sessionTTL: 60 * 60 * 24 * 30, // 30 days
-    serviceAccountAccessTokenTTL: 60 * 60, // 1 hour
+    serviceAccountAccessTokenTTL: ACCESS_TOKEN_TTL,
     maxServiceAccountClientJwtTTL: 600, // 10 minutes
 
     tokenPrivateKey: getEnvCert(process.env.TOKEN_PRIVATE_KEY as string),

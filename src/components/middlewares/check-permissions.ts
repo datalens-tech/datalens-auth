@@ -8,6 +8,14 @@ import {introspectUserPermission} from '../../services/permissions/introspect-us
 import {absurd} from '../../utils/absurd';
 import {checkPermission as checkPermissionFunc} from '../../utils/permission';
 
+const sendSubjectNotFoundResponse = (req: Request, res: Response) => {
+    req.ctx.logError('Subject not found');
+    res.status(403).send({
+        message: 'Subject not found',
+        code: AUTH_ERROR.ACCESS_DENIED,
+    });
+};
+
 export const checkPermissions = async (req: Request, res: Response, next: NextFunction) => {
     const permission = req.routeInfo.permission;
     const check = req.routeInfo.check;
@@ -15,22 +23,25 @@ export const checkPermissions = async (req: Request, res: Response, next: NextFu
 
     const subject = req.ctx.get('subject');
 
-    if (userOnly && subject?.type !== USER_TYPE.USER) {
-        req.ctx.logError(`${subject?.type} subject type is not allowed on this endpoint`);
-        res.status(403).send({
-            message: 'You do not have a sufficient permission for this operation',
-            code: AUTH_ERROR.ACCESS_DENIED,
-        });
-        return;
+    if (userOnly) {
+        if (!subject) {
+            sendSubjectNotFoundResponse(req, res);
+            return;
+        }
+
+        if (subject.type !== USER_TYPE.USER) {
+            req.ctx.logError(`${subject.type} subject type is not allowed on this endpoint`);
+            res.status(403).send({
+                message: 'You do not have a sufficient permission for this operation',
+                code: AUTH_ERROR.ACCESS_DENIED,
+            });
+            return;
+        }
     }
 
     if (permission) {
         if (!subject) {
-            req.ctx.logError('Subject not found');
-            res.status(403).send({
-                message: 'Subject not found',
-                code: AUTH_ERROR.ACCESS_DENIED,
-            });
+            sendSubjectNotFoundResponse(req, res);
             return;
         }
 

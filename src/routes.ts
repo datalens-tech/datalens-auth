@@ -215,6 +215,13 @@ export function getRoutes(_nodekit: NodeKit, options: GetRoutesOptions) {
             apiHeaders: [AUTHORIZATION_HEADER],
             permission: Permission.Manage,
         }),
+        updateServiceAccount: makeRoute({
+            route: 'POST /v1/management/service-accounts/:serviceAccountId',
+            handler: serviceAccounts.updateServiceAccountController,
+            write: true,
+            apiHeaders: [AUTHORIZATION_HEADER],
+            permission: Permission.Manage,
+        }),
         createServiceAccountKey: makeRoute({
             route: 'POST /v1/management/service-accounts/:serviceAccountId/keys',
             handler: serviceAccounts.createServiceAccountKeyController,

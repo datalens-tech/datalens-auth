@@ -7,9 +7,9 @@ export type ExchangeServiceAccountTokenResult = {
 
 export const exchangeServiceAccountToken = async (
     {ctx, trx}: ServiceArgs,
-    {clientJwt}: {clientJwt: string},
+    {saToken}: {saToken: string},
 ): Promise<ExchangeServiceAccountTokenResult> => {
-    const accessToken = await jwtExchangeServiceAccountToken({ctx, trx}, {clientJwt});
+    const accessToken = await jwtExchangeServiceAccountToken({ctx, trx}, {saToken});
 
     return {accessToken};
 };

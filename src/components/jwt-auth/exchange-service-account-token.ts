@@ -20,11 +20,7 @@ const invalidJwt = (message: string) =>
 
 const resolveVerifiedPayload = async (
     {trx, ctx}: ServiceArgs,
-    {
-        clientJwt,
-        kid,
-        serviceAccountId,
-    }: {clientJwt: string; kid: string; serviceAccountId: BigIntId},
+    {saToken, kid, serviceAccountId}: {saToken: string; kid: string; serviceAccountId: BigIntId},
 ): Promise<jwt.JwtPayload> => {
     let decodedKeyId: BigIntId;
     try {
@@ -48,7 +44,7 @@ const resolveVerifiedPayload = async (
     }
 
     try {
-        return jwt.verify(clientJwt, key.publicKey, {
+        return jwt.verify(saToken, key.publicKey, {
             algorithms: [SIGNATURE_ALGORITHM],
         }) as jwt.JwtPayload;
     } catch {
@@ -59,13 +55,13 @@ const resolveVerifiedPayload = async (
 
 export const exchangeServiceAccountToken = async (
     {trx, ctx}: ServiceArgs,
-    {clientJwt}: {clientJwt: string},
+    {saToken}: {saToken: string},
 ): Promise<string> => {
     ctx.log('EXCHANGE_SA_TOKEN');
 
     let decoded: jwt.Jwt | null;
     try {
-        decoded = jwt.decode(clientJwt, {complete: true});
+        decoded = jwt.decode(saToken, {complete: true});
     } catch (err) {
         ctx.logError('EXCHANGE_SA_TOKEN_DECODE_ERROR', err);
         throw invalidJwt('Malformed client JWT');
@@ -103,7 +99,7 @@ export const exchangeServiceAccountToken = async (
 
     const payload = await resolveVerifiedPayload(
         {trx, ctx},
-        {clientJwt, kid: rawKid, serviceAccountId: decodedServiceAccountId},
+        {saToken, kid: rawKid, serviceAccountId: decodedServiceAccountId},
     );
 
     if (typeof payload.iat !== 'number' || typeof payload.exp !== 'number') {

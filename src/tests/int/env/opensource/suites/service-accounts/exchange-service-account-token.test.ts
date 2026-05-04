@@ -63,7 +63,7 @@ describe('Exchange service account token', () => {
     test('Returns 401 for malformed JWT string', async () => {
         const response = await request(app)
             .post(makeRoute('exchangeServiceAccountToken'))
-            .send({jwt: 'this-is-not-a-jwt'});
+            .send({saToken: 'this-is-not-a-jwt'});
 
         expect(response.status).toBe(401);
         expect(response.body).toStrictEqual({
@@ -79,11 +79,11 @@ describe('Exchange service account token', () => {
             privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
         });
 
-        const clientJwt = signClientJwt(saId, keyId, wrongKey);
+        const saToken = signClientJwt(saId, keyId, wrongKey);
 
         const response = await request(app)
             .post(makeRoute('exchangeServiceAccountToken'))
-            .send({jwt: clientJwt});
+            .send({saToken});
 
         expect(response.status).toBe(401);
         expect(response.body).toStrictEqual({
@@ -94,14 +94,14 @@ describe('Exchange service account token', () => {
 
     test('Returns 401 for JWT with TTL exceeding 600 seconds', async () => {
         const now = Math.floor(Date.now() / 1000);
-        const clientJwt = signClientJwt(saId, keyId, privateKey, {
+        const saToken = signClientJwt(saId, keyId, privateKey, {
             iat: now,
             exp: now + 601,
         });
 
         const response = await request(app)
             .post(makeRoute('exchangeServiceAccountToken'))
-            .send({jwt: clientJwt});
+            .send({saToken});
 
         expect(response.status).toBe(401);
         expect(response.body).toStrictEqual({
@@ -127,7 +127,7 @@ describe('Exchange service account token', () => {
             accessToken: adminTokens.accessToken,
         });
 
-        const clientJwt = signClientJwt(
+        const saToken = signClientJwt(
             deletedSaId,
             deletedKeyResp.body.keyId,
             deletedKeyResp.body.privateKey,
@@ -135,7 +135,7 @@ describe('Exchange service account token', () => {
 
         const response = await request(app)
             .post(makeRoute('exchangeServiceAccountToken'))
-            .send({jwt: clientJwt});
+            .send({saToken});
 
         expect(response.status).toBe(404);
         expect(response.body).toStrictEqual({
@@ -151,11 +151,11 @@ describe('Exchange service account token', () => {
             iat: now,
             exp: now + 300,
         };
-        const clientJwt = jwt.sign(payload, privateKey, {algorithm: 'PS256'});
+        const saToken = jwt.sign(payload, privateKey, {algorithm: 'PS256'});
 
         const response = await request(app)
             .post(makeRoute('exchangeServiceAccountToken'))
-            .send({jwt: clientJwt});
+            .send({saToken});
 
         expect(response.status).toBe(401);
         expect(response.body).toStrictEqual({
@@ -171,11 +171,11 @@ describe('Exchange service account token', () => {
             iat: now,
             exp: now + 300,
         };
-        const clientJwt = jwt.sign(payload, privateKey, {algorithm: 'PS256', keyid: keyId});
+        const saToken = jwt.sign(payload, privateKey, {algorithm: 'PS256', keyid: keyId});
 
         const response = await request(app)
             .post(makeRoute('exchangeServiceAccountToken'))
-            .send({jwt: clientJwt});
+            .send({saToken});
 
         expect(response.status).toBe(401);
         expect(response.body).toStrictEqual({
@@ -185,11 +185,11 @@ describe('Exchange service account token', () => {
     });
 
     test('Valid JWT returns access token', async () => {
-        const clientJwt = signClientJwt(saId, keyId, privateKey);
+        const saToken = signClientJwt(saId, keyId, privateKey);
 
         const response = await request(app)
             .post(makeRoute('exchangeServiceAccountToken'))
-            .send({jwt: clientJwt});
+            .send({saToken});
 
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({

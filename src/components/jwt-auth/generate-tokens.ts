@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import {raw} from 'objection';
 
+import {USER_TYPE} from '../../constants/user';
 import {RefreshTokenModel} from '../../db/models/refresh-token';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import type {BigIntId} from '../../db/types/id';
@@ -32,6 +33,7 @@ export const generateTokens = async (
         userId: encodedUserId,
         sessionId: encodedSessionId,
         roles,
+        type: USER_TYPE.USER,
     };
 
     const accessToken = jwt.sign(accessTokenPayload, ctx.config.tokenPrivateKey, {

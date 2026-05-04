@@ -10,7 +10,7 @@ import {
 
 const requestSchema = {
     body: z.object({
-        jwt: z.string().min(1),
+        saToken: z.string().min(1),
     }),
 };
 
@@ -36,7 +36,7 @@ export const exchangeServiceAccountTokenController: AppRouteHandler = async (
 ) => {
     const {body} = await parseReq(req);
 
-    const result = await exchangeServiceAccountToken({ctx: req.ctx}, {clientJwt: body.jwt});
+    const result = await exchangeServiceAccountToken({ctx: req.ctx}, {saToken: body.saToken});
 
     res.status(200).send(format(result));
 };
