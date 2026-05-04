@@ -1,6 +1,7 @@
 import {AppError} from '@gravity-ui/nodekit';
 
 import {AUTH_ERROR} from '../../constants/error-constants';
+import {USER_TYPE} from '../../constants/user';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import type {BigIntId} from '../../db/types/id';
 import {getPrimary, getReplica} from '../../db/utils/db';
@@ -24,6 +25,7 @@ export const updateUserProfile = async ({ctx, trx}: ServiceArgs, args: UpdateUse
     const user = await UserModel.query(getReplica(trx))
         .select([UserModelColumn.IdpSlug])
         .where(UserModelColumn.UserId, userId)
+        .where(UserModelColumn.Type, USER_TYPE.USER)
         .first()
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 

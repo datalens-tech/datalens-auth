@@ -4,16 +4,15 @@ import {ApiTag} from '../../components/api-docs';
 import {makeIdDecoder, makeReqParser, z} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {UserRole} from '../../constants/role';
-import {updateUsersRoles} from '../../services/roles/update-users-roles';
+import {addUsersRoles} from '../../services/roles/add-users-roles';
 import {macrotasksMap} from '../../utils/ids';
-import {SuccessResponseModel, successModel} from '../reponse-models';
+import {SuccessResponseModel, successModel} from '../response-models';
 
 const requestSchema = {
     body: z.object({
         deltas: z
             .object({
-                oldRole: z.enum(UserRole),
-                newRole: z.enum(UserRole),
+                role: z.enum(UserRole),
                 subjectId: z.string(),
             })
             .array()
@@ -30,13 +29,13 @@ const requestSchema = {
 
 const parseReq = makeReqParser(requestSchema);
 
-export const updateUsersRolesController: AppRouteHandler = async (
+export const addUsersRolesController: AppRouteHandler = async (
     req,
     res: Response<SuccessResponseModel>,
 ) => {
     const {body} = await parseReq(req);
 
-    await updateUsersRoles(
+    await addUsersRoles(
         {ctx: req.ctx},
         {
             deltas: body.deltas,
@@ -46,8 +45,8 @@ export const updateUsersRolesController: AppRouteHandler = async (
     res.status(200).send(successModel.format());
 };
 
-updateUsersRolesController.api = {
-    summary: 'Update users roles',
+addUsersRolesController.api = {
+    summary: 'Add users roles',
     tags: [ApiTag.Management],
     request: {
         body: {

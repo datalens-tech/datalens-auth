@@ -11,6 +11,8 @@ const schema = z
         lastName: z.string().nullable(),
         idpType: z.string().nullable(),
         idpSlug: z.string().nullable(),
+        name: z.string().nullable().optional(),
+        type: z.string().optional(),
     })
     .describe('User model');
 
@@ -27,6 +29,8 @@ const format = (data: UserFormatData): UserModel => {
         lastName: data.lastName,
         idpType: data.idpType,
         idpSlug: data.idpSlug,
+        name: data.name,
+        type: data.type,
     };
 };
 

@@ -4,6 +4,7 @@ import request from 'supertest';
 import {getAuthCookieName, getAuthExpCookieName} from '../../../../../components/cookies';
 import {verifyAccessToken, verifyRefreshToken} from '../../../../../components/jwt-auth';
 import {SET_COOKIE_HEADER} from '../../../../../constants/header';
+import {USER_TYPE} from '../../../../../constants/user';
 import {AUTH_ERROR, app, appConfig, appCtx, auth} from '../../../auth';
 import {testUserLogin, testUserPassword} from '../../../constants';
 import {makeRoute} from '../../../routes';
@@ -56,6 +57,7 @@ function checkSettedCookies(responseHeader: Record<string, string | string[]>, s
                 userId: expect.any(String),
                 sessionId: expect.any(String),
                 roles: [appConfig.defaultRole],
+                type: USER_TYPE.USER,
             });
 
             expect(refreshTokenPayload).toStrictEqual({

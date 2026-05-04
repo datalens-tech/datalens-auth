@@ -4,6 +4,7 @@ import {AppError} from '@gravity-ui/nodekit';
 
 import {comparePasswords, hashPassword} from '../../components/passwords';
 import {AUTH_ERROR} from '../../constants/error-constants';
+import {USER_TYPE} from '../../constants/user';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import type {BigIntId} from '../../db/types/id';
 import {getPrimary, getReplica} from '../../db/utils/db';
@@ -26,6 +27,7 @@ export const updateUserPassword = async ({ctx, trx}: ServiceArgs, args: UpdateUs
     const user = await UserModel.query(getReplica(trx))
         .select([UserModelColumn.UserId, UserModelColumn.Password, UserModelColumn.IdpSlug])
         .where(UserModelColumn.UserId, userId)
+        .where(UserModelColumn.Type, USER_TYPE.USER)
         .first()
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 

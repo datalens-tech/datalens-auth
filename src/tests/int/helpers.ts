@@ -1,6 +1,7 @@
 import {startSession} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {UserRole} from '../../constants/role';
+import {USER_TYPE} from '../../constants/user';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import type {BigIntId, StringId} from '../../db/types/id';
@@ -39,6 +40,7 @@ export const createTestUsers = async ({
             [UserModelColumn.Email]: email,
             [UserModelColumn.FirstName]: firstName,
             [UserModelColumn.LastName]: lastName,
+            [UserModelColumn.Type]: USER_TYPE.USER,
         })
         .returning('*')
         .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
@@ -76,4 +78,37 @@ export const isBigIntId = (value: string) => {
         return typeof BigInt(value) === 'bigint';
     } catch {}
     return false;
+};
+
+export type CreateTestServiceAccountArgs = {
+    name: string;
+    roles?: `${UserRole}`[];
+};
+
+export const createTestServiceAccount = async ({name, roles}: CreateTestServiceAccountArgs) => {
+    const {db, getId} = registry.getDbInstance();
+
+    const serviceAccount = await UserModel.query(db.primary)
+        .insert({
+            [UserModelColumn.UserId]: await getId(),
+            [UserModelColumn.Name]: name,
+            [UserModelColumn.Type]: USER_TYPE.SERVICE_ACCOUNT,
+        })
+        .returning('*')
+        .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
+
+    const resultRoles = Array.isArray(roles) ? roles : [appConfig.defaultRole].filter(Boolean);
+
+    if (resultRoles.length) {
+        await RoleModel.query(db.primary)
+            .insert(
+                resultRoles.map((role) => ({
+                    [RoleModelColumn.UserId]: serviceAccount[UserModelColumn.UserId],
+                    [RoleModelColumn.Role]: role,
+                })),
+            )
+            .timeout(RoleModel.DEFAULT_QUERY_TIMEOUT);
+    }
+
+    return serviceAccount;
 };

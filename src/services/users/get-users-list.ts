@@ -1,6 +1,7 @@
 import pick from 'lodash/pick';
 
 import {UserRole} from '../../constants/role';
+import {USER_TYPE} from '../../constants/user';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import type {BigIntId} from '../../db/types/id';
@@ -8,6 +9,7 @@ import type {ModelInstance} from '../../db/types/model';
 import {getReplica} from '../../db/utils/db';
 import {getNextPageToken, searchSubstring} from '../../db/utils/query';
 import {ServiceArgs} from '../../types/service';
+import {UserType} from '../../types/user';
 import type {ArrayElement, NullableValues} from '../../utils/utility-types';
 
 const selectedUserColumns = [
@@ -18,6 +20,8 @@ const selectedUserColumns = [
     UserModelColumn.LastName,
     UserModelColumn.IdpSlug,
     UserModelColumn.IdpType,
+    UserModelColumn.Name,
+    UserModelColumn.Type,
 ] as const;
 
 const selectedRoleColumns = [RoleModelColumn.Role] as const;
@@ -43,10 +47,11 @@ export interface GetUserListArgs {
     idpType?: string;
     roles?: `${UserRole}`[];
     userIds?: BigIntId[];
+    type?: UserType;
 }
 
 export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArgs) => {
-    const {page = 0, pageSize = 20, filterString, roles, idpType, userIds} = args;
+    const {page = 0, pageSize = 20, filterString, roles, idpType, userIds, type} = args;
 
     const registry = ctx.get('registry');
 
@@ -71,30 +76,41 @@ export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArg
                 .where((qb1) => {
                     if (filterString) {
                         qb1.where((qb2) => {
-                            qb2.where(
-                                searchSubstring({
-                                    column: `${UserModel.tableName}.${UserModelColumn.Login}`,
-                                    search: filterString,
-                                }),
-                            )
-                                .orWhere(
+                            if (type !== USER_TYPE.SERVICE_ACCOUNT) {
+                                qb2.orWhere(
                                     searchSubstring({
-                                        column: `${UserModel.tableName}.${UserModelColumn.Email}`,
+                                        column: `${UserModel.tableName}.${UserModelColumn.Login}`,
                                         search: filterString,
                                     }),
                                 )
-                                .orWhere(
+                                    .orWhere(
+                                        searchSubstring({
+                                            column: `${UserModel.tableName}.${UserModelColumn.Email}`,
+                                            search: filterString,
+                                        }),
+                                    )
+                                    .orWhere(
+                                        searchSubstring({
+                                            column: `${UserModel.tableName}.${UserModelColumn.FirstName}`,
+                                            search: filterString,
+                                        }),
+                                    )
+                                    .orWhere(
+                                        searchSubstring({
+                                            column: `${UserModel.tableName}.${UserModelColumn.LastName}`,
+                                            search: filterString,
+                                        }),
+                                    );
+                            }
+
+                            if (type !== USER_TYPE.USER) {
+                                qb2.orWhere(
                                     searchSubstring({
-                                        column: `${UserModel.tableName}.${UserModelColumn.FirstName}`,
-                                        search: filterString,
-                                    }),
-                                )
-                                .orWhere(
-                                    searchSubstring({
-                                        column: `${UserModel.tableName}.${UserModelColumn.LastName}`,
+                                        column: `${UserModel.tableName}.${UserModelColumn.Name}`,
                                         search: filterString,
                                     }),
                                 );
+                            }
                         });
                     }
 
@@ -111,6 +127,10 @@ export const getUsersList = async ({ctx, trx}: ServiceArgs, args: GetUserListArg
 
                     if (userIds) {
                         qb1.whereIn(`${UserModel.tableName}.${UserModelColumn.UserId}`, userIds);
+                    }
+
+                    if (type) {
+                        qb1.where(`${UserModel.tableName}.${UserModelColumn.Type}`, type);
                     }
                 })
                 .orderBy(`${UserModel.tableName}.${UserModelColumn.UserId}`)

@@ -1,7 +1,6 @@
 import chunk from 'lodash/chunk';
 import PowerRadix from 'power-radix';
 
-import {ID_VARIABLES} from '../db/constants/id';
 import {BigIntId, StringId} from '../db/types/id';
 
 const CODING_BASE = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
@@ -54,16 +53,6 @@ export function decodeId(stringId: StringId): BigIntId {
     return decodedId as BigIntId;
 }
 
-function encodeIds(object: Record<string, string | BigIntId>) {
-    for (const idVariable of ID_VARIABLES) {
-        if (object && object[idVariable]) {
-            const id = object[idVariable];
-            object[idVariable] = id && encodeId(id as BigIntId);
-        }
-    }
-    return object as Record<string, string | StringId>;
-}
-
 export async function macrotasksMap<T, R extends (item: T) => unknown>(
     arr: T[],
     cb: R,
@@ -89,18 +78,4 @@ export async function macrotasksMap<T, R extends (item: T) => unknown>(
         results.push(...items);
     }
     return results;
-}
-
-export async function encodeData<T, R = T>(data: T) {
-    let dataFormed: R;
-
-    if (Array.isArray(data)) {
-        dataFormed = (await macrotasksMap(data, encodeIds)) as R;
-    } else if (data !== null && typeof data === 'object') {
-        dataFormed = encodeIds(data as Record<string, string | BigIntId>) as R;
-    } else {
-        dataFormed = data as unknown as R;
-    }
-
-    return dataFormed;
 }

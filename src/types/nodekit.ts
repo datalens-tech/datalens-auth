@@ -2,7 +2,7 @@ import type {FeaturesConfig} from '../components/features/types';
 import type {UserRole} from '../constants/role';
 import type {Registry} from '../registry';
 
-import type {PlatformCtxInfo, PlatformCtxUser} from './ctx';
+import type {PlatformCtxInfo, PlatformCtxSubject} from './ctx';
 
 export interface PlatformAppConfig {
     features: FeaturesConfig;
@@ -19,6 +19,8 @@ export interface PlatformAppConfig {
     accessTokenTTL: number;
     refreshTokenTTL: number;
     sessionTTL: number;
+    serviceAccountAccessTokenTTL: number;
+    maxServiceAccountClientJwtTTL?: number;
 
     tokenPrivateKey: string;
     tokenPublicKey: string;
@@ -38,5 +40,5 @@ export interface PlatformAppDynamicConfig {
 export interface PlatformAppContextParams {
     info: PlatformCtxInfo;
     registry: Registry;
-    user: PlatformCtxUser;
+    subject: PlatformCtxSubject;
 }

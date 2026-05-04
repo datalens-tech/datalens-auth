@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 
 import {AUTH_DEFAULT_COOKIE_NAME} from '../constants/cookie';
 import {AUTH_ERROR} from '../constants/error-constants';
-import {AccessTokenPayload} from '../types/token';
+import {UserAccessTokenPayload} from '../types/token';
 import type {Optional} from '../utils/utility-types';
 
 type Tokens = {accessToken: string; refreshToken: string};
@@ -60,7 +60,7 @@ export const setAuthCookie = ({
         },
     );
 
-    const {exp} = jwt.decode(accessToken) as AccessTokenPayload;
+    const {exp} = jwt.decode(accessToken) as UserAccessTokenPayload;
 
     res.cookie(getAuthExpCookieName(ctx), exp, {
         ...baseCookieOptions,
