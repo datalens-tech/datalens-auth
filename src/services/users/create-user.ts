@@ -4,10 +4,11 @@ import {transaction} from 'objection';
 import {hashPassword} from '../../components/passwords';
 import {AUTH_ERROR} from '../../constants/error-constants';
 import {UserRole} from '../../constants/role';
-import {RoleModel, RoleModelColumn} from '../../db/models/role';
+import {USER_TYPE} from '../../constants/user';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import {getPrimary, getReplica} from '../../db/utils/db';
 import {lowerEqual} from '../../db/utils/query';
+import {insertRoles} from '../../db/utils/roles';
 import {ServiceArgs} from '../../types/service';
 import {Optional} from '../../utils/utility-types';
 
@@ -40,7 +41,6 @@ export const createUser = async ({ctx, trx}: ServiceArgs, args: CreateUserArgs) 
     }
 
     const hashedPassword = await hashPassword(password);
-
     const userId = await getId();
 
     const result = await transaction(getPrimary(trx), async (transactionTrx) => {
@@ -52,33 +52,22 @@ export const createUser = async ({ctx, trx}: ServiceArgs, args: CreateUserArgs) 
                 [UserModelColumn.Email]: email,
                 [UserModelColumn.FirstName]: firstName,
                 [UserModelColumn.LastName]: lastName,
+                [UserModelColumn.Type]: USER_TYPE.USER,
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
-        const resultRoles = (Array.isArray(roles) ? roles : [ctx.config.defaultRole]).filter(
-            Boolean,
-        );
-
-        if (resultRoles.length) {
-            const normalizedRoles = Array.from(new Set(resultRoles));
-            await RoleModel.query(transactionTrx)
-                .insert(
-                    normalizedRoles.map((role) => ({
-                        [RoleModelColumn.UserId]: userId,
-                        [RoleModelColumn.Role]: role,
-                    })),
-                )
-                .timeout(RoleModel.DEFAULT_QUERY_TIMEOUT);
-        }
+        await insertRoles({
+            trx: transactionTrx,
+            userId,
+            roles,
+            defaultRole: ctx.config.defaultRole as UserRole,
+        });
 
         return createdUser;
     });
 
     const {createUserSuccess} = registry.common.functions.get();
-    await createUserSuccess({
-        ctx,
-        userId,
-    });
+    await createUserSuccess({ctx, userId});
 
     ctx.log('CREATE_USER_SUCCESS', {userId});
 

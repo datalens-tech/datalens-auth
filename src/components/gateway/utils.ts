@@ -16,7 +16,7 @@ export type AuthArgsData = {
 
 export const getAuthArgs = (req: Request, _res: Response): AuthArgsData => {
     return {
-        accessToken: req.ctx.get('user')?.accessToken,
+        accessToken: req.ctx.get('subject')?.accessToken,
     };
 };
 

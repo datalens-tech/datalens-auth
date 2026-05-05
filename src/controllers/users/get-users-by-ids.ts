@@ -4,7 +4,7 @@ import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {getUsersByIds} from '../../services/users/get-users-by-Ids';
-import {userWithRolesModelArray} from '../reponse-models/users/user-with-roles-model-array';
+import {userWithRolesModelArray} from '../response-models/users/user-with-roles-model-array';
 
 const requestSchema = {
     body: z.object({

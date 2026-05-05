@@ -5,6 +5,7 @@ import '../../../index';
 import {registry} from '../../../registry';
 import {hashPassword} from '../../../components/passwords';
 import {UserRole} from '../../../constants/role';
+import {USER_TYPE} from '../../../constants/user';
 import {UserModel, UserModelColumn} from '../../models/user';
 import {RoleModel, RoleModelColumn} from '../../models/role';
 
@@ -25,6 +26,7 @@ if (require.main === module) {
                         [UserModelColumn.Login]: 'admin',
                         [UserModelColumn.Password]: hashedPassword,
                         [UserModelColumn.FirstName]: 'Admin',
+                        [UserModelColumn.Type]: USER_TYPE.USER,
                     })
                     .returning(UserModelColumn.UserId)
                     .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);

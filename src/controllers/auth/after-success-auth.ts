@@ -10,7 +10,7 @@ import {
     errorModel,
     setCookieHeaderSchema,
     successModel,
-} from '../reponse-models';
+} from '../response-models';
 
 const requestSchema = {
     body: z.object({

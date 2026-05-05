@@ -1,7 +1,7 @@
-export interface ExampleContructor {
+export interface ExampleConstructor {
     new (): {};
 }
 
 export interface ExampleInstance {}
 
-export const Example: ExampleContructor = class Example implements ExampleInstance {};
+export const Example: ExampleConstructor = class Example implements ExampleInstance {};

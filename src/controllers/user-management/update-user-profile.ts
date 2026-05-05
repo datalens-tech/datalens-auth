@@ -3,38 +3,53 @@ import {AppRouteHandler, Response} from '@gravity-ui/expresskit';
 import {ApiTag} from '../../components/api-docs';
 import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
-import {deleteUser} from '../../services/users/delete-user';
-import {SuccessResponseModel, successModel} from '../reponse-models';
+import {updateUserProfile} from '../../services/users/update-user-profile';
+import {SuccessResponseModel, successModel} from '../response-models';
 
 const requestSchema = {
     params: z.object({
         userId: zc.decodeId(),
     }),
+    body: z.object({
+        email: z.email().optional().nullable(),
+        firstName: z.string().min(1).max(200).optional().nullable(),
+        lastName: z.string().min(1).max(200).optional().nullable(),
+    }),
 };
 
 const parseReq = makeReqParser(requestSchema);
 
-export const deleteUserController: AppRouteHandler = async (
+export const updateUserProfileController: AppRouteHandler = async (
     req,
     res: Response<SuccessResponseModel>,
 ) => {
-    const {params} = await parseReq(req);
+    const {params, body} = await parseReq(req);
 
-    await deleteUser(
+    await updateUserProfile(
         {ctx: req.ctx},
         {
             userId: params.userId,
+            email: body.email,
+            firstName: body.firstName,
+            lastName: body.lastName,
         },
     );
 
     res.status(200).send(successModel.format());
 };
 
-deleteUserController.api = {
-    summary: 'Delete a user',
+updateUserProfileController.api = {
+    summary: 'Update a user profile',
     tags: [ApiTag.Management],
     request: {
         params: requestSchema.params,
+        body: {
+            content: {
+                [CONTENT_TYPE_JSON]: {
+                    schema: requestSchema.body,
+                },
+            },
+        },
     },
     responses: {
         200: {

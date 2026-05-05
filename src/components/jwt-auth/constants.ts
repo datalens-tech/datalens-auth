@@ -1,1 +1,3 @@
 export const SIGNATURE_ALGORITHM = 'PS256';
+
+export const DEFAULT_MAX_CLIENT_JWT_TTL_SECONDS = 600;

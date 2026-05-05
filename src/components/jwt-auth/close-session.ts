@@ -16,6 +16,7 @@ export const closeSession = async (
 
     try {
         const token = verifyRefreshToken({ctx, refreshToken});
+
         const decodedRefreshTokenId = decodeId(token.refreshTokenId);
 
         await transaction(getPrimary(trx), async (transactionTrx) => {

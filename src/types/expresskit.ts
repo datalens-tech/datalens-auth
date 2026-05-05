@@ -10,6 +10,7 @@ export interface PlatformAppRouteParams {
     apiHeaders?: ApiHeader[];
     permission?: Permission;
     check?: RouteCheck[];
+    userOnly?: boolean;
 }
 
 export interface PlatformAppRouteHandler {

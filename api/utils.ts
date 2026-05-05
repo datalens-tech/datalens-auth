@@ -9,6 +9,6 @@ export {
     ValueOf,
 } from '../src/utils/utility-types';
 
-export {encodeId, decodeId, macrotasksMap, encodeData} from '../src/utils/ids';
+export {encodeId, decodeId, macrotasksMap} from '../src/utils/ids';
 
 export {absurd} from '../src/utils/absurd';

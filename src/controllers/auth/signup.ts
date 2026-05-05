@@ -7,7 +7,7 @@ import {makeReqParser, z, zc} from '../../components/zod';
 import {CONTENT_TYPE_JSON} from '../../constants/content-type';
 import {USER_AGENT_HEADER} from '../../constants/header';
 import {signup} from '../../services/auth/signup';
-import {SuccessResponseModel, setCookieHeaderSchema, successModel} from '../reponse-models';
+import {SuccessResponseModel, setCookieHeaderSchema, successModel} from '../response-models';
 
 const requestSchema = {
     body: z.object({

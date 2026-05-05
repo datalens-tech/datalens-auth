@@ -1,7 +1,7 @@
 import {makeClassTemplate} from '../utils/make-class-template';
 
-import type {ExampleContructor} from './example';
+import type {ExampleConstructor} from './example';
 
 export const commonClassesMap = {
-    Example: makeClassTemplate<ExampleContructor>(),
+    Example: makeClassTemplate<ExampleConstructor>(),
 } as const;

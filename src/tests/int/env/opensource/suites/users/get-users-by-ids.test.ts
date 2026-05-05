@@ -21,6 +21,8 @@ const pickCreatedUserFields = (user: UserModel, roles: UserRole[]) => ({
         UserModelColumn.LastName,
         UserModelColumn.IdpSlug,
         UserModelColumn.IdpType,
+        UserModelColumn.Name,
+        UserModelColumn.Type,
     ]),
     userId: encodeId(user.userId),
     roles: expect.toIncludeSameMembers(roles),

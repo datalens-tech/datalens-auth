@@ -1,11 +1,12 @@
 import pick from 'lodash/pick';
 import request from 'supertest';
 
-import type {UserWithRolesModel} from '../../../../../../controllers/reponse-models/users/user-with-roles-model';
+import {USER_TYPE} from '../../../../../../constants/user';
+import type {UserWithRolesModel} from '../../../../../../controllers/response-models/users/user-with-roles-model';
 import {UserModel, UserModelColumn} from '../../../../../../db/models/user';
 import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
-import {createTestUsers, generateTokens} from '../../../../helpers';
+import {createTestServiceAccount, createTestUsers, generateTokens} from '../../../../helpers';
 import {makeRoute} from '../../../../routes';
 
 type CreatedUsers = {
@@ -13,6 +14,7 @@ type CreatedUsers = {
     user: UserWithRolesModel;
     user2: UserWithRolesModel;
     userWithoutRoles: UserWithRolesModel;
+    serviceAccount: UserWithRolesModel;
 };
 
 const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRolesModel => ({
@@ -23,6 +25,8 @@ const pickCreatedUserFields = (user: UserModel, roles: UserRole[]): UserWithRole
         UserModelColumn.LastName,
         UserModelColumn.IdpSlug,
         UserModelColumn.IdpType,
+        UserModelColumn.Name,
+        UserModelColumn.Type,
     ]),
     userId: encodeId(user.userId),
     roles: expect.toIncludeSameMembers(roles),
@@ -72,6 +76,12 @@ describe('Get users list', () => {
         });
         createdUsers['userWithoutRoles'] = pickCreatedUserFields(userWithoutRoles, []);
 
+        const serviceAccount = await createTestServiceAccount({
+            name: 'test-service-account',
+            roles: [],
+        });
+        createdUsers['serviceAccount'] = pickCreatedUserFields(serviceAccount, []);
+
         userTokens = await generateTokens({userId: user.userId});
         simpleUserTokens = await generateTokens({userId: userWithoutRoles.userId});
     });
@@ -104,6 +114,7 @@ describe('Get users list', () => {
                 createdUsers['user'],
                 createdUsers['user2'],
                 createdUsers['userWithoutRoles'],
+                createdUsers['serviceAccount'],
             ],
         });
     });
@@ -122,6 +133,7 @@ describe('Get users list', () => {
                 createdUsers['user'],
                 createdUsers['user2'],
                 createdUsers['userWithoutRoles'],
+                createdUsers['serviceAccount'],
             ],
         });
     });
@@ -223,7 +235,45 @@ describe('Get users list', () => {
         });
         expect(response3.status).toBe(200);
         expect(response3.body).toStrictEqual({
+            users: [createdUsers['serviceAccount']],
+        });
+
+        const response4 = await auth(request(app).get(makeRoute('getUsersList')), {
+            accessToken: userTokens.accessToken,
+        }).query({
+            page: 3,
+            pageSize: 2,
+        });
+        expect(response4.status).toBe(200);
+        expect(response4.body).toStrictEqual({
             users: [],
+        });
+    });
+
+    test('Filter by type', async () => {
+        const response1 = await auth(request(app).get(makeRoute('getUsersList')), {
+            accessToken: userTokens.accessToken,
+        }).query({
+            type: USER_TYPE.USER,
+        });
+        expect(response1.status).toBe(200);
+        expect(response1.body).toStrictEqual({
+            users: [
+                createdUsers['admin'],
+                createdUsers['user'],
+                createdUsers['user2'],
+                createdUsers['userWithoutRoles'],
+            ],
+        });
+
+        const response2 = await auth(request(app).get(makeRoute('getUsersList')), {
+            accessToken: userTokens.accessToken,
+        }).query({
+            type: USER_TYPE.SERVICE_ACCOUNT,
+        });
+        expect(response2.status).toBe(200);
+        expect(response2.body).toStrictEqual({
+            users: [createdUsers['serviceAccount']],
         });
     });
 });

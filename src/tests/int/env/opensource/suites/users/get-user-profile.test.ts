@@ -1,7 +1,7 @@
 import pick from 'lodash/pick';
 import request from 'supertest';
 
-import type {UserProfileModel} from '../../../../../../controllers/reponse-models/users/user-profile-model';
+import type {UserProfileModel} from '../../../../../../controllers/response-models/users/user-profile-model';
 import {UserModel, UserModelColumn} from '../../../../../../db/models/user';
 import {encodeId} from '../../../../../../utils/ids';
 import {AUTH_ERROR, UserRole, app, auth} from '../../../../auth';
@@ -25,6 +25,8 @@ const pickCreatedUserFields = (
         UserModelColumn.LastName,
         UserModelColumn.IdpType,
         UserModelColumn.IdpSlug,
+        UserModelColumn.Name,
+        UserModelColumn.Type,
     ]),
     userId: encodeId(user.userId),
     roles: expect.toIncludeSameMembers(roles),

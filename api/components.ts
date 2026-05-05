@@ -34,10 +34,11 @@ export {
 } from '../src/components/zod';
 
 export {
-    generateTokens,
-    startSession,
     closeSession,
+    exchangeServiceAccountToken,
     refreshTokens,
+    startSession,
+    generateTokens,
     verifyAccessToken,
     verifyRefreshToken,
 } from '../src/components/jwt-auth';

@@ -4,6 +4,7 @@ import {transaction} from 'objection';
 import {startSession} from '../../components/jwt-auth';
 import {hashPassword} from '../../components/passwords';
 import {AUTH_ERROR} from '../../constants/error-constants';
+import {USER_TYPE} from '../../constants/user';
 import {RoleModel, RoleModelColumn} from '../../db/models/role';
 import {UserModel, UserModelColumn} from '../../db/models/user';
 import {getPrimary, getReplica} from '../../db/utils/db';
@@ -53,6 +54,7 @@ export const signup = async ({ctx, trx}: ServiceArgs, args: SignupArgs) => {
                 [UserModelColumn.Email]: email,
                 [UserModelColumn.FirstName]: firstName,
                 [UserModelColumn.LastName]: lastName,
+                [UserModelColumn.Type]: USER_TYPE.USER,
             })
             .timeout(UserModel.DEFAULT_QUERY_TIMEOUT);
 
